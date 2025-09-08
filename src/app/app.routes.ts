@@ -3,7 +3,8 @@ import { authGuard } from './core/auth/auth.guard';
 import { adminGuard } from './core/auth/admin.guard';
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+  { path: '', pathMatch: 'full', redirectTo: 'home' },
+  { path: 'home', loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent) },
   { path: 'auth', children: [
     { path: 'login', loadComponent: () => import('./features/auth/login.component').then(m => m.LoginComponent) },
     { path: 'register', loadComponent: () => import('./features/auth/register.component').then(m => m.RegisterComponent) },
@@ -18,5 +19,5 @@ export const routes: Routes = [
   { path: 'notifications', canActivate: [authGuard], loadComponent: () => import('./features/notifications/notifications.component').then(m => m.NotificationsComponent) },
   { path: 'profile', canActivate: [authGuard], loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent) },
   { path: 'admin', canActivate: [authGuard, adminGuard], loadComponent: () => import('./features/admin/admin.component').then(m => m.AdminComponent) },
-  { path: '**', redirectTo: 'dashboard' }
+  { path: '**', redirectTo: 'home' }
 ];
