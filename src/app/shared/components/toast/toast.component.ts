@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
 import { Subscription, timer } from 'rxjs';
-import { NotificationService } from '../../../app/core/services/notification.service';
-import { AppNotification } from '../../../app/models/notifications.models';
+import { NotificationService } from '../../../core/services/notification.service';
+import { AppNotification } from '../../../models/notifications.models';
 
 @Component({
   selector: 'app-toast-center',
