@@ -1,0 +1,7 @@
+.grid{display:grid;gap:1rem}
+label{display:flex;flex-direction:column;gap:.25rem}
+input,select,textarea{padding:.5rem;border:1px solid #e5e7eb;border-radius:.375rem}
+.variants{border:1px solid #e5e7eb;border-radius:.5rem;padding:.75rem}
+.variants-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
+.variant{display:grid;gap:.5rem;border:1px dashed #e5e7eb;border-radius:.5rem;padding:.5rem;margin-bottom:.5rem}
+button{width:max-content;padding:.5rem .75rem;border-radius:.375rem;border:1px solid #111827;background:#111827;color:#fff}

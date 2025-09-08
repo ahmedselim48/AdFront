@@ -1,0 +1,6 @@
+.filters{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem}
+.kpi-card{border:1px solid #e5e7eb;border-radius:.5rem;padding:.75rem}
+.chart-placeholder{height:260px;border:1px dashed #e5e7eb;border-radius:.5rem;margin-top:1rem;display:flex;align-items:center;justify-content:center;color:#6b7280}
+@media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.kpi-grid{grid-template-columns:1fr}}

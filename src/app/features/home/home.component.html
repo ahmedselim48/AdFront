@@ -1,0 +1,21 @@
+<section class="home-wrap">
+  <h2>Latest Ads</h2>
+  <div class="ads-grid">
+    <article class="ad-card" *ngFor="let ad of ads">
+      <header class="ad-head">
+        <h3>{{ad.name}}</h3>
+        <span class="status" [attr.data-status]="ad.status">{{ad.status}}</span>
+      </header>
+      <div class="ad-body">
+        <ng-container *ngIf="ad.variants && ad.variants.length; else noVar">
+          <div class="variant" *ngFor="let v of ad.variants">
+            <h4>{{v.title}}</h4>
+            <p>{{v.body}}</p>
+          </div>
+        </ng-container>
+        <ng-template #noVar><p>No variants</p></ng-template>
+      </div>
+    </article>
+  </div>
+  <p class="empty" *ngIf="!ads.length">لا توجد إعلانات حتى الآن.</p>
+</section>

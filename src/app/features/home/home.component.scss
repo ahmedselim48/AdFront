@@ -1,0 +1,8 @@
+.home-wrap{max-width:1024px;margin:auto;display:block}
+.ads-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.ad-card{border:1px solid #e5e7eb;border-radius:.5rem;padding:.75rem;background:#fff}
+.ad-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
+.status{font-size:.75rem;border:1px solid #e5e7eb;border-radius:9999px;padding:.125rem .5rem;text-transform:capitalize}
+.ad-body .variant{border:1px dashed #e5e7eb;border-radius:.5rem;padding:.5rem;margin-bottom:.5rem}
+@media(max-width:900px){.ads-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.ads-grid{grid-template-columns:1fr}}
