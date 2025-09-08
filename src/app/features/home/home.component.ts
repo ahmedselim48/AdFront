@@ -27,6 +27,7 @@ import { AdItem } from '../../models/ads.models';
         </div>
       </article>
     </div>
+    <p class="empty" *ngIf="!ads.length">لا توجد إعلانات حتى الآن.</p>
   </section>
   `,
   styles: [`.home-wrap{max-width:1024px;margin:auto;display:block}
