@@ -1,0 +1,58 @@
+import { Injectable, inject } from '@angular/core';
+import { ApiClientService } from '../services/api-client.service';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { ForgotPasswordRequest, LoginRequest, RegisterRequest, ResetPasswordRequest, TokenResponse, UserProfile } from '../../models/auth.models';
+import { TokenStorageService } from './token-storage.service';
+
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+  private api = inject(ApiClientService);
+  private storage = inject(TokenStorageService);
+
+  private currentUserSubject = new BehaviorSubject<UserProfile | null>(null);
+  currentUser$ = this.currentUserSubject.asObservable();
+
+  get accessToken(): string | null { return this.storage.accessToken; }
+
+  login(req: LoginRequest): Observable<TokenResponse> {
+    return this.api.post$<TokenResponse>('/auth/login', req).pipe(
+      tap(t => this.setTokens(t))
+    );
+  }
+
+  register(req: RegisterRequest): Observable<TokenResponse> {
+    return this.api.post$<TokenResponse>('/auth/register', req).pipe(
+      tap(t => this.setTokens(t))
+    );
+  }
+
+  forgotPassword(req: ForgotPasswordRequest) {
+    return this.api.post$<void>('/auth/forgot-password', req);
+  }
+
+  resetPassword(req: ResetPasswordRequest) {
+    return this.api.post$<void>('/auth/reset-password', req);
+  }
+
+  refresh(refreshToken: string): Observable<TokenResponse> {
+    return this.api.post$<TokenResponse>('/auth/refresh', { refreshToken }).pipe(
+      tap(t => this.setTokens(t))
+    );
+  }
+
+  loadProfile(): Observable<UserProfile> {
+    return this.api.get$<UserProfile>('/users/me').pipe(
+      tap(u => this.currentUserSubject.next(u))
+    );
+  }
+
+  logout(): void {
+    this.storage.clear();
+    this.currentUserSubject.next(null);
+  }
+
+  private setTokens(t: TokenResponse) {
+    this.storage.accessToken = t.accessToken;
+    this.storage.refreshToken = t.refreshToken;
+  }
+}
