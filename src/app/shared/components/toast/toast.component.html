@@ -1,0 +1,6 @@
+<div class="toast-container">
+  <div *ngFor="let n of items" class="toast" [class.info]="n.level==='info'" [class.warning]="n.level==='warning'" [class.error]="n.level==='error'" [class.success]="n.level==='success'">
+    <span class="toast-message">{{ n.message }}</span>
+    <button class="toast-close" (click)="dismiss(n.id)" aria-label="Close">×</button>
+  </div>
+</div>
