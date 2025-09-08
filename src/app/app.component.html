@@ -1,6 +1,7 @@
 <header class="app-header">
   <div class="brand">AdFront</div>
   <nav class="nav-links">
+    <a routerLink="/home" routerLinkActive="active">Home</a>
     <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
     <a routerLink="/ads" routerLinkActive="active">Ads</a>
     <a routerLink="/smart-replies" routerLinkActive="active">Smart Replies</a>
@@ -14,3 +15,6 @@
   <router-outlet></router-outlet>
 </main>
 <app-toast-center></app-toast-center>
+<footer class="app-footer">
+  <div class="footer-content">© {{ new Date().getFullYear() }} AdFront</div>
+</footer>
