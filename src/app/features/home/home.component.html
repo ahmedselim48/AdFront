@@ -20,7 +20,7 @@
 </section>
 <section class="home-wrap container">
   <h2>Latest Ads</h2>
-  <div class="ads-grid">
+  <div class="ads-grid" *ngIf="!loading; else loadingTpl">
     <article class="ad-card" *ngFor="let ad of ads">
       <header class="ad-head">
         <h3>{{ad.name}}</h3>
