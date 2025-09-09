@@ -9,6 +9,7 @@
       <a routerLink="/dashboard" routerLinkActive="active" aria-label="Dashboard">{{ 'nav.dashboard' | t }}</a>
       <a routerLink="/ads" routerLinkActive="active" aria-label="Ads">{{ 'nav.ads' | t }}</a>
       <a routerLink="/smart-replies" routerLinkActive="active" aria-label="Smart Replies">{{ 'nav.smartReplies' | t }}</a>
+      <a routerLink="/chat" routerLinkActive="active" aria-label="Chat" class="chat-link">{{ 'nav.chat' | t }}<span class="badge" *ngIf="unreadCount>0">{{ unreadCount }}</span></a>
       <a routerLink="/competition" routerLinkActive="active" aria-label="Competition">{{ 'nav.competition' | t }}</a>
       <a routerLink="/reports" routerLinkActive="active" aria-label="Reports">{{ 'nav.reports' | t }}</a>
       <a routerLink="/admin" routerLinkActive="active" aria-label="Admin">{{ 'nav.admin' | t }}</a>
