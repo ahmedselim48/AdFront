@@ -8,6 +8,8 @@
 .nav-links a{color:inherit;text-decoration:none;padding:.375rem .625rem;border-radius:.5rem;transition:background .2s ease,color .2s ease}
 .nav-links a:hover{background:#f3f4f6}
 .nav-links a.active{background:#e8f0ff;color:#003b99}
+.nav-links .chat-link{position:relative}
+.nav-links .chat-link .badge{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 6px;border-radius:9999px;background:#ef4444;color:#fff;font-size:12px;line-height:18px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.2)}
 
 .app-main{padding:2rem 0;min-height:calc(100vh - 120px)}
 .app-footer{border-top:1px solid var(--border);padding:1rem;background:rgba(255,255,255,.75);backdrop-filter:saturate(180%) blur(10px);text-align:center}
