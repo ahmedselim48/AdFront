@@ -37,5 +37,18 @@
       </div>
     </article>
   </div>
-  <p class="empty" *ngIf="!ads.length">لا توجد إعلانات حتى الآن.</p>
+  <ng-template #loadingTpl>
+    <div class="ads-grid">
+      <article class="ad-card" *ngFor="let _ of skeletons">
+        <header class="ad-head">
+          <div class="skeleton" style="height:16px;width:50%;border-radius:8px"></div>
+          <div class="skeleton" style="height:16px;width:80px;border-radius:20px"></div>
+        </header>
+        <div class="ad-body">
+          <div class="skeleton" style="height:84px;border-radius:12px"></div>
+        </div>
+      </article>
+    </div>
+  </ng-template>
+  <p class="empty" *ngIf="!loading && !ads.length">لا توجد إعلانات حتى الآن.</p>
 </section>
