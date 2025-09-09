@@ -1,15 +1,20 @@
 <header class="app-header">
-  <div class="brand">AdFront</div>
-  <nav class="nav-links">
-    <a routerLink="/home" routerLinkActive="active">Home</a>
-    <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
-    <a routerLink="/ads" routerLinkActive="active">Ads</a>
-    <a routerLink="/smart-replies" routerLinkActive="active">Smart Replies</a>
-    <a routerLink="/competition" routerLinkActive="active">Competition</a>
-    <a routerLink="/reports" routerLinkActive="active">Reports</a>
-    <a routerLink="/admin" routerLinkActive="active">Admin</a>
-    <a routerLink="/profile" routerLinkActive="active">Profile</a>
-  </nav>
+  <div class="container header-inner">
+    <a routerLink="/home" class="brand" aria-label="AdFront home">AdFront</a>
+    <button class="menu-toggle focus-ring" (click)="toggleMenu()" [attr.aria-expanded]="mobileOpen" aria-label="Toggle menu">
+      <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+    </button>
+    <nav class="nav-links" [class.open]="mobileOpen" (click)="closeMenu()">
+      <a routerLink="/home" routerLinkActive="active" aria-label="Home">Home</a>
+      <a routerLink="/dashboard" routerLinkActive="active" aria-label="Dashboard">Dashboard</a>
+      <a routerLink="/ads" routerLinkActive="active" aria-label="Ads">Ads</a>
+      <a routerLink="/smart-replies" routerLinkActive="active" aria-label="Smart Replies">Smart Replies</a>
+      <a routerLink="/competition" routerLinkActive="active" aria-label="Competition">Competition</a>
+      <a routerLink="/reports" routerLinkActive="active" aria-label="Reports">Reports</a>
+      <a routerLink="/admin" routerLinkActive="active" aria-label="Admin">Admin</a>
+      <a routerLink="/profile" routerLinkActive="active" aria-label="Profile">Profile</a>
+    </nav>
+  </div>
 </header>
 <main class="app-main">
   <router-outlet></router-outlet>
