@@ -3,6 +3,7 @@ export interface KpiSummary {
   messages: number;
   conversions: number;
   ctr: number;
+  alerts: number;
 }
 
 export interface ChartSeriesPoint {
