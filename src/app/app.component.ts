@@ -5,7 +5,6 @@ import { ToastComponent } from './shared/components/toast/toast.component';
 import { TranslatePipe } from './shared/pipes/translate.pipe';
 import { I18nService } from './core/services/i18n.service';
 import { ChatService } from './core/services/chat.service';
-import { ThemeService } from './core/services/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -16,7 +15,6 @@ import { ThemeService } from './core/services/theme.service';
 export class AppComponent {
   private i18n = inject(I18nService);
   private chat = inject(ChatService);
-  private theme = inject(ThemeService);
   currentYear = new Date().getFullYear();
   mobileOpen = false;
   unreadCount = 0;
@@ -34,6 +32,5 @@ export class AppComponent {
   toggleLang(){ this.i18n.toggle(); }
   get langLabel(){ return this.i18n.current === 'ar' ? 'EN' : 'AR'; }
 
-  toggleTheme(){ this.theme.toggle(); }
-  get isDark(){ return this.theme.current() === 'dark'; }
+  
 }

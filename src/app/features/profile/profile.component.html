@@ -1,9 +1,72 @@
-<section class="profile-wrap">
-  <h2>{{ 'profile.title' | t }}</h2>
-  <form [formGroup]="form" (ngSubmit)="save()" class="grid">
-    <label>{{ 'common.name' | t }}<input type="text" formControlName="name"></label>
-    <label>{{ 'common.email' | t }}<input type="email" formControlName="email" [disabled]="true"></label>
-    <label>{{ 'profile.plan' | t }}<select formControlName="plan"><option value="free">{{ 'plan.free' | t }}</option><option value="pro">{{ 'plan.pro' | t }}</option><option value="enterprise">{{ 'plan.enterprise' | t }}</option></select></label>
-    <button type="submit" [disabled]="form.invalid">{{ 'common.save' | t }}</button>
-  </form>
+<section class="profile-wrap container">
+  <div class="profile-card card glass">
+    <div class="avatar" aria-hidden="true">{{ (form.value.name || 'U').slice(0,1) }}</div>
+    <div class="info">
+      <h2 class="name">{{ form.value.name || '—' }}</h2>
+      <div class="contact">
+        <span class="pill">{{ form.value.email || '—' }}</span>
+        <span class="pill">{{ form.value.plan | uppercase }}</span>
+      </div>
+      <p class="bio">{{ 'Create, manage, and optimize your ads with AI assistance.' }}</p>
+    </div>
+    <form [formGroup]="form" (ngSubmit)="save()" class="edit-form">
+      <label>{{ 'common.name' | t }}<input type="text" formControlName="name"></label>
+      <label>{{ 'common.email' | t }}<input type="email" formControlName="email" [disabled]="true"></label>
+      <label>{{ 'profile.plan' | t }}
+        <select formControlName="plan">
+          <option value="free">{{ 'plan.free' | t }}</option>
+          <option value="pro">{{ 'plan.pro' | t }}</option>
+          <option value="enterprise">{{ 'plan.enterprise' | t }}</option>
+        </select>
+      </label>
+      <button type="submit" class="button" [disabled]="form.invalid">{{ 'common.save' | t }}</button>
+    </form>
+  </div>
+</section>
+<section class="profile-ads container">
+  <div class="ads-header">
+    <h3>{{ 'home.latestAds' | t }}</h3>
+    <div class="actions">
+      <div class="pill" role="tablist">
+        <button class="pill" [class.active]="filter==='all'" (click)="setFilter('all')">All ({{counts['all']}})</button>
+        <button class="pill" [class.active]="filter==='draft'" (click)="setFilter('draft')">Draft ({{counts['draft']}})</button>
+        <button class="pill" [class.active]="filter==='scheduled'" (click)="setFilter('scheduled')">Scheduled ({{counts['scheduled']}})</button>
+        <button class="pill" [class.active]="filter==='published'" (click)="setFilter('published')">Published ({{counts['published']}})</button>
+      </div>
+      <div class="pill">
+        <button class="pill" [class.active]="viewMode==='grid'" (click)="setView('grid')">Grid</button>
+        <button class="pill" [class.active]="viewMode==='list'" (click)="setView('list')">List</button>
+      </div>
+      <a routerLink="/ads" class="button ghost">+ New Ad</a>
+    </div>
+  </div>
+  <div [ngClass]="{ 'ads-grid': viewMode==='grid', 'ads-list': viewMode==='list' }" *ngIf="!loadingAds; else loadingAdsTpl">
+    <article class="ad-card" *ngFor="let ad of filteredAds">
+      <header class="ad-head">
+        <h4>{{ ad.name }}</h4>
+        <span class="status" [attr.data-status]="ad.status">{{ ad.status }}</span>
+      </header>
+      <div class="ad-body">
+        <ng-container *ngIf="ad.variants && ad.variants.length; else noVar">
+          <div class="variant" *ngFor="let v of ad.variants">
+            <img *ngIf="v.imageUrl" [src]="v.imageUrl" alt="ad image" style="width:100%;max-height:140px;object-fit:cover;border-radius:10px;margin-bottom:6px"/>
+            <div class="title">{{ v.title }}</div>
+            <p>{{ v.body }}</p>
+          </div>
+        </ng-container>
+        <ng-template #noVar><p>No variants</p></ng-template>
+      </div>
+      <footer class="ad-foot">
+        <span class="pill" *ngIf="ad.category">{{ad.category}}</span>
+        <span class="pill" *ngIf="ad.price">{{ad.price | number:'1.0-0'}}</span>
+        <span class="flex-spacer"></span>
+        <a class="button secondary" [routerLink]="['/chat']">Chat</a>
+        <button type="button" class="button ghost" (click)="editAd(ad)">Edit</button>
+        <button type="button" class="button secondary" (click)="deleteAd(ad)">Delete</button>
+      </footer>
+    </article>
+  </div>
+  <ng-template #loadingAdsTpl>
+    <div class="ads-grid"><article class="ad-card" *ngFor="let _ of [0,1,2]"><div class="skeleton" style="height:96px;border-radius:12px"></div></article></div>
+  </ng-template>
 </section>

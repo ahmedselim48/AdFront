@@ -11,6 +11,8 @@ export interface AdVariant {
 export interface AdItem {
   id: string;
   name: string;
+  category?: string;
+  price?: number;
   status: AdStatus;
   scheduleAt?: string;
   variants: AdVariant[];

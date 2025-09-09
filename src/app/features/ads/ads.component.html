@@ -1,13 +1,24 @@
 <section class="ads-wrap">
   <h2>{{ 'ads.createTitle' | t }}</h2>
+  <div class="tabs card" aria-label="Management tabs">
+    <button class="pill active">All</button>
+    <button class="pill">Draft</button>
+    <button class="pill">Scheduled</button>
+    <button class="pill">Published</button>
+  </div>
   <form [formGroup]="form" (ngSubmit)="save()" class="grid">
     <label>{{ 'common.name' | t }}<input formControlName="name"></label>
+    <label>Category<input formControlName="category"></label>
+    <label>Price<input type="number" formControlName="price"></label>
     <label>{{ 'ads.status' | t }}<select formControlName="status"><option value="draft">{{ 'status.draft' | t }}</option><option value="scheduled">{{ 'status.scheduled' | t }}</option><option value="active">{{ 'status.active' | t }}</option><option value="paused">{{ 'status.paused' | t }}</option></select></label>
     <label>{{ 'ads.scheduleAt' | t }}<input type="datetime-local" formControlName="scheduleAt"></label>
     <div class="variants">
       <div class="variants-header">
         <h3>{{ 'ads.variants' | t }}</h3>
-        <button type="button" (click)="addVariant()">{{ 'ads.addVariant' | t }}</button>
+        <div class="actions">
+          <button type="button" class="button ghost" (click)="generateFromAI()" [disabled]="generating">{{ 'smart.generate' | t }}</button>
+          <button type="button" (click)="addVariant()">{{ 'ads.addVariant' | t }}</button>
+        </div>
       </div>
       <div class="variant" *ngFor="let v of variants.controls; let i = index" [formGroup]="$any(v)">
         <label>{{ 'common.title' | t }}<input formControlName="title"></label>

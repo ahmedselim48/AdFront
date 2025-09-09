@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
+import { CompetitionService, CompetitorRow } from '../../core/services/competition.service';
 
 @Component({
   selector: 'app-competition',
@@ -12,9 +13,14 @@ import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 })
 export class CompetitionComponent {
   filters!: FormGroup;
-  rows = [{ name: 'Competitor A', count: 12, ctr: 1.8 }, { name: 'Competitor B', count: 8, ctr: 2.1 }];
-  constructor(private fb: FormBuilder){
+  rows: CompetitorRow[] = [];
+  constructor(private fb: FormBuilder, private competition: CompetitionService){
     this.filters = this.fb.group({ keyword: [''], industry: ['all'] });
+    this.search();
   }
-  open(_row: { name: string; count: number; ctr: number }): void {}
+  search(){
+    const kw = this.filters.get('keyword')?.value || '';
+    this.competition.search(kw).subscribe(r => this.rows = r);
+  }
+  open(_row: CompetitorRow): void {}
 }

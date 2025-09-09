@@ -14,10 +14,7 @@
       <a routerLink="/reports" routerLinkActive="active" aria-label="Reports">{{ 'nav.reports' | t }}</a>
       <a routerLink="/admin" routerLinkActive="active" aria-label="Admin">{{ 'nav.admin' | t }}</a>
       <a routerLink="/profile" routerLinkActive="active" aria-label="Profile">{{ 'nav.profile' | t }}</a>
-      <label class="switch" aria-label="Toggle dark mode">
-        <input type="checkbox" [checked]="isDark" (change)="toggleTheme()" />
-        <span class="track"><span class="thumb"></span></span>
-      </label>
+      
       <button type="button" class="button ghost focus-ring" (click)="toggleLang()" aria-label="Change language">{{ langLabel }}</button>
     </nav>
   </div>

@@ -3,3 +3,20 @@
 label{display:flex;flex-direction:column;gap:.25rem}
 input,select{padding:.5rem;border:1px solid #e5e7eb;border-radius:.375rem}
 button{width:max-content;padding:.5rem .75rem;border-radius:.375rem;border:1px solid #111827;background:#111827;color:#fff}
+.profile-card{display:grid;grid-template-columns:120px 1fr 340px;gap:16px;align-items:start;padding:16px}
+.profile-card .avatar{width:100px;height:100px;border-radius:9999px;background:var(--gradient);display:grid;place-items:center;color:#fff;font-size:2rem;font-weight:800}
+.profile-card .info .name{margin:0 0 .25rem}
+.profile-card .info .contact{display:flex;flex-wrap:wrap;gap:.5rem;margin:.25rem 0  .5rem}
+.profile-card .edit-form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:960px){.profile-card{grid-template-columns:100%;}}
+
+.ads-header{display:flex;align-items:center;justify-content:space-between;margin:.75rem 0;gap:.75rem}
+.ads-header .actions{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.ads-list{display:flex;flex-direction:column;gap:10px}
+.ads-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:1000px){.ads-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.ads-grid{grid-template-columns:1fr}}
+.ad-card{padding:12px}
+.ad-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem}
+.ad-foot{display:flex;align-items:center;gap:.5rem;margin-top:.5rem}
+.flex-spacer{flex:1}

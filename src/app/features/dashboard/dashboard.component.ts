@@ -7,6 +7,7 @@ import { LineChartComponent } from '../../shared/components/line-chart/line-char
 import { NotificationService } from '../../core/services/notification.service';
 import { Observable } from 'rxjs';
 import { AppNotification } from '../../models/notifications.models';
+import { AnalyticsService } from '../../core/services/analytics.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -17,13 +18,18 @@ import { AppNotification } from '../../models/notifications.models';
 })
 export class DashboardComponent {
   filters!: FormGroup;
-  kpi: KpiSummary = { views: 12540, messages: 812, conversions: 146, ctr: 2.3, alerts: 3 } as KpiSummary;
+  kpi!: KpiSummary;
   labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  series = [120, 180, 140, 220, 260, 200, 280];
+  series: number[] = [];
   notifications$: Observable<AppNotification[]>;
 
-  constructor(private fb: FormBuilder, notifications: NotificationService){
+  constructor(private fb: FormBuilder, notifications: NotificationService, private analytics: AnalyticsService){
     this.filters = this.fb.group({ from: [''], to: [''], channel: ['all'] });
     this.notifications$ = notifications.list$;
+    this.load();
+  }
+  private load(){
+    this.analytics.getSummary().subscribe(s => this.kpi = s);
+    this.analytics.getPerformanceSeries().subscribe(s => this.series = s[0]?.values ?? []);
   }
 }
