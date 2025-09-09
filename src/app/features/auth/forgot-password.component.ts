@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
@@ -11,7 +11,9 @@ import { AuthService } from '../../core/auth/auth.service';
   styleUrls: ['./forgot-password.component.scss']
 })
 export class ForgotPasswordComponent {
-  form = this.fb.group({ email: ['', [Validators.required, Validators.email]] });
-  constructor(private fb: FormBuilder, private auth: AuthService) {}
+  form!: FormGroup;
+  constructor(private fb: FormBuilder, private auth: AuthService) {
+    this.form = this.fb.group({ email: ['', [Validators.required, Validators.email]] });
+  }
   submit(){ if(this.form.invalid) return; this.auth.forgotPassword(this.form.value as any).subscribe(); }
 }
