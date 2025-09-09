@@ -12,7 +12,12 @@ import { AdItem } from '../../models/ads.models';
 })
 export class HomeComponent {
   ads: AdItem[] = [];
+  loading = true;
+  skeletons = Array.from({ length: 6 });
   constructor(private adsService: AdsService){
-    this.adsService.list().subscribe({ next: (list)=> this.ads = list, error: ()=> this.ads = [] });
+    this.adsService.list().subscribe({
+      next: (list)=> { this.ads = list; this.loading = false; },
+      error: ()=> { this.ads = []; this.loading = false; }
+    });
   }
 }
