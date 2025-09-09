@@ -63,6 +63,8 @@ const en: Dict = {
   'dash.messages': 'Messages',
   'dash.conversions': 'Conversions',
   'dash.ctr': 'CTR',
+  'dash.alerts': 'Alerts',
+  'dash.performance': 'Performance',
   'dash.chartsHere': 'Charts appear here',
 
   'comp.title': 'Competition Analysis',
@@ -165,6 +167,8 @@ const ar: Dict = {
   'dash.messages': 'الرسائل',
   'dash.conversions': 'التحويلات',
   'dash.ctr': 'نسبة النقر',
+  'dash.alerts': 'التنبيهات',
+  'dash.performance': 'الأداء',
   'dash.chartsHere': 'ستظهر الرسوم البيانية هنا',
 
   'comp.title': 'تحليل المنافسة',
@@ -181,7 +185,7 @@ const ar: Dict = {
 
   'profile.title': 'الملف الشخصي',
   'profile.plan': 'الباقة',
-  'plan.free': 'مجاني',
+  'plan.free': 'مجان��',
   'plan.pro': 'احترافي',
   'plan.enterprise': 'شركات',
 
