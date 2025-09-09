@@ -50,3 +50,15 @@ p{margin:0 0 1rem;color:var(--muted)}
 @keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
 
 .hidden-visually{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap}
+
+/* Forms */
+label{display:grid;gap:6px;font-size:.9rem;margin-bottom:10px}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fff;transition:border-color .15s ease, box-shadow .15s ease}
+input:focus,select:focus,textarea:focus{outline:none;border-color:color-mix(in oklab, var(--brand) 60%, white);box-shadow:0 0 0 4px rgba(0,102,255,.08)}
+textarea{min-height:96px;resize:vertical}
+
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(max-width:760px){.form-grid{grid-template-columns:1fr}}
+
+/* Utility */
+.mt-2{margin-top:.5rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}
