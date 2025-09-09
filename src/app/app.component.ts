@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { ToastComponent } from './shared/components/toast/toast.component';
 import { TranslatePipe } from './shared/pipes/translate.pipe';
@@ -7,7 +8,7 @@ import { ChatService } from './core/services/chat.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, ToastComponent, TranslatePipe],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, ToastComponent, TranslatePipe],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
