@@ -15,6 +15,7 @@ const en: Dict = {
   'nav.reports': 'Reports',
   'nav.admin': 'Admin',
   'nav.profile': 'Profile',
+  'nav.chat': 'Chat',
 
   'hero.headline': 'Create campaigns that convert',
   'hero.sub': 'Design, launch, and optimize ads with confidence. Beautiful analytics, smart automations, and blazing-fast workflows.',
@@ -88,6 +89,13 @@ const en: Dict = {
   'smart.suggested': 'Suggested Reply',
   'smart.templates': 'Templates',
 
+  'chat.title': 'Conversations',
+  'chat.thread': 'Conversation',
+  'chat.typeMessage': 'Type a message…',
+  'chat.send': 'Send',
+  'chat.templates': 'Reply Templates',
+  'chat.conversation': 'Conversation',
+
   'auth.login': 'Login',
   'auth.register': 'Register',
   'auth.createAccount': 'Create account',
@@ -101,7 +109,7 @@ const en: Dict = {
 };
 
 const ar: Dict = {
-  'nav.home': 'الرئيسية',
+  'nav.home': 'الرئي��ية',
   'nav.dashboard': 'لوحة التحكم',
   'nav.ads': 'الإعلانات',
   'nav.smartReplies': 'الردود الذكية',
@@ -109,6 +117,7 @@ const ar: Dict = {
   'nav.reports': 'التقارير',
   'nav.admin': 'الإدارة',
   'nav.profile': 'الملف الشخصي',
+  'nav.chat': 'الدردشة',
 
   'hero.headline': 'أنشئ حملات تَحوِّل',
   'hero.sub': 'صمم وأطلق وحسّن إعلاناتك بثقة. تحليلات جميلة، أتمتة ذكية، وتجربة عمل سريعة.',
@@ -181,6 +190,13 @@ const ar: Dict = {
   'smart.generate': 'توليد',
   'smart.suggested': 'الرد المقترح',
   'smart.templates': 'القوالب',
+
+  'chat.title': 'المحادثات',
+  'chat.thread': 'محادثة',
+  'chat.typeMessage': 'اكتب رسالة…',
+  'chat.send': 'إرسال',
+  'chat.templates': 'قوالب الرد',
+  'chat.conversation': 'محادثة',
 
   'auth.login': 'تسجيل الدخول',
   'auth.register': 'إنشاء حساب',
