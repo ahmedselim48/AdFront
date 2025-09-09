@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../core/auth/auth.service';
 import { UserProfile } from '../../models/auth.models';
 
@@ -12,9 +12,10 @@ import { UserProfile } from '../../models/auth.models';
   styleUrls: ['./profile.component.scss']
 })
 export class ProfileComponent {
-  form = this.fb.group({ id: [''], email: [''], name: ['', Validators.required], plan: ['free', Validators.required] });
+  form!: FormGroup;
   constructor(private fb: FormBuilder, private auth: AuthService){
+    this.form = this.fb.group({ id: [''], email: [''], name: ['', Validators.required], plan: ['free', Validators.required] });
     this.auth.loadProfile().subscribe((u: UserProfile)=> this.form.patchValue(u));
   }
-  save(){ /* integrate with backend when endpoint available */ }
+  save(){ }
 }
