@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 import { FileService } from '../../core/services/file.service';
 
 @Component({
   selector: 'app-ads',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, TranslatePipe],
   templateUrl: './ads.component.html',
   styleUrls: ['./ads.component.scss']
 })
