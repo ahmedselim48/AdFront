@@ -10,4 +10,7 @@ import { ToastComponent } from './shared/components/toast/toast.component';
 })
 export class AppComponent {
   currentYear = new Date().getFullYear();
+  mobileOpen = false;
+  toggleMenu(){ this.mobileOpen = !this.mobileOpen; }
+  closeMenu(){ this.mobileOpen = false; }
 }
