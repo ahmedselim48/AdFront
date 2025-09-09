@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormArray, FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-admin',
@@ -11,10 +11,12 @@ import { FormArray, FormBuilder, ReactiveFormsModule } from '@angular/forms';
 })
 export class AdminComponent {
   users = [{ email: 'admin@example.com', role: 'admin' }, { email: 'user@example.com', role: 'user' }];
-  tenants = this.fb.group({ items: this.fb.array([this.fb.group({ name: ['Default'] })]) });
-  get tArr(){ return this.tenants.get('items') as FormArray; }
-  constructor(private fb: FormBuilder){}
+  tenants!: FormGroup;
+  get tArr(){ return this.tenants.get('items') as FormArray<FormGroup>; }
+  constructor(private fb: FormBuilder){
+    this.tenants = this.fb.group({ items: this.fb.array([this.fb.group({ name: ['Default'] })]) });
+  }
   addTenant(){ this.tArr.push(this.fb.group({ name: [''] })); }
   removeTenant(i: number){ this.tArr.removeAt(i); }
-  saveTenants(){ /* integrate with backend */ }
+  saveTenants(){ }
 }
