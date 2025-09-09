@@ -1,4 +1,4 @@
-import { HttpErrorResponse, HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
+import { HttpErrorResponse, HttpEvent, HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, finalize, firstValueFrom, Observable, switchMap, throwError } from 'rxjs';
 import { AuthService } from './auth.service';
@@ -7,7 +7,7 @@ import { TokenStorageService } from './token-storage.service';
 let isRefreshing = false;
 let pendingRequests: { resolve: (token: string | null) => void; reject: (err: unknown) => void; }[] = [];
 
-export const jwtInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<any> => {
+export const jwtInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> => {
   const auth = inject(AuthService);
   const storage = inject(TokenStorageService);
 
@@ -24,7 +24,7 @@ export const jwtInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, nex
   );
 };
 
-function handle401(auth: AuthService, storage: TokenStorageService, req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<any> {
+function handle401(auth: AuthService, storage: TokenStorageService, req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> {
   if (!storage.refreshToken) {
     auth.logout();
     return throwError(() => new Error('Unauthorized'));
