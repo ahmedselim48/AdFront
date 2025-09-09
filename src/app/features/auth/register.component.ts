@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
+import { RegisterRequest } from '../../models/auth.models';
 
 @Component({
   selector: 'app-register',
@@ -18,7 +19,8 @@ export class RegisterComponent {
   }
   submit(){
     if(this.form.invalid) return;
-    this.auth.register(this.form.value as any).subscribe({
+    const req: RegisterRequest = { name: this.form.get('name')?.value ?? '', email: this.form.get('email')?.value ?? '', password: this.form.get('password')?.value ?? '' };
+    this.auth.register(req).subscribe({
       next: () => this.router.navigateByUrl('/dashboard')
     });
   }
