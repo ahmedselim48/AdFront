@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { KpiSummary } from '../../models/dashboard.models';
 
 @Component({
@@ -11,7 +11,9 @@ import { KpiSummary } from '../../models/dashboard.models';
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent {
-  filters = this.fb.group({ from: [''], to: [''], channel: ['all'] });
+  filters!: FormGroup;
   kpi: KpiSummary = { views: 0, messages: 0, conversions: 0, ctr: 0 };
-  constructor(private fb: FormBuilder){}
+  constructor(private fb: FormBuilder){
+    this.filters = this.fb.group({ from: [''], to: [''], channel: ['all'] });
+  }
 }
