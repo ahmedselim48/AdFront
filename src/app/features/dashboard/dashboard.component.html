@@ -3,16 +3,16 @@
     <input type="date" formControlName="from">
     <input type="date" formControlName="to">
     <select formControlName="channel">
-      <option value="all">All Channels</option>
-      <option value="facebook">Facebook</option>
-      <option value="google">Google</option>
+      <option value="all">{{ 'dash.allChannels' | t }}</option>
+      <option value="facebook">{{ 'dash.facebook' | t }}</option>
+      <option value="google">{{ 'dash.google' | t }}</option>
     </select>
   </form>
   <div class="kpi-grid">
-    <div class="kpi-card"><h3>Views</h3><strong>{{kpi.views}}</strong></div>
-    <div class="kpi-card"><h3>Messages</h3><strong>{{kpi.messages}}</strong></div>
-    <div class="kpi-card"><h3>Conversions</h3><strong>{{kpi.conversions}}</strong></div>
-    <div class="kpi-card"><h3>CTR</h3><strong>{{kpi.ctr}}%</strong></div>
+    <div class="kpi-card"><h3>{{ 'dash.views' | t }}</h3><strong>{{kpi.views}}</strong></div>
+    <div class="kpi-card"><h3>{{ 'dash.messages' | t }}</h3><strong>{{kpi.messages}}</strong></div>
+    <div class="kpi-card"><h3>{{ 'dash.conversions' | t }}</h3><strong>{{kpi.conversions}}</strong></div>
+    <div class="kpi-card"><h3>{{ 'dash.ctr' | t }}</h3><strong>{{kpi.ctr}}%</strong></div>
   </div>
-  <div class="chart-placeholder">Charts appear here</div>
+  <div class="chart-placeholder">{{ 'dash.chartsHere' | t }}</div>
 </section>
