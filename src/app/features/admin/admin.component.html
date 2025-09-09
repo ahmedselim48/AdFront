@@ -10,7 +10,7 @@
     <div>
       <h3>Tenants</h3>
       <form [formGroup]="tenants" (ngSubmit)="saveTenants()">
-        <div class="tenant" *ngFor="let t of tArr.controls; let i = index" [formGroup]="t">
+        <div class="tenant" *ngFor="let t of tArr.controls; let i = index" [formGroup]="$any(t)">
           <input placeholder="Tenant Name" formControlName="name">
           <button type="button" (click)="removeTenant(i)">Remove</button>
         </div>
