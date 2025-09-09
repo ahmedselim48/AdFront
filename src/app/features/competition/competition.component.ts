@@ -15,5 +15,5 @@ export class CompetitionComponent {
   constructor(private fb: FormBuilder){
     this.filters = this.fb.group({ keyword: [''], industry: ['all'] });
   }
-  open(_row: any){}
+  open(_row: { name: string; count: number; ctr: number }): void {}
 }
