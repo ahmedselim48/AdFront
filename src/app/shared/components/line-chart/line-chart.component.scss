@@ -1,0 +1,5 @@
+.chart-svg{width:100%;display:block}
+.chart-footer{position:relative}
+.labels{position:relative;height:18px;margin-top:6px}
+.tick{position:absolute;top:0;transform:translateX(-50%);font-size:12px;color:var(--muted)}
+.tooltip{position:absolute;inset-block-start:-44px;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 8px;box-shadow:var(--shadow);white-space:nowrap}
