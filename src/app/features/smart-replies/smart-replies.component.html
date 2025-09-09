@@ -1,17 +1,37 @@
-<section class="smart-wrap">
-  <h2>{{ 'smart.title' | t }}</h2>
-  <form [formGroup]="form" (ngSubmit)="generate()" class="row">
-    <input [placeholder]="('smart.messagePlaceholder' | t)" formControlName="message">
-    <button type="submit" [disabled]="form.invalid || loading">{{ 'smart.generate' | t }}</button>
-  </form>
-  <div class="result" *ngIf="reply">
-    <h3>{{ 'smart.suggested' | t }}</h3>
-    <pre>{{ reply }}</pre>
+<section class="smart-container">
+  <header class="smart-header">
+    <h2>{{ 'smart.title' | t }}</h2>
+  </header>
+
+  <div class="chat-panel card glass">
+    <div class="messages">
+      <div class="bubble user" *ngIf="form.value.message as msg">{{ msg }}</div>
+      <div class="bubble ai" *ngIf="reply">
+        <div class="bubble-title">{{ 'smart.suggested' | t }}</div>
+        <div class="bubble-body">{{ reply }}</div>
+        <div class="bubble-actions">
+          <button class="button secondary" (click)="useReply(reply)">Use</button>
+          <button class="button ghost" (click)="saveTemplate(reply)">{{ 'common.save' | t }}</button>
+        </div>
+      </div>
+    </div>
+    <form [formGroup]="form" (ngSubmit)="generate()" class="composer">
+      <input [placeholder]="('smart.messagePlaceholder' | t)" formControlName="message">
+      <button type="submit" class="button" [disabled]="form.invalid || loading">{{ 'smart.generate' | t }}</button>
+    </form>
   </div>
-  <div class="templates">
-    <h3>{{ 'smart.templates' | t }}</h3>
-    <ul>
+
+  <div class="templates card">
+    <div class="templates-header">
+      <h3>{{ 'smart.templates' | t }}</h3>
+    </div>
+    <ul class="template-list">
       <li *ngFor="let t of templates" (click)="form.patchValue({message: t})">{{t}}</li>
     </ul>
+  </div>
+
+  <div class="fab">
+    <button class="fab-btn" aria-label="WhatsApp">WA</button>
+    <button class="fab-btn" aria-label="Call">Call</button>
   </div>
 </section>

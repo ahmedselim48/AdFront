@@ -2,6 +2,7 @@
   --brand: #0066FF;
   --brand-600: #1a6bff;
   --brand-700: #0052cc;
+  --purple: #7c3aed;
   --bg: #F8F9FA;
   --surface: #ffffff;
   --text: #0f172a;
@@ -11,6 +12,16 @@
   --danger: #ef4444;
   --radius: 12px;
   --shadow: 0 10px 30px rgba(0,0,0,.08);
+  --gradient: linear-gradient(135deg, var(--brand), var(--purple));
+}
+
+[data-theme="dark"]{
+  --bg: #0b1220;
+  --surface: #0f172a;
+  --text: #e5e7eb;
+  --muted: #94a3b8;
+  --border: #1f2937;
+  --shadow: 0 10px 30px rgba(0,0,0,.4);
 }
 
 *{box-sizing:border-box}
@@ -20,8 +31,9 @@ body{
   font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
   color: var(--text);
   background:
-    radial-gradient(1200px 500px at 80% -100px, rgba(0,102,255,.08), transparent 60%),
+    radial-gradient(1200px 500px at 80% -100px, color-mix(in oklab, var(--brand) 24%, transparent), transparent 60%),
     linear-gradient(180deg, #fff, var(--bg));
+  transition: background-color .3s ease, color .3s ease;
 }
 
 h1,h2,h3{line-height:1.2;margin:0 0 .5rem}
@@ -42,7 +54,7 @@ p{margin:0 0 1rem;color:var(--muted)}
 
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
 
-.glass{background:rgba(255,255,255,.7);backdrop-filter:saturate(180%) blur(10px);-webkit-backdrop-filter:saturate(180%) blur(10px)}
+.glass{background:color-mix(in oklab, var(--surface) 72%, transparent);backdrop-filter:saturate(180%) blur(10px);-webkit-backdrop-filter:saturate(180%) blur(10px)}
 
 .focus-ring:focus{outline:3px solid color-mix(in oklab, var(--brand) 60%, white);outline-offset:2px;border-radius:10px}
 
@@ -54,11 +66,29 @@ p{margin:0 0 1rem;color:var(--muted)}
 /* Forms */
 label{display:grid;gap:6px;font-size:.9rem;margin-bottom:10px}
 input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fff;transition:border-color .15s ease, box-shadow .15s ease}
+[data-theme="dark"] input,[data-theme="dark"] select,[data-theme="dark"] textarea{background:#0b1220;color:var(--text)}
 input:focus,select:focus,textarea:focus{outline:none;border-color:color-mix(in oklab, var(--brand) 60%, white);box-shadow:0 0 0 4px rgba(0,102,255,.08)}
 textarea{min-height:96px;resize:vertical}
 
 .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 @media(max-width:760px){.form-grid{grid-template-columns:1fr}}
+
+/* Switch */
+.switch{position:relative;display:inline-flex;align-items:center;gap:.5rem}
+.switch input{position:absolute;opacity:0;width:0;height:0}
+.switch .track{width:44px;height:26px;border-radius:9999px;background:color-mix(in oklab, var(--brand) 12%, var(--border));position:relative;transition:all .2s ease}
+.switch .thumb{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:9999px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.2);transition:all .2s ease}
+.switch input:checked + .track{background:var(--gradient)}
+.switch input:checked + .track .thumb{left:21px}
+
+/* Pills */
+.pill{display:inline-flex;align-items:center;gap:.375rem;padding:.375rem .625rem;border:1px solid var(--border);border-radius:9999px;background:color-mix(in oklab, #fff 90%, transparent)}
+.pill.active{border-color:color-mix(in oklab, var(--brand) 40%, var(--border));background:color-mix(in oklab, var(--brand) 8%, #fff)}
+
+/* Device frames */
+.device-frame{border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);background:var(--surface)}
+.device-frame.desktop{padding:12px}
+.device-frame.mobile{padding:10px;border-radius:28px;max-width:360px}
 
 /* Utility */
 .mt-2{margin-top:.5rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}
