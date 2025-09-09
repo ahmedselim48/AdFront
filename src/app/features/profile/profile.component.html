@@ -2,7 +2,7 @@
   <h2>Profile</h2>
   <form [formGroup]="form" (ngSubmit)="save()" class="grid">
     <label>Name<input type="text" formControlName="name"></label>
-    <label>Email<input type="email" formControlName="email" disabled></label>
+    <label>Email<input type="email" formControlName="email" [disabled]="true"></label>
     <label>Plan<select formControlName="plan"><option value="free">Free</option><option value="pro">Pro</option><option value="enterprise">Enterprise</option></select></label>
     <button type="submit" [disabled]="form.invalid">Save</button>
   </form>
