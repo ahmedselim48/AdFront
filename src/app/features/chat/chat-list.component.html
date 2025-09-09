@@ -1,0 +1,12 @@
+<section class="container">
+  <h2>{{ 'chat.title' | t }}</h2>
+  <div *ngIf="loading" class="skeleton" style="height:60px;border-radius:12px"></div>
+  <ul class="list">
+    <li *ngFor="let c of conversations" class="card item">
+      <a [routerLink]="['/chat', c.id]">
+        <div class="name">{{ c.title || ('chat.conversation' | t) }}</div>
+        <small>{{ c.createdAt | date:'short' }}</small>
+      </a>
+    </li>
+  </ul>
+</section>

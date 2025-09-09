@@ -1,15 +1,15 @@
 <section class="smart-wrap">
-  <h2>Smart Replies</h2>
+  <h2>{{ 'smart.title' | t }}</h2>
   <form [formGroup]="form" (ngSubmit)="generate()" class="row">
-    <input placeholder="Customer message..." formControlName="message">
-    <button type="submit" [disabled]="form.invalid || loading">Generate</button>
+    <input [placeholder]="('smart.messagePlaceholder' | t)" formControlName="message">
+    <button type="submit" [disabled]="form.invalid || loading">{{ 'smart.generate' | t }}</button>
   </form>
   <div class="result" *ngIf="reply">
-    <h3>Suggested Reply</h3>
+    <h3>{{ 'smart.suggested' | t }}</h3>
     <pre>{{ reply }}</pre>
   </div>
   <div class="templates">
-    <h3>Templates</h3>
+    <h3>{{ 'smart.templates' | t }}</h3>
     <ul>
       <li *ngFor="let t of templates" (click)="form.patchValue({message: t})">{{t}}</li>
     </ul>

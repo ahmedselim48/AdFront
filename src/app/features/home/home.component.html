@@ -1,6 +1,26 @@
-<section class="home-wrap">
-  <h2>Latest Ads</h2>
-  <div class="ads-grid">
+<section class="hero">
+  <div class="container hero-inner">
+    <div class="hero-copy">
+      <h1 class="headline">{{ 'hero.headline' | t }}</h1>
+      <p class="sub">{{ 'hero.sub' | t }}</p>
+      <div class="actions">
+        <a routerLink="/ads" class="button focus-ring">{{ 'hero.ctaPrimary' | t }}</a>
+        <a routerLink="/dashboard" class="button secondary focus-ring">{{ 'hero.ctaSecondary' | t }}</a>
+      </div>
+    </div>
+    <div class="hero-visual" aria-hidden="true">
+      <div class="orb"></div>
+      <div class="glass-card card">
+        <div class="line skeleton" style="height:10px;border-radius:6px"></div>
+        <div class="line skeleton" style="height:10px;border-radius:6px;width:70%"></div>
+        <div class="block skeleton" style="height:72px;border-radius:10px;margin-top:10px"></div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="home-wrap container">
+  <h2>{{ 'home.latestAds' | t }}</h2>
+  <div class="ads-grid" *ngIf="!loading; else loadingTpl">
     <article class="ad-card" *ngFor="let ad of ads">
       <header class="ad-head">
         <h3>{{ad.name}}</h3>
@@ -17,5 +37,18 @@
       </div>
     </article>
   </div>
-  <p class="empty" *ngIf="!ads.length">لا توجد إعلانات حتى الآن.</p>
+  <ng-template #loadingTpl>
+    <div class="ads-grid">
+      <article class="ad-card" *ngFor="let _ of skeletons">
+        <header class="ad-head">
+          <div class="skeleton" style="height:16px;width:50%;border-radius:8px"></div>
+          <div class="skeleton" style="height:16px;width:80px;border-radius:20px"></div>
+        </header>
+        <div class="ad-body">
+          <div class="skeleton" style="height:84px;border-radius:12px"></div>
+        </div>
+      </article>
+    </div>
+  </ng-template>
+  <p class="empty" *ngIf="!loading && !ads.length">{{ 'home.noAds' | t }}</p>
 </section>

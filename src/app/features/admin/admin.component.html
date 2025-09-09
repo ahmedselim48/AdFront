@@ -1,21 +1,21 @@
 <section class="admin-wrap">
-  <h2>Admin Panel</h2>
+  <h2>{{ 'admin.title' | t }}</h2>
   <div class="grid">
     <div>
-      <h3>Users</h3>
+      <h3>{{ 'admin.users' | t }}</h3>
       <ul class="list">
         <li *ngFor="let u of users">{{u.email}} — {{u.role}}</li>
       </ul>
     </div>
     <div>
-      <h3>Tenants</h3>
+      <h3>{{ 'admin.tenants' | t }}</h3>
       <form [formGroup]="tenants" (ngSubmit)="saveTenants()">
-        <div class="tenant" *ngFor="let t of tArr.controls; let i = index" [formGroup]="t">
-          <input placeholder="Tenant Name" formControlName="name">
-          <button type="button" (click)="removeTenant(i)">Remove</button>
+        <div class="tenant" *ngFor="let t of tArr.controls; let i = index" [formGroup]="$any(t)">
+          <input [placeholder]="('admin.tenantName' | t)" formControlName="name">
+          <button type="button" (click)="removeTenant(i)">{{ 'common.remove' | t }}</button>
         </div>
-        <button type="button" (click)="addTenant()">Add Tenant</button>
-        <button type="submit">Save</button>
+        <button type="button" (click)="addTenant()">{{ 'admin.addTenant' | t }}</button>
+        <button type="submit">{{ 'common.save' | t }}</button>
       </form>
     </div>
   </div>

@@ -1,10 +1,10 @@
 <section>
-  <h2>Notifications</h2>
+  <h2>{{ 'notifications.title' | t }}</h2>
   <ul class="list">
     <li *ngFor="let n of (notifications.list$ | async)">
       <span class="badge" [class.info]="n.level==='info'" [class.warning]="n.level==='warning'" [class.error]="n.level==='error'" [class.success]="n.level==='success'"></span>
       <span class="msg">{{n.message}}</span>
-      <small>{{n.createdAt | date:'short'}}</small>
+      <small>{{n.createdAt | date:'short':'': locale}}</small>
     </li>
   </ul>
 </section>

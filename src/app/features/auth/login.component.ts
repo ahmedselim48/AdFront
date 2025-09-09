@@ -1,22 +1,27 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 import { AuthService } from '../../core/auth/auth.service';
+import { LoginRequest } from '../../models/auth.models';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslatePipe],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent {
-  form = this.fb.group({ email: ['', [Validators.required, Validators.email]], password: ['', Validators.required] });
-  constructor(private fb: FormBuilder, private auth: AuthService, private router: Router) {}
+  form!: FormGroup;
+  constructor(private fb: FormBuilder, private auth: AuthService, private router: Router) {
+    this.form = this.fb.group({ email: ['', [Validators.required, Validators.email]], password: ['', Validators.required] });
+  }
   submit(){
     if(this.form.invalid) return;
-    this.auth.login(this.form.value as any).subscribe({
+    const req: LoginRequest = { email: this.form.get('email')?.value ?? '', password: this.form.get('password')?.value ?? '' };
+    this.auth.login(req).subscribe({
       next: () => this.router.navigateByUrl('/dashboard')
     });
   }

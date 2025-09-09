@@ -1,13 +1,13 @@
 <section class="comp-wrap">
-  <h2>Competition Analysis</h2>
+  <h2>{{ 'comp.title' | t }}</h2>
   <form [formGroup]="filters" class="filters">
-    <input placeholder="Keyword" formControlName="keyword">
-    <select formControlName="industry"><option value="all">All</option><option>Retail</option><option>SaaS</option></select>
+    <input [placeholder]="('comp.keyword' | t)" formControlName="keyword">
+    <select formControlName="industry"><option value="all">{{ 'common.all' | t }}</option><option>Retail</option><option>SaaS</option></select>
   </form>
   <table class="table">
-    <thead><tr><th>Competitor</th><th>Ad Count</th><th>Avg CTR</th><th>Actions</th></tr></thead>
+    <thead><tr><th>{{ 'comp.competitor' | t }}</th><th>{{ 'comp.adCount' | t }}</th><th>{{ 'comp.avgCtr' | t }}</th><th>{{ 'common.actions' | t }}</th></tr></thead>
     <tbody>
-      <tr *ngFor="let r of rows"><td>{{r.name}}</td><td>{{r.count}}</td><td>{{r.ctr}}%</td><td><button (click)="open(r)">Details</button></td></tr>
+      <tr *ngFor="let r of rows"><td>{{r.name}}</td><td>{{r.count}}</td><td>{{r.ctr}}%</td><td><button (click)="open(r)">{{ 'common.details' | t }}</button></td></tr>
     </tbody>
   </table>
 </section>

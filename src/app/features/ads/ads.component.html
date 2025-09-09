@@ -1,22 +1,22 @@
 <section class="ads-wrap">
-  <h2>Create Ad</h2>
+  <h2>{{ 'ads.createTitle' | t }}</h2>
   <form [formGroup]="form" (ngSubmit)="save()" class="grid">
-    <label>Name<input formControlName="name"></label>
-    <label>Status<select formControlName="status"><option value="draft">Draft</option><option value="scheduled">Scheduled</option><option value="active">Active</option><option value="paused">Paused</option></select></label>
-    <label>Schedule at<input type="datetime-local" formControlName="scheduleAt"></label>
+    <label>{{ 'common.name' | t }}<input formControlName="name"></label>
+    <label>{{ 'ads.status' | t }}<select formControlName="status"><option value="draft">{{ 'status.draft' | t }}</option><option value="scheduled">{{ 'status.scheduled' | t }}</option><option value="active">{{ 'status.active' | t }}</option><option value="paused">{{ 'status.paused' | t }}</option></select></label>
+    <label>{{ 'ads.scheduleAt' | t }}<input type="datetime-local" formControlName="scheduleAt"></label>
     <div class="variants">
       <div class="variants-header">
-        <h3>Variants (A/B)</h3>
-        <button type="button" (click)="addVariant()">Add Variant</button>
+        <h3>{{ 'ads.variants' | t }}</h3>
+        <button type="button" (click)="addVariant()">{{ 'ads.addVariant' | t }}</button>
       </div>
-      <div class="variant" *ngFor="let v of variants.controls; let i = index" [formGroup]="v">
-        <label>Title<input formControlName="title"></label>
-        <label>Body<textarea formControlName="body"></textarea></label>
-        <label>Active<input type="checkbox" formControlName="isActive"></label>
+      <div class="variant" *ngFor="let v of variants.controls; let i = index" [formGroup]="$any(v)">
+        <label>{{ 'common.title' | t }}<input formControlName="title"></label>
+        <label>{{ 'ads.body' | t }}<textarea formControlName="body"></textarea></label>
+        <label>{{ 'common.active' | t }}<input type="checkbox" formControlName="isActive"></label>
         <input type="file" (change)="onFile($event, i)">
-        <button type="button" (click)="removeVariant(i)">Remove</button>
+        <button type="button" (click)="removeVariant(i)">{{ 'common.remove' | t }}</button>
       </div>
     </div>
-    <button type="submit" [disabled]="form.invalid">Save</button>
+    <button type="submit" [disabled]="form.invalid">{{ 'common.save' | t }}</button>
   </form>
 </section>

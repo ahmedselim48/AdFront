@@ -1,17 +1,21 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../core/auth/auth.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
+import { ForgotPasswordRequest } from '../../models/auth.models';
 
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, TranslatePipe],
   templateUrl: './forgot-password.component.html',
   styleUrls: ['./forgot-password.component.scss']
 })
 export class ForgotPasswordComponent {
-  form = this.fb.group({ email: ['', [Validators.required, Validators.email]] });
-  constructor(private fb: FormBuilder, private auth: AuthService) {}
-  submit(){ if(this.form.invalid) return; this.auth.forgotPassword(this.form.value as any).subscribe(); }
+  form!: FormGroup;
+  constructor(private fb: FormBuilder, private auth: AuthService) {
+    this.form = this.fb.group({ email: ['', [Validators.required, Validators.email]] });
+  }
+  submit(){ if(this.form.invalid) return; const req: ForgotPasswordRequest = { email: this.form.get('email')?.value ?? '' }; this.auth.forgotPassword(req).subscribe(); }
 }

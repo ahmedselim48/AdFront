@@ -15,35 +15,43 @@ export class AuthService {
   get accessToken(): string | null { return this.storage.accessToken; }
 
   login(req: LoginRequest): Observable<TokenResponse> {
-    return this.api.post$<TokenResponse>('/auth/login', req).pipe(
+    return this.api.post$<TokenResponse>('/Auth/login', req).pipe(
       tap(t => this.setTokens(t))
     );
   }
 
   register(req: RegisterRequest): Observable<TokenResponse> {
-    return this.api.post$<TokenResponse>('/auth/register', req).pipe(
+    return this.api.post$<TokenResponse>('/Auth/register', req).pipe(
       tap(t => this.setTokens(t))
     );
   }
 
   forgotPassword(req: ForgotPasswordRequest) {
-    return this.api.post$<void>('/auth/forgot-password', req);
+    return this.api.post$<void>('/Auth/forgot-password', req);
   }
 
   resetPassword(req: ResetPasswordRequest) {
-    return this.api.post$<void>('/auth/reset-password', req);
+    return this.api.post$<void>('/Auth/reset-password', req);
   }
 
   refresh(refreshToken: string): Observable<TokenResponse> {
-    return this.api.post$<TokenResponse>('/auth/refresh', { refreshToken }).pipe(
+    return this.api.post$<TokenResponse>('/Auth/refresh', { refreshToken }).pipe(
       tap(t => this.setTokens(t))
     );
   }
 
   loadProfile(): Observable<UserProfile> {
-    return this.api.get$<UserProfile>('/users/me').pipe(
+    return this.api.get$<UserProfile>('/Auth/me').pipe(
       tap(u => this.currentUserSubject.next(u))
     );
+  }
+
+  logoutRequest(){
+    return this.api.post$<void>('/Auth/logout', {});
+  }
+
+  changePassword(currentPassword: string, newPassword: string){
+    return this.api.post$<void>('/Auth/change-password', { currentPassword, newPassword });
   }
 
   logout(): void {

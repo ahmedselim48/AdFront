@@ -1,0 +1,16 @@
+<section class="container">
+  <h2>{{ 'chat.thread' | t }}</h2>
+  <div class="msgs card" *ngIf="!loading; else loadTpl">
+    <div class="msg" *ngFor="let m of messages">
+      <div class="bubble">{{ m.content }}</div>
+      <small class="time">{{ m.createdAt | date:'short' }}</small>
+    </div>
+  </div>
+  <ng-template #loadTpl>
+    <div class="skeleton" style="height:160px;border-radius:12px"></div>
+  </ng-template>
+  <form [formGroup]="form" (ngSubmit)="send()" class="row mt-3">
+    <input [placeholder]="('chat.typeMessage' | t)" formControlName="content">
+    <button class="button" type="submit" [disabled]="form.invalid">{{ 'chat.send' | t }}</button>
+  </form>
+</section>

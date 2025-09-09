@@ -1,0 +1,15 @@
+<section class="container">
+  <h2>{{ 'chat.templates' | t }}</h2>
+  <form [formGroup]="form" (ngSubmit)="save()" class="form-grid">
+    <label>{{ 'common.title' | t }}<input formControlName="title"></label>
+    <label>{{ 'smart.templates' | t }}<textarea formControlName="body"></textarea></label>
+    <button class="button" type="submit" [disabled]="form.invalid">{{ 'common.save' | t }}</button>
+  </form>
+  <ul class="list mt-4">
+    <li class="card item" *ngFor="let t of items">
+      <div class="title">{{t.title}}</div>
+      <pre>{{t.body}}</pre>
+      <button class="button secondary" (click)="remove(t.id)">{{ 'common.remove' | t }}</button>
+    </li>
+  </ul>
+</section>

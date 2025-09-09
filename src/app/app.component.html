@@ -1,20 +1,27 @@
 <header class="app-header">
-  <div class="brand">AdFront</div>
-  <nav class="nav-links">
-    <a routerLink="/home" routerLinkActive="active">Home</a>
-    <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
-    <a routerLink="/ads" routerLinkActive="active">Ads</a>
-    <a routerLink="/smart-replies" routerLinkActive="active">Smart Replies</a>
-    <a routerLink="/competition" routerLinkActive="active">Competition</a>
-    <a routerLink="/reports" routerLinkActive="active">Reports</a>
-    <a routerLink="/admin" routerLinkActive="active">Admin</a>
-    <a routerLink="/profile" routerLinkActive="active">Profile</a>
-  </nav>
+  <div class="container header-inner">
+    <a routerLink="/home" class="brand" aria-label="AdFront home">AdFront</a>
+    <button class="menu-toggle focus-ring" (click)="toggleMenu()" [attr.aria-expanded]="mobileOpen" aria-label="Toggle menu">
+      <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+    </button>
+    <nav class="nav-links" [class.open]="mobileOpen" (click)="closeMenu()">
+      <a routerLink="/home" routerLinkActive="active" aria-label="Home">{{ 'nav.home' | t }}</a>
+      <a routerLink="/dashboard" routerLinkActive="active" aria-label="Dashboard">{{ 'nav.dashboard' | t }}</a>
+      <a routerLink="/ads" routerLinkActive="active" aria-label="Ads">{{ 'nav.ads' | t }}</a>
+      <a routerLink="/smart-replies" routerLinkActive="active" aria-label="Smart Replies">{{ 'nav.smartReplies' | t }}</a>
+      <a routerLink="/chat" routerLinkActive="active" aria-label="Chat" class="chat-link">{{ 'nav.chat' | t }}<span class="badge" *ngIf="unreadCount>0">{{ unreadCount }}</span></a>
+      <a routerLink="/competition" routerLinkActive="active" aria-label="Competition">{{ 'nav.competition' | t }}</a>
+      <a routerLink="/reports" routerLinkActive="active" aria-label="Reports">{{ 'nav.reports' | t }}</a>
+      <a routerLink="/admin" routerLinkActive="active" aria-label="Admin">{{ 'nav.admin' | t }}</a>
+      <a routerLink="/profile" routerLinkActive="active" aria-label="Profile">{{ 'nav.profile' | t }}</a>
+      <button type="button" class="button ghost focus-ring" (click)="toggleLang()" aria-label="Change language">{{ langLabel }}</button>
+    </nav>
+  </div>
 </header>
 <main class="app-main">
   <router-outlet></router-outlet>
 </main>
 <app-toast-center></app-toast-center>
 <footer class="app-footer">
-  <div class="footer-content">© {{ new Date().getFullYear() }} AdFront</div>
+  <div class="footer-content">© {{ currentYear }} AdFront</div>
 </footer>

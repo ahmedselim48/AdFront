@@ -1,9 +1,9 @@
 <section class="profile-wrap">
-  <h2>Profile</h2>
+  <h2>{{ 'profile.title' | t }}</h2>
   <form [formGroup]="form" (ngSubmit)="save()" class="grid">
-    <label>Name<input type="text" formControlName="name"></label>
-    <label>Email<input type="email" formControlName="email" disabled></label>
-    <label>Plan<select formControlName="plan"><option value="free">Free</option><option value="pro">Pro</option><option value="enterprise">Enterprise</option></select></label>
-    <button type="submit" [disabled]="form.invalid">Save</button>
+    <label>{{ 'common.name' | t }}<input type="text" formControlName="name"></label>
+    <label>{{ 'common.email' | t }}<input type="email" formControlName="email" [disabled]="true"></label>
+    <label>{{ 'profile.plan' | t }}<select formControlName="plan"><option value="free">{{ 'plan.free' | t }}</option><option value="pro">{{ 'plan.pro' | t }}</option><option value="enterprise">{{ 'plan.enterprise' | t }}</option></select></label>
+    <button type="submit" [disabled]="form.invalid">{{ 'common.save' | t }}</button>
   </form>
 </section>

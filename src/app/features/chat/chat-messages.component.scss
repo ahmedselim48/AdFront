@@ -1,0 +1,5 @@
+.msgs{padding:12px}
+.msg{display:grid;gap:4px;margin:10px 0}
+.bubble{max-width:720px;background:#f3f4f6;border-radius:12px;padding:10px}
+.time{color:var(--muted)}
+.row{display:grid;grid-template-columns:1fr auto;gap:8px}
