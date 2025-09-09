@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 
@@ -12,14 +12,16 @@ import { environment } from '../../../environments/environment';
   styleUrls: ['./smart-replies.component.scss']
 })
 export class SmartRepliesComponent {
-  form = this.fb.group({ message: ['', Validators.required] });
+  form!: FormGroup;
   loading = false;
   reply = '';
   templates = [
     'Thanks for reaching out! Can you share your order number?',
     'We appreciate your feedback. Could you provide more details?'
   ];
-  constructor(private fb: FormBuilder, private http: HttpClient){}
+  constructor(private fb: FormBuilder, private http: HttpClient){
+    this.form = this.fb.group({ message: ['', Validators.required] });
+  }
   generate(){
     if(this.form.invalid) return;
     this.loading = true;
