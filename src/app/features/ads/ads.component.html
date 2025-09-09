@@ -9,7 +9,7 @@
         <h3>Variants (A/B)</h3>
         <button type="button" (click)="addVariant()">Add Variant</button>
       </div>
-      <div class="variant" *ngFor="let v of variants.controls; let i = index" [formGroup]="v">
+      <div class="variant" *ngFor="let v of variants.controls; let i = index" [formGroup]="$any(v)">
         <label>Title<input formControlName="title"></label>
         <label>Body<textarea formControlName="body"></textarea></label>
         <label>Active<input type="checkbox" formControlName="isActive"></label>
