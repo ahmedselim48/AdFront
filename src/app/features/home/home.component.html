@@ -1,11 +1,11 @@
 <section class="hero">
   <div class="container hero-inner">
     <div class="hero-copy">
-      <h1 class="headline">Create campaigns that convert</h1>
-      <p class="sub">Design, launch, and optimize ads with confidence. Beautiful analytics, smart automations, and blazing-fast workflows.</p>
+      <h1 class="headline">{{ 'hero.headline' | t }}</h1>
+      <p class="sub">{{ 'hero.sub' | t }}</p>
       <div class="actions">
-        <a routerLink="/ads" class="button focus-ring">New Campaign</a>
-        <a routerLink="/dashboard" class="button secondary focus-ring">View Dashboard</a>
+        <a routerLink="/ads" class="button focus-ring">{{ 'hero.ctaPrimary' | t }}</a>
+        <a routerLink="/dashboard" class="button secondary focus-ring">{{ 'hero.ctaSecondary' | t }}</a>
       </div>
     </div>
     <div class="hero-visual" aria-hidden="true">
@@ -19,7 +19,7 @@
   </div>
 </section>
 <section class="home-wrap container">
-  <h2>Latest Ads</h2>
+  <h2>{{ 'home.latestAds' | t }}</h2>
   <div class="ads-grid" *ngIf="!loading; else loadingTpl">
     <article class="ad-card" *ngFor="let ad of ads">
       <header class="ad-head">
@@ -50,5 +50,5 @@
       </article>
     </div>
   </ng-template>
-  <p class="empty" *ngIf="!loading && !ads.length">لا توجد إعلانات حتى الآن.</p>
+  <p class="empty" *ngIf="!loading && !ads.length">{{ 'home.noAds' | t }}</p>
 </section>

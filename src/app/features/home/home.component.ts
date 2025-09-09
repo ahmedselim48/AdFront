@@ -1,12 +1,14 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { AdsService } from '../ads/ads.service';
 import { AdItem } from '../../models/ads.models';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink, TranslatePipe],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })

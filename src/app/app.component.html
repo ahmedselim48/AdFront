@@ -5,14 +5,15 @@
       <span class="bar"></span><span class="bar"></span><span class="bar"></span>
     </button>
     <nav class="nav-links" [class.open]="mobileOpen" (click)="closeMenu()">
-      <a routerLink="/home" routerLinkActive="active" aria-label="Home">Home</a>
-      <a routerLink="/dashboard" routerLinkActive="active" aria-label="Dashboard">Dashboard</a>
-      <a routerLink="/ads" routerLinkActive="active" aria-label="Ads">Ads</a>
-      <a routerLink="/smart-replies" routerLinkActive="active" aria-label="Smart Replies">Smart Replies</a>
-      <a routerLink="/competition" routerLinkActive="active" aria-label="Competition">Competition</a>
-      <a routerLink="/reports" routerLinkActive="active" aria-label="Reports">Reports</a>
-      <a routerLink="/admin" routerLinkActive="active" aria-label="Admin">Admin</a>
-      <a routerLink="/profile" routerLinkActive="active" aria-label="Profile">Profile</a>
+      <a routerLink="/home" routerLinkActive="active" aria-label="Home">{{ 'nav.home' | t }}</a>
+      <a routerLink="/dashboard" routerLinkActive="active" aria-label="Dashboard">{{ 'nav.dashboard' | t }}</a>
+      <a routerLink="/ads" routerLinkActive="active" aria-label="Ads">{{ 'nav.ads' | t }}</a>
+      <a routerLink="/smart-replies" routerLinkActive="active" aria-label="Smart Replies">{{ 'nav.smartReplies' | t }}</a>
+      <a routerLink="/competition" routerLinkActive="active" aria-label="Competition">{{ 'nav.competition' | t }}</a>
+      <a routerLink="/reports" routerLinkActive="active" aria-label="Reports">{{ 'nav.reports' | t }}</a>
+      <a routerLink="/admin" routerLinkActive="active" aria-label="Admin">{{ 'nav.admin' | t }}</a>
+      <a routerLink="/profile" routerLinkActive="active" aria-label="Profile">{{ 'nav.profile' | t }}</a>
+      <button type="button" class="button ghost focus-ring" (click)="toggleLang()" aria-label="Change language">{{ langLabel }}</button>
     </nav>
   </div>
 </header>
