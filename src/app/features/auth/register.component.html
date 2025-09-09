@@ -1,12 +1,12 @@
 <section class="auth-card">
-  <h2>Register</h2>
+  <h2>{{ 'auth.register' | t }}</h2>
   <form [formGroup]="form" (ngSubmit)="submit()">
-    <label>Name<input type="text" formControlName="name" required></label>
-    <label>Email<input type="email" formControlName="email" required></label>
-    <label>Password<input type="password" formControlName="password" required></label>
-    <button type="submit" [disabled]="form.invalid">Create account</button>
+    <label>{{ 'common.name' | t }}<input type="text" formControlName="name" required></label>
+    <label>{{ 'common.email' | t }}<input type="email" formControlName="email" required></label>
+    <label>{{ 'common.password' | t }}<input type="password" formControlName="password" required></label>
+    <button type="submit" [disabled]="form.invalid">{{ 'auth.createAccount' | t }}</button>
   </form>
   <div class="auth-links">
-    <a routerLink="/auth/login">Already have an account?</a>
+    <a routerLink="/auth/login">{{ 'auth.already' | t }}</a>
   </div>
 </section>
