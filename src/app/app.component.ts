@@ -8,4 +8,6 @@ import { ToastComponent } from './shared/components/toast/toast.component';
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent {}
+export class AppComponent {
+  currentYear = new Date().getFullYear();
+}
