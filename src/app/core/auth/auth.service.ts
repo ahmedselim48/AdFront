@@ -46,6 +46,14 @@ export class AuthService {
     );
   }
 
+  logoutRequest(){
+    return this.api.post$<void>('/Auth/logout', {});
+  }
+
+  changePassword(currentPassword: string, newPassword: string){
+    return this.api.post$<void>('/Auth/change-password', { currentPassword, newPassword });
+  }
+
   logout(): void {
     this.storage.clear();
     this.currentUserSubject.next(null);
