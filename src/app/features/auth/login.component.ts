@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
+import { LoginRequest } from '../../models/auth.models';
 
 @Component({
   selector: 'app-login',
@@ -18,7 +19,8 @@ export class LoginComponent {
   }
   submit(){
     if(this.form.invalid) return;
-    this.auth.login(this.form.value as any).subscribe({
+    const req: LoginRequest = { email: this.form.get('email')?.value ?? '', password: this.form.get('password')?.value ?? '' };
+    this.auth.login(req).subscribe({
       next: () => this.router.navigateByUrl('/dashboard')
     });
   }
