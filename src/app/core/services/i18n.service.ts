@@ -143,7 +143,7 @@ const ar: Dict = {
   'ads.addVariant': 'إضافة نسخة',
   'ads.body': 'النص',
 
-  'admin.title': 'لو��ة الإدارة',
+  'admin.title': 'لوحة الإدارة',
   'admin.users': 'المستخدمون',
   'admin.tenants': 'المستأجرون',
   'admin.tenantName': 'اسم المستأجر',
@@ -179,7 +179,7 @@ const ar: Dict = {
   'smart.title': 'الردود الذكية',
   'smart.messagePlaceholder': 'رسالة العميل...',
   'smart.generate': 'توليد',
-  'smart.suggested': 'ا��رد المقترح',
+  'smart.suggested': 'الرد المقترح',
   'smart.templates': 'القوالب',
 
   'auth.login': 'تسجيل الدخول',
@@ -229,7 +229,7 @@ export class I18nService {
   }
 
   private applyToDocument(lang: Lang): void {
-    this.doc.documentElement.lang = lang;
+    this.doc.documentElement.lang = lang === 'ar' ? 'ar-SA' : 'en';
     this.doc.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
   }
 }
