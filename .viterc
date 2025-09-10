@@ -1,0 +1,16 @@
+{
+  "build": {
+    "rollupOptions": {
+      "output": {
+        "manualChunks": {
+          "vendor": ["@angular/core", "@angular/common", "@angular/forms", "@angular/router"],
+          "rxjs": ["rxjs"]
+        }
+      }
+    }
+  },
+  "server": {
+    "hmr": true,
+    "liveReload": true
+  }
+}

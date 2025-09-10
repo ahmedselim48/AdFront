@@ -1,0 +1,44 @@
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.item {
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.item a {
+  display: block;
+  padding: 1rem;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.item a:hover {
+  background-color: var(--color-surface);
+}
+
+.name {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.badge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background-color: var(--color-primary);
+  color: white;
+  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+}

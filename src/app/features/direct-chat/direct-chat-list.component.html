@@ -1,11 +1,12 @@
 <section class="container">
-  <h2>{{ 'chat.title' | t }}</h2>
+  <h2>{{ 'chat.directChat' | t }}</h2>
   <div *ngIf="loading" class="skeleton" style="height:60px;border-radius:12px"></div>
   <ul class="list">
     <li *ngFor="let c of conversations" class="card item">
-      <a [routerLink]="['/chat', c.id]">
-        <div class="name">{{ c.adTitle || ('chat.conversation' | t) }}</div>
+      <a [routerLink]="['/direct-chat', c.id]">
+        <div class="name">{{ c.user2Name }}</div>
         <small>{{ c.createdAt | date:'short' }}</small>
+        <span *ngIf="c.unreadMessageCount > 0" class="badge">{{ c.unreadMessageCount }}</span>
       </a>
     </li>
   </ul>

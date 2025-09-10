@@ -1,0 +1,30 @@
+<section class="auth-card">
+  <h2>{{ 'auth.resendConfirmation' | t }}</h2>
+  
+  <div *ngIf="success" class="success-message">
+    {{ success }}
+  </div>
+  
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+  
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <label>
+      {{ 'common.email' | t }}
+      <input type="email" formControlName="email" required>
+      <div *ngIf="form.get('email')?.invalid && form.get('email')?.touched" class="error">
+        {{ 'auth.emailInvalid' | t }}
+      </div>
+    </label>
+    
+    <button type="submit" [disabled]="form.invalid || loading">
+      <span *ngIf="loading">{{ 'common.loading' | t }}</span>
+      <span *ngIf="!loading">{{ 'auth.resendConfirmation' | t }}</span>
+    </button>
+  </form>
+  
+  <div class="auth-links">
+    <a routerLink="/auth/login">{{ 'auth.backToLogin' | t }}</a>
+  </div>
+</section>

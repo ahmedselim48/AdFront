@@ -1,12 +1,15 @@
 export interface LoginRequest {
   email: string;
   password: string;
+  rememberMe?: boolean;
 }
 
 export interface RegisterRequest {
   email: string;
   password: string;
-  name: string;
+  userName: string;
+  fullName: string;
+  confirmPassword: string;
 }
 
 export interface ForgotPasswordRequest {
@@ -14,7 +17,8 @@ export interface ForgotPasswordRequest {
 }
 
 export interface ResetPasswordRequest {
-  token: string;
+  email: string;
+  resetToken: string;
   newPassword: string;
 }
 
@@ -27,9 +31,27 @@ export interface TokenResponse {
 export interface UserProfile {
   id: string;
   email: string;
-  name: string;
-  role: 'user' | 'admin';
-  tenantId?: string;
-  avatarUrl?: string;
-  plan?: 'free' | 'pro' | 'enterprise';
+  userName: string;
+  fullName: string;
+  roles: string[];
+  emailConfirmed: boolean;
+}
+
+// Additional models for new endpoints
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
+export interface ResendConfirmationRequest {
+  email: string;
+}
+
+export interface VerifyEmailRequest {
+  token: string;
+  email: string;
 }

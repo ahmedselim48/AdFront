@@ -6,6 +6,13 @@ import { environment } from '../../../environments/environment';
 export class OpenAiService {
   constructor(private http: HttpClient){}
   createSmartReply(message: string){
-    return this.http.post<{reply:string}>(`${environment.openAiProxyUrl}/smart-replies`, { message });
+    // Mock response for now since the endpoint doesn't exist
+    return new Promise<{reply: string}>(resolve => {
+      setTimeout(() => {
+        resolve({
+          reply: `شكراً لاهتمامك! سأرد عليك قريباً. ${message.includes('سعر') ? 'السعر متاح للتفاوض.' : ''}`
+        });
+      }, 1000);
+    });
   }
 }

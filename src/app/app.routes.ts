@@ -1,37 +1,58 @@
 import { Routes } from '@angular/router';
-// import { authGuard } from './core/auth/auth.guard';
+import { AuthGuard, GuestGuard } from './core/auth/auth.guard';
 import { adminGuard } from './core/auth/admin.guard';
+
+// Import components statically to avoid dynamic import issues
+import { HomeComponent } from './features/home/home.component';
+import { LoginComponent } from './features/auth/login.component';
+import { RegisterComponent } from './features/auth/register.component';
+import { ForgotPasswordComponent } from './features/auth/forgot-password.component';
+import { ResetPasswordComponent } from './features/auth/reset-password.component';
+import { VerifyEmailComponent } from './features/auth/verify-email.component';
+import { ResendConfirmationComponent } from './features/auth/resend-confirmation.component';
+import { ChangePasswordComponent } from './features/auth/change-password.component';
+import { DashboardComponent } from './features/dashboard/dashboard.component';
+import { AdsComponent } from './features/ads/ads.component';
+import { SmartRepliesComponent } from './features/smart-replies/smart-replies.component';
+import { CompetitionComponent } from './features/competition/competition.component';
+import { ReportsComponent } from './features/reports/reports.component';
+import { NotificationsComponent } from './features/notifications/notifications.component';
+import { ChatListComponent } from './features/chat/chat-list.component';
+import { TemplatesComponent } from './features/chat/templates.component';
+import { ChatMessagesComponent } from './features/chat/chat-messages.component';
+import { DirectChatListComponent } from './features/direct-chat/direct-chat-list.component';
+import { DirectChatMessagesComponent } from './features/direct-chat/direct-chat-messages.component';
+import { ProfileComponent } from './features/profile/profile.component';
+import { AdminComponent } from './features/admin/admin.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'home' },
-  { path: 'home', loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent) },
+  { path: 'home', component: HomeComponent },
   { path: 'auth', children: [
-    { path: 'login', loadComponent: () => import('./features/auth/login.component').then(m => m.LoginComponent) },
-    { path: 'register', loadComponent: () => import('./features/auth/register.component').then(m => m.RegisterComponent) },
-    { path: 'forgot', loadComponent: () => import('./features/auth/forgot-password.component').then(m => m.ForgotPasswordComponent) },
-    { path: 'reset', loadComponent: () => import('./features/auth/reset-password.component').then(m => m.ResetPasswordComponent) },
+    { path: 'login', canActivate: [GuestGuard], component: LoginComponent },
+    { path: 'register', canActivate: [GuestGuard], component: RegisterComponent },
+    { path: 'forgot', canActivate: [GuestGuard], component: ForgotPasswordComponent },
+    { path: 'reset', canActivate: [GuestGuard], component: ResetPasswordComponent },
+    { path: 'verify-email', canActivate: [GuestGuard], component: VerifyEmailComponent },
+    { path: 'resend-confirmation', canActivate: [GuestGuard], component: ResendConfirmationComponent },
+    { path: 'change-password', canActivate: [AuthGuard], component: ChangePasswordComponent },
   ]},
-  // { path: 'dashboard', canActivate: [authGuard], loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
-  { path: 'dashboard', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
-  // { path: 'ads', canActivate: [authGuard], loadComponent: () => import('./features/ads/ads.component').then(m => m.AdsComponent) },
-  { path: 'ads', loadComponent: () => import('./features/ads/ads.component').then(m => m.AdsComponent) },
-  // { path: 'smart-replies', canActivate: [authGuard], loadComponent: () => import('./features/smart-replies/smart-replies.component').then(m => m.SmartRepliesComponent) },
-  { path: 'smart-replies', loadComponent: () => import('./features/smart-replies/smart-replies.component').then(m => m.SmartRepliesComponent) },
-  // { path: 'competition', canActivate: [authGuard], loadComponent: () => import('./features/competition/competition.component').then(m => m.CompetitionComponent) },
-  { path: 'competition', loadComponent: () => import('./features/competition/competition.component').then(m => m.CompetitionComponent) },
-  // { path: 'reports', canActivate: [authGuard], loadComponent: () => import('./features/reports/reports.component').then(m => m.ReportsComponent) },
-  { path: 'reports', loadComponent: () => import('./features/reports/reports.component').then(m => m.ReportsComponent) },
-  // { path: 'notifications', canActivate: [authGuard], loadComponent: () => import('./features/notifications/notifications.component').then(m => m.NotificationsComponent) },
-  { path: 'notifications', loadComponent: () => import('./features/notifications/notifications.component').then(m => m.NotificationsComponent) },
-  // { path: 'chat', canActivate: [authGuard], children: [
-  { path: 'chat', children: [
-    { path: '', loadComponent: () => import('./features/chat/chat-list.component').then(m => m.ChatListComponent) },
-    { path: 'templates', loadComponent: () => import('./features/chat/templates.component').then(m => m.TemplatesComponent) },
-    { path: ':id', loadComponent: () => import('./features/chat/chat-messages.component').then(m => m.ChatMessagesComponent) },
+  { path: 'dashboard', canActivate: [AuthGuard], component: DashboardComponent },
+  { path: 'ads', canActivate: [AuthGuard], component: AdsComponent },
+  { path: 'smart-replies', canActivate: [AuthGuard], component: SmartRepliesComponent },
+  { path: 'competition', canActivate: [AuthGuard], component: CompetitionComponent },
+  { path: 'reports', canActivate: [AuthGuard], component: ReportsComponent },
+  { path: 'notifications', canActivate: [AuthGuard], component: NotificationsComponent },
+  { path: 'chat', canActivate: [AuthGuard], children: [
+    { path: '', component: ChatListComponent },
+    { path: 'templates', component: TemplatesComponent },
+    { path: ':id', component: ChatMessagesComponent },
   ] },
-  // { path: 'profile', canActivate: [authGuard], loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent) },
-  { path: 'profile', loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent) },
-  // { path: 'admin', canActivate: [authGuard, adminGuard], loadComponent: () => import('./features/admin/admin.component').then(m => m.AdminComponent) },
-  { path: 'admin', loadComponent: () => import('./features/admin/admin.component').then(m => m.AdminComponent) },
+  { path: 'direct-chat', canActivate: [AuthGuard], children: [
+    { path: '', component: DirectChatListComponent },
+    { path: ':id', component: DirectChatMessagesComponent },
+  ] },
+  { path: 'profile', canActivate: [AuthGuard], component: ProfileComponent },
+  { path: 'admin', canActivate: [AuthGuard, adminGuard], component: AdminComponent },
   { path: '**', redirectTo: 'home' }
 ];

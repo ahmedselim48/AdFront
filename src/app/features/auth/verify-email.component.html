@@ -1,0 +1,27 @@
+<section class="auth-card">
+  <h2>{{ 'auth.verifyEmail' | t }}</h2>
+  
+  <!-- Verifying State -->
+  <div *ngIf="status === 'verifying'">
+    <div class="status-icon verifying">
+      <div class="loading-spinner"></div>
+    </div>
+    <div class="message">{{ 'auth.verifying' | t }}...</div>
+  </div>
+  
+  <!-- Success State -->
+  <div *ngIf="status === 'success'">
+    <div class="status-icon success">✓</div>
+    <div class="message success">{{ message }}</div>
+    <button class="button" (click)="goLogin()">{{ 'auth.login' | t }}</button>
+  </div>
+  
+  <!-- Error State -->
+  <div *ngIf="status === 'error'">
+    <div class="status-icon error">✗</div>
+    <div class="message error">{{ message }}</div>
+    <button class="button" (click)="goLogin()">{{ 'auth.login' | t }}</button>
+  </div>
+</section>
+
+

@@ -5,6 +5,9 @@ import { ToastComponent } from './shared/components/toast/toast.component';
 import { TranslatePipe } from './shared/pipes/translate.pipe';
 import { I18nService } from './core/services/i18n.service';
 import { ChatService } from './core/services/chat.service';
+import { TokenStorageService } from './core/auth/token-storage.service';
+import { AuthService } from './core/auth/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -15,14 +18,30 @@ import { ChatService } from './core/services/chat.service';
 export class AppComponent {
   private i18n = inject(I18nService);
   private chat = inject(ChatService);
+  protected storage = inject(TokenStorageService);
+  private auth = inject(AuthService);
+  private router = inject(Router);
   currentYear = new Date().getFullYear();
   mobileOpen = false;
   unreadCount = 0;
+  currentUser: any = null;
   constructor(){
+    // Initialize authentication state from stored tokens
+    this.auth.initializeAuth();
     this.pollUnread();
+    this.loadCurrentUser();
   }
+  private loadCurrentUser() {
+    this.auth.currentUser$.subscribe(user => {
+      this.currentUser = user;
+    });
+  }
+
   private pollUnread(){
-    const run = () => this.chat.unreadCount().subscribe({ next: r => this.unreadCount = r.count, error: () => {} });
+    const run = () => {
+      if (!this.storage.accessToken) { this.unreadCount = 0; return; }
+      this.chat.unreadCount().subscribe({ next: r => this.unreadCount = r.count, error: () => {} });
+    };
     run();
     setInterval(run, 30000);
   }
@@ -32,5 +51,12 @@ export class AppComponent {
   toggleLang(){ this.i18n.toggle(); }
   get langLabel(){ return this.i18n.current === 'ar' ? 'EN' : 'AR'; }
 
-  
+  logout(){
+    this.auth.logout();
+    // Clear remember me settings
+    localStorage.removeItem('rememberMe');
+    localStorage.removeItem('loginTime');
+    sessionStorage.removeItem('loginTime');
+    this.router.navigateByUrl('/home');
+  }
 }

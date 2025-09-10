@@ -1,72 +1,218 @@
 <section class="profile-wrap container">
-  <div class="profile-card card glass">
-    <div class="avatar" aria-hidden="true">{{ (form.value.name || 'U').slice(0,1) }}</div>
-    <div class="info">
-      <h2 class="name">{{ form.value.name || '—' }}</h2>
-      <div class="contact">
-        <span class="pill">{{ form.value.email || '—' }}</span>
-        <span class="pill">{{ form.value.plan | uppercase }}</span>
-      </div>
-      <p class="bio">{{ 'Create, manage, and optimize your ads with AI assistance.' }}</p>
-    </div>
-    <form [formGroup]="form" (ngSubmit)="save()" class="edit-form">
-      <label>{{ 'common.name' | t }}<input type="text" formControlName="name"></label>
-      <label>{{ 'common.email' | t }}<input type="email" formControlName="email" [disabled]="true"></label>
-      <label>{{ 'profile.plan' | t }}
-        <select formControlName="plan">
-          <option value="free">{{ 'plan.free' | t }}</option>
-          <option value="pro">{{ 'plan.pro' | t }}</option>
-          <option value="enterprise">{{ 'plan.enterprise' | t }}</option>
-        </select>
-      </label>
-      <button type="submit" class="button" [disabled]="form.invalid">{{ 'common.save' | t }}</button>
-    </form>
-  </div>
-</section>
-<section class="profile-ads container">
-  <div class="ads-header">
-    <h3>{{ 'home.latestAds' | t }}</h3>
-    <div class="actions">
-      <div class="pill" role="tablist">
-        <button class="pill" [class.active]="filter==='all'" (click)="setFilter('all')">All ({{counts['all']}})</button>
-        <button class="pill" [class.active]="filter==='draft'" (click)="setFilter('draft')">Draft ({{counts['draft']}})</button>
-        <button class="pill" [class.active]="filter==='scheduled'" (click)="setFilter('scheduled')">Scheduled ({{counts['scheduled']}})</button>
-        <button class="pill" [class.active]="filter==='published'" (click)="setFilter('published')">Published ({{counts['published']}})</button>
-      </div>
-      <div class="pill">
-        <button class="pill" [class.active]="viewMode==='grid'" (click)="setView('grid')">Grid</button>
-        <button class="pill" [class.active]="viewMode==='list'" (click)="setView('list')">List</button>
-      </div>
-      <a routerLink="/ads" class="button ghost">+ New Ad</a>
-    </div>
-  </div>
-  <div [ngClass]="{ 'ads-grid': viewMode==='grid', 'ads-list': viewMode==='list' }" *ngIf="!loadingAds; else loadingAdsTpl">
-    <article class="ad-card" *ngFor="let ad of filteredAds">
-      <header class="ad-head">
-        <h4>{{ ad.name }}</h4>
-        <span class="status" [attr.data-status]="ad.status">{{ ad.status }}</span>
-      </header>
-      <div class="ad-body">
-        <ng-container *ngIf="ad.variants && ad.variants.length; else noVar">
-          <div class="variant" *ngFor="let v of ad.variants">
-            <img *ngIf="v.imageUrl" [src]="v.imageUrl" alt="ad image" style="width:100%;max-height:140px;object-fit:cover;border-radius:10px;margin-bottom:6px"/>
-            <div class="title">{{ v.title }}</div>
-            <p>{{ v.body }}</p>
+  <!-- Profile Header -->
+  <div class="profile-header">
+    <div class="profile-card card glass">
+      <div class="profile-info">
+        <div class="avatar" aria-hidden="true">{{ (form.value.name || 'U').slice(0,1) }}</div>
+        <div class="info">
+          <h2 class="name">{{ form.value.name || '—' }}</h2>
+          <div class="contact">
+            <span class="pill email">{{ form.value.email || '—' }}</span>
+            <span class="pill plan" [class]="'plan-' + form.value.plan">{{ form.value.plan | uppercase }}</span>
           </div>
-        </ng-container>
-        <ng-template #noVar><p>No variants</p></ng-template>
+          <p class="bio">{{ 'Create, manage, and optimize your ads with AI assistance.' }}</p>
+        </div>
       </div>
-      <footer class="ad-foot">
-        <span class="pill" *ngIf="ad.category">{{ad.category}}</span>
-        <span class="pill" *ngIf="ad.price">{{ad.price | number:'1.0-0'}}</span>
-        <span class="flex-spacer"></span>
-        <a class="button secondary" [routerLink]="['/chat']">Chat</a>
-        <button type="button" class="button ghost" (click)="editAd(ad)">Edit</button>
-        <button type="button" class="button secondary" (click)="deleteAd(ad)">Delete</button>
-      </footer>
-    </article>
+      
+      <!-- Profile Stats -->
+      <div class="profile-stats">
+        <div class="stat-item">
+          <div class="stat-number">{{ totalAds }}</div>
+          <div class="stat-label">{{ 'profile.totalAds' | t }}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">{{ activeAds }}</div>
+          <div class="stat-label">{{ 'profile.activeAds' | t }}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">{{ unreadMessages }}</div>
+          <div class="stat-label">{{ 'profile.unreadMessages' | t }}</div>
+        </div>
+      </div>
+    </div>
   </div>
-  <ng-template #loadingAdsTpl>
-    <div class="ads-grid"><article class="ad-card" *ngFor="let _ of [0,1,2]"><div class="skeleton" style="height:96px;border-radius:12px"></div></article></div>
-  </ng-template>
+
+  <!-- Profile Content Tabs -->
+  <div class="profile-content">
+    <div class="tabs">
+      <button class="tab-button" [class.active]="activeTab === 'profile'" (click)="setActiveTab('profile')">
+        <i class="icon">👤</i>
+        {{ 'profile.profile' | t }}
+      </button>
+      <button class="tab-button" [class.active]="activeTab === 'ads'" (click)="setActiveTab('ads')">
+        <i class="icon">📊</i>
+        {{ 'profile.myAds' | t }}
+      </button>
+      <button class="tab-button" [class.active]="activeTab === 'chat'" (click)="setActiveTab('chat')">
+        <i class="icon">💬</i>
+        {{ 'profile.chat' | t }}
+        <span class="badge" *ngIf="unreadMessages > 0">{{ unreadMessages }}</span>
+      </button>
+    </div>
+
+    <!-- Profile Tab -->
+    <div class="tab-content" *ngIf="activeTab === 'profile'">
+      <div class="card glass">
+        <h3>{{ 'profile.editProfile' | t }}</h3>
+        <form [formGroup]="form" (ngSubmit)="save()" class="edit-form">
+          <div class="form-row">
+            <label>{{ 'common.name' | t }}
+              <input type="text" formControlName="name" class="field-input" 
+                     [class.error]="hasFieldError('name')" 
+                     [class.success]="hasFieldSuccess('name')">
+              <div class="field-error" *ngIf="hasFieldError('name')">{{ getFieldError('name') }}</div>
+            </label>
+            <label>{{ 'common.email' | t }}
+              <input type="email" formControlName="email" class="field-input" [attr.disabled]="true">
+              <small class="field-hint">{{ 'profile.emailCannotChange' | t }}</small>
+            </label>
+          </div>
+          <div class="form-row">
+            <label>{{ 'profile.plan' | t }}
+              <select formControlName="plan" class="field-input">
+                <option value="free">{{ 'plan.free' | t }}</option>
+                <option value="pro">{{ 'plan.pro' | t }}</option>
+                <option value="enterprise">{{ 'plan.enterprise' | t }}</option>
+              </select>
+            </label>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="button primary" [disabled]="form.invalid || saving">
+              <span *ngIf="saving" class="loading-spinner"></span>
+              {{ saving ? ('common.saving' | t) : ('common.save' | t) }}
+            </button>
+            <a routerLink="/auth/change-password" class="button secondary">{{ 'auth.changePassword' | t }}</a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Ads Tab -->
+    <div class="tab-content" *ngIf="activeTab === 'ads'">
+      <div class="ads-section">
+        <div class="ads-header">
+          <h3>{{ 'profile.myAds' | t }}</h3>
+          <div class="actions">
+            <div class="filter-tabs" role="tablist">
+              <button class="filter-tab" [class.active]="filter==='all'" (click)="setFilter('all')">
+                {{ 'profile.all' | t }} ({{counts['all']}})
+              </button>
+              <button class="filter-tab" [class.active]="filter==='draft'" (click)="setFilter('draft')">
+                {{ 'profile.draft' | t }} ({{counts['draft']}})
+              </button>
+              <button class="filter-tab" [class.active]="filter==='scheduled'" (click)="setFilter('scheduled')">
+                {{ 'profile.scheduled' | t }} ({{counts['scheduled']}})
+              </button>
+              <button class="filter-tab" [class.active]="filter==='published'" (click)="setFilter('published')">
+                {{ 'profile.published' | t }} ({{counts['published']}})
+              </button>
+            </div>
+            <div class="view-controls">
+              <button class="view-btn" [class.active]="viewMode==='grid'" (click)="setView('grid')" title="Grid View">
+                <i class="icon">⊞</i>
+              </button>
+              <button class="view-btn" [class.active]="viewMode==='list'" (click)="setView('list')" title="List View">
+                <i class="icon">☰</i>
+              </button>
+            </div>
+            <a routerLink="/ads" class="button primary">
+              <i class="icon">+</i>
+              {{ 'profile.newAd' | t }}
+            </a>
+          </div>
+        </div>
+        
+        <div [ngClass]="{ 'ads-grid': viewMode==='grid', 'ads-list': viewMode==='list' }" *ngIf="!loadingAds; else loadingAdsTpl">
+          <article class="ad-card" *ngFor="let ad of filteredAds">
+            <header class="ad-head">
+              <h4>{{ ad.name }}</h4>
+              <span class="status" [attr.data-status]="ad.status">{{ ad.status }}</span>
+            </header>
+            <div class="ad-body">
+              <ng-container *ngIf="ad.variants && ad.variants.length; else noVar">
+                <div class="variant" *ngFor="let v of ad.variants">
+                  <img *ngIf="v.imageUrl" [src]="v.imageUrl" alt="ad image" class="ad-image"/>
+                  <div class="title">{{ v.title }}</div>
+                  <p>{{ v.body }}</p>
+                </div>
+              </ng-container>
+              <ng-template #noVar><p class="no-variants">{{ 'profile.noVariants' | t }}</p></ng-template>
+            </div>
+            <footer class="ad-foot">
+              <span class="pill" *ngIf="ad.category">{{ad.category}}</span>
+              <span class="pill" *ngIf="ad.price">{{ad.price | number:'1.0-0'}}</span>
+              <span class="flex-spacer"></span>
+              <a class="button secondary" [routerLink]="['/chat']">
+                <i class="icon">💬</i>
+                {{ 'profile.chat' | t }}
+              </a>
+              <button type="button" class="button ghost" (click)="editAd(ad)">
+                <i class="icon">✏️</i>
+                {{ 'common.edit' | t }}
+              </button>
+              <button type="button" class="button danger" (click)="deleteAd(ad)">
+                <i class="icon">🗑️</i>
+                {{ 'common.delete' | t }}
+              </button>
+            </footer>
+          </article>
+        </div>
+        
+        <ng-template #loadingAdsTpl>
+          <div class="ads-grid">
+            <article class="ad-card" *ngFor="let _ of [0,1,2]">
+              <div class="skeleton" style="height:96px;border-radius:12px"></div>
+            </article>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+
+    <!-- Chat Tab -->
+    <div class="tab-content" *ngIf="activeTab === 'chat'">
+      <div class="chat-section">
+        <div class="chat-header">
+          <h3>{{ 'profile.recentChats' | t }}</h3>
+          <a routerLink="/chat" class="button primary">
+            <i class="icon">💬</i>
+            {{ 'profile.viewAllChats' | t }}
+          </a>
+        </div>
+        
+        <div class="chat-list" *ngIf="!loadingChats; else loadingChatsTpl">
+          <div class="chat-item" *ngFor="let conversation of recentChats" [routerLink]="['/chat', conversation.id]">
+            <div class="chat-avatar">
+              {{ (conversation.adTitle || 'C').slice(0,1) }}
+            </div>
+            <div class="chat-info">
+              <div class="chat-title">{{ conversation.adTitle || 'Untitled Chat' }}</div>
+              <div class="chat-preview">{{ conversation.lastMessage?.content || 'No messages yet' }}</div>
+            </div>
+            <div class="chat-meta">
+              <div class="chat-time">{{ conversation.lastMessageAt | date:'short' }}</div>
+              <span class="unread-badge" *ngIf="conversation.unreadMessageCount > 0">
+                {{ conversation.unreadMessageCount }}
+              </span>
+            </div>
+          </div>
+          
+          <div class="empty-state" *ngIf="recentChats.length === 0">
+            <div class="empty-icon">💬</div>
+            <h4>{{ 'profile.noChats' | t }}</h4>
+            <p>{{ 'profile.noChatsDescription' | t }}</p>
+            <a routerLink="/chat" class="button primary">{{ 'profile.startChat' | t }}</a>
+          </div>
+        </div>
+        
+        <ng-template #loadingChatsTpl>
+          <div class="chat-list">
+            <div class="chat-item" *ngFor="let _ of [0,1,2]">
+              <div class="skeleton avatar"></div>
+              <div class="skeleton content"></div>
+            </div>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
 </section>

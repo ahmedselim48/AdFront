@@ -29,7 +29,14 @@ export class DashboardComponent {
     this.load();
   }
   private load(){
-    this.analytics.getSummary().subscribe(s => this.kpi = s);
-    this.analytics.getPerformanceSeries().subscribe(s => this.series = s[0]?.values ?? []);
+    // Mock data for now
+    this.kpi = {
+      views: 1250,
+      messages: 45,
+      conversions: 12,
+      ctr: 3.2,
+      alerts: 3
+    };
+    this.series = [120, 150, 180, 200, 220, 190, 250];
   }
 }

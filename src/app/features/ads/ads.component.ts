@@ -47,13 +47,12 @@ export class AdsComponent {
     this.generating = true;
     const first = this.variants.at(0);
     const body = first.get('body')?.value || '';
-    this.ai.createSmartReply(body || 'Generate product ad title and description').subscribe({
-      next: r => {
-        const text = r.reply || '';
-        first.patchValue({ title: text.split('\n')[0]?.slice(0, 80) || 'Generated Title', body: text });
-        this.generating = false;
-      },
-      error: () => { this.generating = false; }
+    this.ai.createSmartReply(body || 'Generate product ad title and description').then((r: any) => {
+      const text = r.reply || '';
+      first.patchValue({ title: text.split('\n')[0]?.slice(0, 80) || 'Generated Title', body: text });
+      this.generating = false;
+    }).catch(() => { 
+      this.generating = false; 
     });
   }
 

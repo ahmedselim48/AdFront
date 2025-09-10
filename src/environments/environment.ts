@@ -1,5 +1,5 @@
 export const environment = {
-  production: true,
-  apiBaseUrl: '/api',
-  openAiProxyUrl: '/ai'
+  production: false,
+  apiBaseUrl: 'http://localhost:5254/api',
+  openAiProxyUrl: 'http://localhost:5254/ai'
 };

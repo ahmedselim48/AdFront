@@ -1,5 +1,5 @@
 <section class="container">
-  <h2>{{ 'chat.thread' | t }}</h2>
+  <h2>{{ 'chat.directChat' | t }}</h2>
   <div class="msgs card" *ngIf="!loading; else loadTpl">
     <div class="msg" *ngFor="let m of messages">
       <div class="bubble">{{ m.content }}</div>

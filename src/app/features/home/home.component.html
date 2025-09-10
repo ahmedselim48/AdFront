@@ -50,5 +50,6 @@
       </article>
     </div>
   </ng-template>
-  <p class="empty" *ngIf="!loading && !ads.length">{{ 'home.noAds' | t }}</p>
+  <p class="empty" *ngIf="!loading && !ads.length && !error">{{ 'home.noAds' | t }}</p>
+  <p class="error" *ngIf="error" style="color: red; text-align: center; padding: 2rem;">{{ error }}</p>
 </section>
