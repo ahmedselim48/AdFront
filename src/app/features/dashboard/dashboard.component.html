@@ -1,43 +1,96 @@
 <section class="dashboard">
-  <form [formGroup]="filters" class="filters">
-    <input type="date" formControlName="from">
-    <input type="date" formControlName="to">
-    <select formControlName="channel">
-      <option value="all">{{ 'dash.allChannels' | t }}</option>
-      <option value="facebook">{{ 'dash.facebook' | t }}</option>
-      <option value="google">{{ 'dash.google' | t }}</option>
-    </select>
-  </form>
-
-  <div class="kpi-grid">
-    <div class="kpi-card card glass">
-      <h3>{{ 'dash.views' | t }}</h3>
-      <strong>{{kpi.views | number}}</strong>
+  <!-- Unified header bar -->
+  <div class="dash-header card glass">
+    <div class="title">
+      <h2>لوحة التحكم</h2>
+      <small>متابعة الأداء والتنبيهات والوصول السريع.</small>
     </div>
-    <div class="kpi-card card glass">
-      <h3>{{ 'dash.messages' | t }}</h3>
-      <strong>{{kpi.messages | number}}</strong>
-    </div>
-    <div class="kpi-card card glass">
-      <h3>{{ 'dash.conversions' | t }}</h3>
-      <strong>{{kpi.conversions | number}}</strong>
-    </div>
-    <div class="kpi-card card glass">
-      <h3>{{ 'dash.ctr' | t }}</h3>
-      <strong>{{kpi.ctr | number:'1.0-2'}}%</strong>
-    </div>
-    <div class="kpi-card card glass">
-      <h3>{{ 'dash.alerts' | t }}</h3>
-      <strong>{{kpi.alerts}}</strong>
+    <div class="actions">
+      <a class="action" routerLink="/chat" aria-label="Messages">
+        <span class="icon">💬</span>
+        <span>{{ 'dash.messages' | t }}</span>
+        <span class="badge" *ngIf="kpi?.messages">{{ kpi.messages }}</span>
+      </a>
+      <a class="action" routerLink="/notifications" aria-label="Notifications">
+        <span class="icon">🔔</span>
+        <span>{{ 'notifications.title' | t }}</span>
+        <span class="badge warn" *ngIf="kpi?.alerts">{{ kpi.alerts }}</span>
+      </a>
+      <a class="action" routerLink="/reports">
+        <span class="icon">📈</span>
+        <span>{{ 'nav.reports' | t }}</span>
+      </a>
+      <a class="action" routerLink="/competition">
+        <span class="icon">🏆</span>
+        <span>{{ 'nav.competition' | t }}</span>
+      </a>
     </div>
   </div>
 
-  <div class="main-grid">
-    <div class="panel card">
+  <!-- Filters toolbar -->
+  <div class="filters card glass">
+    <form [formGroup]="filters" class="filters-form">
+      <input type="date" formControlName="from">
+      <input type="date" formControlName="to">
+      <select formControlName="channel">
+        <option value="all">{{ 'dash.allChannels' | t }}</option>
+        <option value="facebook">{{ 'dash.facebook' | t }}</option>
+        <option value="google">{{ 'dash.google' | t }}</option>
+      </select>
+      <button type="button" class="apply">تطبيق</button>
+    </form>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card card glass">
+      <div class="kpi-head">
+        <span class="kpi-icon">👁️</span>
+        <h3>{{ 'dash.views' | t }}</h3>
+      </div>
+      <div class="kpi-value">{{kpi.views | number}}</div>
+      <small class="kpi-sub">إجمالي المشاهدات</small>
+    </div>
+    <div class="kpi-card card glass">
+      <div class="kpi-head">
+        <span class="kpi-icon">💬</span>
+        <h3>{{ 'dash.messages' | t }}</h3>
+      </div>
+      <div class="kpi-value">{{kpi.messages | number}}</div>
+      <small class="kpi-sub">الرسائل المستلمة</small>
+    </div>
+    <div class="kpi-card card glass">
+      <div class="kpi-head">
+        <span class="kpi-icon">🎯</span>
+        <h3>{{ 'dash.conversions' | t }}</h3>
+      </div>
+      <div class="kpi-value">{{kpi.conversions | number}}</div>
+      <small class="kpi-sub">تحويلات</small>
+    </div>
+    <div class="kpi-card card glass">
+      <div class="kpi-head">
+        <span class="kpi-icon">📊</span>
+        <h3>{{ 'dash.ctr' | t }}</h3>
+      </div>
+      <div class="kpi-value">{{kpi.ctr | number:'1.0-2'}}%</div>
+      <small class="kpi-sub">نسبة النقر إلى الظهور</small>
+    </div>
+    <div class="kpi-card card glass">
+      <div class="kpi-head">
+        <span class="kpi-icon">🔔</span>
+        <h3>{{ 'dash.alerts' | t }}</h3>
+      </div>
+      <div class="kpi-value">{{kpi.alerts}}</div>
+      <small class="kpi-sub">تنبيهات</small>
+    </div>
+  </div>
+
+  <!-- 12-col responsive grid -->
+  <div class="grid-12">
+    <div class="panel card col-span-8">
       <h3 class="panel-title">{{ 'dash.performance' | t }}</h3>
       <app-line-chart [labels]="labels" [series]="[{ label: 'Performance', values: series }]"></app-line-chart>
     </div>
-    <aside class="panel card glass notifications">
+    <aside class="panel card glass notifications col-span-4">
       <h3 class="panel-title">{{ 'notifications.title' | t }}</h3>
       <ul class="n-list">
         <li *ngFor="let n of (notifications$ | async)">

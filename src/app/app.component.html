@@ -1,66 +1,54 @@
 <header class="app-header">
   <div class="container header-inner">
-    <a routerLink="/home" class="brand" aria-label="AdFront home">AdFront</a>
+    <a routerLink="/home" class="brand" aria-label="AdWise home">AdWise</a>
     <button class="menu-toggle focus-ring" (click)="toggleMenu()" [attr.aria-expanded]="mobileOpen" aria-label="Toggle menu">
       <span class="bar"></span><span class="bar"></span><span class="bar"></span>
     </button>
     <nav class="nav-links" [class.open]="mobileOpen" (click)="closeMenu()">
-      <!-- Main Navigation -->
-      <a routerLink="/home" routerLinkActive="active" aria-label="Home">
-        <i class="icon">🏠</i>
-        {{ 'nav.home' | t }}
-      </a>
-      <a routerLink="/dashboard" routerLinkActive="active" aria-label="Dashboard" *ngIf="storage?.accessToken">
-        <i class="icon">📊</i>
-        {{ 'nav.dashboard' | t }}
-      </a>
+      <!-- Main: فقط الإعلانات -->
       <a routerLink="/ads" routerLinkActive="active" aria-label="Ads" *ngIf="storage?.accessToken">
         <i class="icon">📢</i>
         {{ 'nav.ads' | t }}
       </a>
-      <a routerLink="/smart-replies" routerLinkActive="active" aria-label="Smart Replies" *ngIf="storage?.accessToken">
-        <i class="icon">🤖</i>
-        {{ 'nav.smartReplies' | t }}
-      </a>
-      <a routerLink="/chat" routerLinkActive="active" aria-label="Chat" class="chat-link" *ngIf="storage?.accessToken">
-        <i class="icon">💬</i>
-        {{ 'nav.chat' | t }}
-        <span class="badge" *ngIf="unreadCount>0">{{ unreadCount }}</span>
-      </a>
-      <a routerLink="/direct-chat" routerLinkActive="active" aria-label="Direct Chat" *ngIf="storage?.accessToken">
-        <i class="icon">👥</i>
-        {{ 'nav.directChat' | t }}
-      </a>
-      <a routerLink="/competition" routerLinkActive="active" aria-label="Competition" *ngIf="storage?.accessToken">
-        <i class="icon">🏆</i>
-        {{ 'nav.competition' | t }}
-      </a>
-      <a routerLink="/reports" routerLinkActive="active" aria-label="Reports" *ngIf="storage?.accessToken">
-        <i class="icon">📈</i>
-        {{ 'nav.reports' | t }}
-      </a>
-      <a routerLink="/admin" routerLinkActive="active" aria-label="Admin" *ngIf="storage?.accessToken">
-        <i class="icon">⚙️</i>
-        {{ 'nav.admin' | t }}
-      </a>
-      
-      <!-- User Section -->
-      <div class="user-section" *ngIf="storage?.accessToken">
-        <div class="user-info">
+
+      <!-- قائمة منسدلة باسم المستخدم لباقي الروابط -->
+      <div class="user-dropdown" *ngIf="storage?.accessToken" (click)="$event.stopPropagation()">
+        <button type="button" class="user-trigger" (click)="toggleDropdown()" [attr.aria-expanded]="dropdownOpen">
           <div class="user-avatar">{{ currentUser?.name?.slice(0,1) || 'U' }}</div>
-          <div class="user-details">
-            <div class="user-name">{{ currentUser?.name || 'User' }}</div>
-            <div class="user-plan">{{ currentUser?.plan || 'free' | uppercase }}</div>
-          </div>
-        </div>
-        <a routerLink="/profile" routerLinkActive="active" class="profile-link" aria-label="Profile">
-          <i class="icon">👤</i>
-          {{ 'nav.profile' | t }}
-        </a>
-        <button type="button" class="button danger" (click)="logout()" aria-label="Logout">
-          <i class="icon">🚪</i>
-          {{ 'auth.logout' | t }}
+          <span class="user-trigger-name">{{ currentUser?.name || 'User' }}</span>
+          <span class="chevron">▾</span>
         </button>
+        <div class="dropdown-menu" *ngIf="dropdownOpen">
+          <a routerLink="/dashboard" (click)="closeDropdown()">
+            <span class="icon">📊</span>
+            {{ 'nav.dashboard' | t }}
+          </a>
+          <a routerLink="/smart-replies" (click)="closeDropdown()">
+            <span class="icon">🤖</span>
+            {{ 'nav.smartReplies' | t }}
+          </a>
+          <a routerLink="/chat" (click)="closeDropdown()" class="chat-link">
+            <span class="icon">💬</span>
+            {{ 'nav.chat' | t }}
+            <span class="badge" *ngIf="unreadCount>0">{{ unreadCount }}</span>
+          </a>
+          <a routerLink="/direct-chat" (click)="closeDropdown()">
+            <span class="icon">👥</span>
+            {{ 'nav.directChat' | t }}
+          </a>
+          <a routerLink="/admin" (click)="closeDropdown()">
+            <span class="icon">⚙️</span>
+            {{ 'nav.admin' | t }}
+          </a>
+          <a routerLink="/profile" (click)="closeDropdown()">
+            <span class="icon">👤</span>
+            {{ 'nav.profile' | t }}
+          </a>
+          <button type="button" class="dropdown-item danger" (click)="logout(); closeDropdown()">
+            <span class="icon">🚪</span>
+            {{ 'auth.logout' | t }}
+          </button>
+        </div>
       </div>
       
       <!-- Guest Section -->
@@ -88,5 +76,5 @@
 </main>
 <app-toast-center></app-toast-center>
 <footer class="app-footer">
-  <div class="footer-content">© {{ currentYear }} AdFront</div>
+  <div class="footer-content">© {{ currentYear }} AdWise</div>
 </footer>
