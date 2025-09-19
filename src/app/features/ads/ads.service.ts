@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ApiClientService } from '../../core/services/api-client.service';
-import { AdItem } from '../../models/ads.models';
 import { Observable, map } from 'rxjs';
+import { AdItem } from '../../models/ads.models';
 
 @Injectable({ providedIn: 'root' })
 export class AdsService {

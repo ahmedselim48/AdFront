@@ -1,0 +1,17 @@
+<div *ngIf="loading">Loading...</div>
+<div *ngIf="error">{{ error }}</div>
+
+<div *ngFor="let ad of ads">
+  <h3>{{ ad.title }}</h3>
+  <p>{{ ad.description }}</p>
+  <p>Price: {{ ad.price }}</p>
+  <div *ngIf="ad.images?.length">
+    <img *ngFor="let img of ad.images" [src]="img" alt="ad image" style="max-width:150px; margin:4px"/>
+  </div>
+</div>
+
+<div class="pagination">
+  <button (click)="prev()" [disabled]="page === 1">Prev</button>
+  <span>Page {{page}} / {{totalPages}}</span>
+  <button (click)="next()" [disabled]="page === totalPages">Next</button>
+</div>

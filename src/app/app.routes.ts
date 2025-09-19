@@ -24,6 +24,7 @@ import { DirectChatListComponent } from './features/direct-chat/direct-chat-list
 import { DirectChatMessagesComponent } from './features/direct-chat/direct-chat-messages.component';
 import { ProfileComponent } from './features/profile/profile.component';
 import { AdminComponent } from './features/admin/admin.component';
+import { AdCreateComponent } from './features/ad-create/ad-create.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'home' },
@@ -39,6 +40,7 @@ export const routes: Routes = [
   ]},
   { path: 'dashboard', canActivate: [AuthGuard], component: DashboardComponent },
   { path: 'ads', canActivate: [AuthGuard], component: AdsComponent },
+  { path: 'adscreate', component: AdCreateComponent },
   { path: 'smart-replies', canActivate: [AuthGuard], component: SmartRepliesComponent },
   { path: 'competition', canActivate: [AuthGuard], component: CompetitionComponent },
   { path: 'reports', canActivate: [AuthGuard], component: ReportsComponent },

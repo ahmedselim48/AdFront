@@ -1,0 +1,34 @@
+<form [formGroup]="form" (ngSubmit)="submit()" class="ad-form">
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Title</mat-label>
+    <input matInput formControlName="title" placeholder="Enter ad title">
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Description</mat-label>
+    <textarea matInput formControlName="description" rows="4" placeholder="Enter description"></textarea>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Price</mat-label>
+    <input matInput type="number" formControlName="price">
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Location</mat-label>
+    <input matInput formControlName="location" placeholder="Enter location">
+  </mat-form-field>
+
+  <input type="file" (change)="onFileChange($event)" multiple>
+
+  <div class="preview" *ngIf="previewUrls.length > 0">
+    <img *ngFor="let url of previewUrls" [src]="url" alt="preview">
+  </div>
+
+  <button mat-raised-button color="primary" type="submit" [disabled]="uploading">
+    {{ uploading ? 'Uploading...' : 'Create Ad' }}
+  </button>
+
+  <div class="error" *ngIf="error">{{ error }}</div>
+</form>
