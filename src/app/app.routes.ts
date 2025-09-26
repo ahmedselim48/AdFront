@@ -54,7 +54,7 @@ export const routes: Routes = [
     { path: '', component: DirectChatListComponent },
     { path: ':id', component: DirectChatMessagesComponent },
   ] },
-  { path: 'profile', canActivate: [AuthGuard], component: ProfileComponent },
+  { path: 'profile', component: ProfileComponent },
   { path: 'admin', canActivate: [AuthGuard, adminGuard], component: AdminComponent },
   { path: '**', redirectTo: 'home' }
 ];

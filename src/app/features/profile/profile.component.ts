@@ -220,4 +220,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       error: () => {}
     });
   }
+   goToAddAd() {
+    this.router.navigate(['/adscreate']); // هتروح على كومبوننت إضافة إعلان
+  }
 }

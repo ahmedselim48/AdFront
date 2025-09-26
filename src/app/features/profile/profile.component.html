@@ -15,21 +15,31 @@
       </div>
       
       <!-- Header Quick Actions -->
-      <div class="header-actions">
-        <a routerLink="/ads" class="h-action">
-          <span class="icon">📢</span>
-          <span>{{ 'nav.ads' | t }}</span>
-        </a>
-        <a routerLink="/chat" class="h-action">
-          <span class="icon">💬</span>
-          <span>{{ 'nav.chat' | t }}</span>
-          <span class="badge" *ngIf="unreadMessages > 0">{{ unreadMessages }}</span>
-        </a>
-        <a routerLink="/auth/change-password" class="h-action">
-          <span class="icon">🔒</span>
-          <span>{{ 'auth.changePassword' | t }}</span>
-        </a>
-      </div>
+     <div class="header-actions d-flex align-items-center gap-3">
+  <a routerLink="/ads" class="h-action d-flex align-items-center gap-1">
+    <span class="icon">📢</span>
+    <span>{{ 'nav.ads' | t }}</span>
+  </a>
+
+  <a routerLink="/chat" class="h-action d-flex align-items-center gap-1">
+    <span class="icon">💬</span>
+    <span>{{ 'nav.chat' | t }}</span>
+    <span class="badge bg-danger" *ngIf="unreadMessages > 0">{{ unreadMessages }}</span>
+  </a>
+
+  <a routerLink="/auth/change-password" class="h-action d-flex align-items-center gap-1">
+    <span class="icon">🔒</span>
+    <span>{{ 'auth.changePassword' | t }}</span>
+  </a>
+
+  <!-- زرار + -->
+  <button class="btn ad-btn rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+          style="width: 40px; height: 40px;"
+          (click)="goToAddAd()">
+    <i class="bi bi-plus-lg"></i>
+  </button>
+</div>
+
 
       <!-- Profile Stats -->
       <div class="profile-stats">
@@ -45,6 +55,9 @@
           <div class="stat-number">{{ unreadMessages }}</div>
           <div class="stat-label">{{ 'profile.unreadMessages' | t }}</div>
         </div>
+        <!-- fab-plus.component.html -->
+
+
       </div>
     </div>
   </div>

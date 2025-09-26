@@ -691,3 +691,25 @@
     grid-template-columns: 1fr;
   }
 }
+/* fab-plus.component.css */
+.ad-btn {
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+  background: var(--gradient);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.ad-btn:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transform: scale(1.05);
+}
+.ad-btn:active {
+  transform: scale(0.95);
+}
