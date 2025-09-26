@@ -26,6 +26,7 @@ export class AppComponent {
   mobileOpen = false;
   unreadCount = 0;
   currentUser: any = null;
+  dropdownOpen = false;
   constructor(){
     // Initialize authentication state from stored tokens
     this.auth.initializeAuth();
@@ -48,6 +49,9 @@ export class AppComponent {
   }
   toggleMenu(){ this.mobileOpen = !this.mobileOpen; }
   closeMenu(){ this.mobileOpen = false; }
+
+  toggleDropdown(){ this.dropdownOpen = !this.dropdownOpen; }
+  closeDropdown(){ this.dropdownOpen = false; }
 
   toggleLang(){ this.i18n.toggle(); }
   get langLabel(){ return this.i18n.current === 'ar' ? 'EN' : 'AR'; }

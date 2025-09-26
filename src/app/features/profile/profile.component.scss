@@ -22,6 +22,39 @@
   box-shadow: 0 8px 32px rgba(0,0,0,0.1);
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin-inline-start: auto;
+  flex-wrap: wrap;
+  
+  .h-action {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .45rem .7rem;
+    border-radius: .6rem;
+    border: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--text-secondary);
+    background: rgba(255,255,255,0.05);
+    
+    .badge {
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: 9999px;
+      background: #3b82f6;
+      color: #fff;
+      font-size: .75rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+}
+
 .profile-info {
   display: flex;
   align-items: center;
