@@ -1,24 +1,147 @@
+// .ad-form {
+//   max-width: 700px;
+//   margin: auto;
+//   display: flex;
+//   flex-direction: column;
+// }
+
+// .full-width {
+//   width: 100%;
+// }
+
+// .row {
+//   display: flex;
+//   gap: 15px;
+// }
+
+// .half-width {
+//   flex: 1;
+// }
+
+// .file-upload {
+//   display: flex;
+//   align-items: center;
+// }
+
+// .file-label {
+//   cursor: pointer;
+//   display: flex;
+//   align-items: center;
+//   gap: 8px;
+//   color: #3f51b5;
+//   font-weight: 500;
+// }
+
+// .preview {
+//   display: flex;
+//   flex-wrap: wrap;
+//   gap: 10px;
+//   margin-top: 10px;
+// }
+
+// .preview-item img {
+//   width: 100px;
+//   height: 100px;
+//   border-radius: 8px;
+//   object-fit: cover;
+//   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+// }
+
 .ad-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  max-width: 500px;
+  max-width: 700px;
   margin: auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  background-color: var(--bg-50);
+  transition: transform 0.4s ease-out,
+    box-shadow 0.4s ease-out,
+    border-color 0.4s ease-out;
 }
 
-.full-width {
-  width: 100%;
+.ad-form:hover {
+  border-color: color-mix(in oklab, var(--brand) 20%, #ddd);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  transform: translateY(-3px);
+  /* يرفع الفورم شويه */
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  border-color: color-mix(in oklab, var(--brand) 20%, #ddd);
+
+}
+
+h2 {
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  text-align: center;
+  color: var(--brand);
+}
+
+label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: block;
+  color: var(--text);
 }
 
 .preview {
   display: flex;
-  gap: 8px;
   flex-wrap: wrap;
+  gap: 10px;
 }
 
-.preview img {
+.preview-item img {
   width: 100px;
   height: 100px;
-  object-fit: cover;
   border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.file-upload {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.file-label {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--brand);
+  font-weight: 500;
+}
+
+button {
+  margin-top: 20px;
+  padding: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 9999px;
+  background: var(--gradient);
+  color: #fff;
+  cursor: pointer;
+  transition: background-color .3s ease, box-shadow .3s ease;
+  width: 100%;
+}
+
+button:hover:enabled {
+  background-color: color-mix(in oklab, var(--brand) 80%, #000);
+  /* أو أي تدرج تاني */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+/* الحالة المعطلة */
+button:disabled {
+  background-color: #ccc;
+  /* لون رمادي معبر عن disabled */
+  color: #888;
+  cursor: not-allowed;
+  box-shadow: none;
 }

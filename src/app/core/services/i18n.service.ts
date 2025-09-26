@@ -7,6 +7,7 @@ type Lang = 'en' | 'ar';
 type Dict = Record<string, string>;
 
 const en: Dict = {
+  'site.title': 'Haraj Plus',
   'nav.home': 'Home',
   'nav.dashboard': 'Dashboard',
   'nav.ads': 'Ads',
@@ -50,6 +51,29 @@ const en: Dict = {
   'ads.variants': 'Variants (A/B)',
   'ads.addVariant': 'Add Variant',
   'ads.body': 'Body',
+  "ads.title": "Title",
+  "ads.titlePlaceholder": "Enter ad title",
+  "ads.titleRequired": "Title is required",
+
+  "ads.description": "Description",
+  "ads.descriptionPlaceholder": "Enter description",
+  "ads.descriptionRequired": "Description is required",
+
+  "ads.price": "Price",
+  "ads.pricePlaceholder": "Enter price",
+  "ads.priceInvalid": "Price must be valid",
+
+  "ads.location": "Location",
+  "ads.locationPlaceholder": "Enter location",
+  "ads.locationRequired": "Location is required",
+
+  "ads.upload": "Upload Images",
+  "ads.uploading": "Uploading...",
+  "ads.create": "Create Ad",
+  "ads.analyze": "Analyze Images",
+  "ads.analyzing": "Analyzing...",
+  "ads.error": "An error occurred while creating the ad. Please try again.",
+  'ads.fillWithAI': 'Fill with AI',
 
   'admin.title': 'Admin Panel',
   'admin.users': 'Users',
@@ -129,7 +153,8 @@ const en: Dict = {
 };
 
 const ar: Dict = {
-  'nav.home': 'الرئي��ية',
+ 'site.title':  'حراج بلس',
+  'nav.home':"الرئيسية",
   'nav.dashboard': 'لوحة التحكم',
   'nav.ads': 'الإعلانات',
   'nav.smartReplies': 'الردود الذكية',
@@ -171,7 +196,29 @@ const ar: Dict = {
   'ads.variants': 'النسخ (A/B)',
   'ads.addVariant': 'إضافة نسخة',
   'ads.body': 'النص',
+     "ads.title": "العنوان",
+  "ads.titlePlaceholder": "أدخل عنوان الإعلان",
+  "ads.titleRequired": "العنوان مطلوب",
 
+  "ads.description": "الوصف",
+  "ads.descriptionPlaceholder": "أدخل الوصف",
+  "ads.descriptionRequired": "الوصف مطلوب",
+  'ads.fillWithAI': 'املأ بالذكاء الاصطناعي',
+
+  "ads.price": "السعر",
+  "ads.pricePlaceholder": "أدخل السعر",
+  "ads.priceInvalid": "يجب إدخال سعر صحيح",
+
+  "ads.location": "الموقع",
+  "ads.locationPlaceholder": "أدخل الموقع",
+  "ads.locationRequired": "الموقع مطلوب",
+
+  "ads.upload": "رفع الصور",
+  "ads.uploading": "جاري الرفع...",
+  "ads.create": "إنشاء إعلان",
+  "ads.analyze": "تحليل الصور",
+  "ads.analyzing": "جاري التحليل...",
+  "ads.error": "حدث خطأ أثناء إنشاء الإعلان. حاول مرة أخرى.",
   'admin.title': 'لوحة الإدارة',
   'admin.users': 'المستخدمون',
   'admin.tenants': 'المستأجرون',

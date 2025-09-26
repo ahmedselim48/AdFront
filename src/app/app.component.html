@@ -1,92 +1,92 @@
-<header class="app-header">
-  <div class="container header-inner">
-    <a routerLink="/home" class="brand" aria-label="AdFront home">AdFront</a>
-    <button class="menu-toggle focus-ring" (click)="toggleMenu()" [attr.aria-expanded]="mobileOpen" aria-label="Toggle menu">
-      <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+<header class="app-header sticky-top">
+  <div class="container d-flex justify-content-between align-items-center py-2">
+    <!-- Brand -->
+    <a routerLink="/home" class="navbar-brand fw-bold d-flex align-items-center" aria-label="AdFront home">
+      <i class="bi bi-rocket-takeoff me-2"></i> {{'site.title'| t}}
+    </a>
+
+    <!-- Toggle Button (mobile) -->
+    <button class="btn btn-outline-light d-lg-none" 
+            type="button" 
+            (click)="toggleMenu()" 
+            [attr.aria-expanded]="mobileOpen" 
+            aria-label="Toggle menu">
+      <i class="bi bi-list"></i>
     </button>
-    <nav class="nav-links" [class.open]="mobileOpen" (click)="closeMenu()">
+
+    <!-- Navigation -->
+    <nav class="nav-links d-lg-flex align-items-center gap-3"
+         [class.d-none]="!mobileOpen"
+         (click)="closeMenu()">
+
       <!-- Main Navigation -->
-      <a routerLink="/home" routerLinkActive="active" aria-label="Home">
-        <i class="icon">🏠</i>
-        {{ 'nav.home' | t }}
+      <a class="nav-link" routerLink="/home" routerLinkActive="active">
+        <i class="bi bi-house-door"></i> {{ 'nav.home' | t }}
       </a>
-      <a routerLink="/dashboard" routerLinkActive="active" aria-label="Dashboard" *ngIf="storage?.accessToken">
-        <i class="icon">📊</i>
-        {{ 'nav.dashboard' | t }}
+      <a class="nav-link" routerLink="/dashboard" *ngIf="storage?.accessToken">
+        <i class="bi bi-speedometer2"></i> {{ 'nav.dashboard' | t }}
       </a>
-      <a routerLink="/ads" routerLinkActive="active" aria-label="Ads" *ngIf="storage?.accessToken">
-        <i class="icon">📢</i>
-        {{ 'nav.ads' | t }}
+      <a class="nav-link" routerLink="/ads" *ngIf="storage?.accessToken">
+        <i class="bi bi-megaphone"></i> {{ 'nav.ads' | t }}
       </a>
-      <a routerLink="/smart-replies" routerLinkActive="active" aria-label="Smart Replies" *ngIf="storage?.accessToken">
-        <i class="icon">🤖</i>
-        {{ 'nav.smartReplies' | t }}
+      <a class="nav-link" routerLink="/smart-replies" *ngIf="storage?.accessToken">
+        <i class="bi bi-robot"></i> {{ 'nav.smartReplies' | t }}
       </a>
-      <a routerLink="/chat" routerLinkActive="active" aria-label="Chat" class="chat-link" *ngIf="storage?.accessToken">
-        <i class="icon">💬</i>
-        {{ 'nav.chat' | t }}
-        <span class="badge" *ngIf="unreadCount>0">{{ unreadCount }}</span>
+      <a class="nav-link position-relative" routerLink="/chat" *ngIf="storage?.accessToken">
+        <i class="bi bi-chat-dots"></i> {{ 'nav.chat' | t }}
+        <span class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle"
+              *ngIf="unreadCount > 0">{{ unreadCount }}</span>
       </a>
-      <a routerLink="/direct-chat" routerLinkActive="active" aria-label="Direct Chat" *ngIf="storage?.accessToken">
-        <i class="icon">👥</i>
-        {{ 'nav.directChat' | t }}
+      <a class="nav-link" routerLink="/direct-chat" *ngIf="storage?.accessToken">
+        <i class="bi bi-people"></i> {{ 'nav.directChat' | t }}
       </a>
-      <a routerLink="/competition" routerLinkActive="active" aria-label="Competition" *ngIf="storage?.accessToken">
-        <i class="icon">🏆</i>
-        {{ 'nav.competition' | t }}
+      <a class="nav-link" routerLink="/competition" *ngIf="storage?.accessToken">
+        <i class="bi bi-trophy"></i> {{ 'nav.competition' | t }}
       </a>
-      <a routerLink="/reports" routerLinkActive="active" aria-label="Reports" *ngIf="storage?.accessToken">
-        <i class="icon">📈</i>
-        {{ 'nav.reports' | t }}
+      <a class="nav-link" routerLink="/reports" *ngIf="storage?.accessToken">
+        <i class="bi bi-graph-up"></i> {{ 'nav.reports' | t }}
       </a>
-      <a routerLink="/admin" routerLinkActive="active" aria-label="Admin" *ngIf="storage?.accessToken">
-        <i class="icon">⚙️</i>
-        {{ 'nav.admin' | t }}
+      <a class="nav-link" routerLink="/admin" *ngIf="storage?.accessToken">
+        <i class="bi bi-gear"></i> {{ 'nav.admin' | t }}
       </a>
-      
+
       <!-- User Section -->
-      <div class="user-section" *ngIf="storage?.accessToken">
-        <div class="user-info">
-          <div class="user-avatar">{{ currentUser?.name?.slice(0,1) || 'U' }}</div>
-          <div class="user-details">
-            <div class="user-name">{{ currentUser?.name || 'User' }}</div>
-            <div class="user-plan">{{ currentUser?.plan || 'free' | uppercase }}</div>
+      <div class="dropdown ms-3" *ngIf="storage?.accessToken">
+        <a class="d-flex align-items-center text-decoration-none dropdown-toggle" href="#" role="button"
+           id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+          <div class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center me-2"
+               style="width: 36px; height: 36px;">
+            {{ currentUser?.name?.slice(0,1) || 'U' }}
           </div>
-        </div>
-        <a routerLink="/profile" routerLinkActive="active" class="profile-link" aria-label="Profile">
-          <i class="icon">👤</i>
-          {{ 'nav.profile' | t }}
+          <span>{{ currentUser?.name || 'User' }}</span>
         </a>
-        <button type="button" class="button danger" (click)="logout()" aria-label="Logout">
-          <i class="icon">🚪</i>
-          {{ 'auth.logout' | t }}
-        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+          <li><a class="dropdown-item" routerLink="/profile"><i class="bi bi-person"></i> {{ 'nav.profile' | t }}</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><button class="dropdown-item text-danger" (click)="logout()"><i class="bi bi-box-arrow-right"></i> {{ 'auth.logout' | t }}</button></li>
+        </ul>
       </div>
-      
+
       <!-- Guest Section -->
-      <div class="guest-section" *ngIf="!storage?.accessToken">
-        <a routerLink="/auth/login" routerLinkActive="active" class="button primary" aria-label="Login">
-          <i class="icon">🔑</i>
-          {{ 'auth.login' | t }}
-        </a>
-        <a routerLink="/auth/register" routerLinkActive="active" class="button secondary" aria-label="Register">
-          <i class="icon">📝</i>
-          {{ 'auth.register' | t }}
-        </a>
+      <div class="d-flex gap-2 ms-3" *ngIf="!storage?.accessToken">
+        <a routerLink="/auth/login" class="btn btn-gradient btn-sm"><i class="bi bi-box-arrow-in-right"></i> {{ 'auth.login' | t }}</a>
+        <a routerLink="/auth/register" class="btn btn-outline-gradient btn-sm"><i class="bi bi-pencil-square"></i> {{ 'auth.register' | t }}</a>
       </div>
-      
+
       <!-- Language Toggle -->
-      <button type="button" class="button ghost focus-ring" (click)="toggleLang()" aria-label="Change language">
-        <i class="icon">🌐</i>
-        {{ langLabel }}
+      <button type="button" class="btn btn-sm btn-light ms-3" (click)="toggleLang()">
+        <i class="bi bi-globe"></i> {{ langLabel }}
       </button>
     </nav>
   </div>
 </header>
-<main class="app-main">
+
+<main class="app-main container py-4">
   <router-outlet></router-outlet>
 </main>
-<app-toast-center></app-toast-center>
-<footer class="app-footer">
-  <div class="footer-content">© {{ currentYear }} AdFront</div>
+
+<footer class="app-footer py-3 mt-auto">
+  <div class="container text-center text-muted">
+    © {{ currentYear }} AdFront
+  </div>
 </footer>

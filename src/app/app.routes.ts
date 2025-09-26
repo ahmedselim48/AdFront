@@ -39,7 +39,7 @@ export const routes: Routes = [
     { path: 'change-password', canActivate: [AuthGuard], component: ChangePasswordComponent },
   ]},
   { path: 'dashboard', canActivate: [AuthGuard], component: DashboardComponent },
-  { path: 'ads', canActivate: [AuthGuard], component: AdsComponent },
+  { path: 'ads', component: AdsComponent },
   { path: 'adscreate', component: AdCreateComponent },
   { path: 'smart-replies', canActivate: [AuthGuard], component: SmartRepliesComponent },
   { path: 'competition', canActivate: [AuthGuard], component: CompetitionComponent },

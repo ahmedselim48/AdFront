@@ -39,6 +39,15 @@ export interface PaginationMeta {
   totalPages: number;
 }
 
+export interface AnalyzeAdImagesResult {
+  title: string;
+  description: string;
+  category: string;
+  confidence: number;
+  isSuccessful: boolean;
+  errorMessage?: string;
+}
+
 
 
 

@@ -1,18 +1,150 @@
-:root{
-  --brand: #0066FF;
-  --brand-600: #1a6bff;
-  --brand-700: #0052cc;
-  --purple: #7c3aed;
-  --bg: #F8F9FA;
-  --surface: #ffffff;
-  --text: #0f172a;
+// :root{
+//   --brand: #0066FF;
+//   --brand-600: #1a6bff;
+//   --brand-700: #0052cc;
+//   --purple: #7c3aed;
+//   --bg: #F8F9FA;
+//   --surface: #ffffff;
+//   --text: #0f172a;
+//   --muted: #64748b;
+//   --border: #e5e7eb;
+//   --accent: #22c55e;
+//   --danger: #ef4444;
+//   --radius: 12px;
+//   --shadow: 0 10px 30px rgba(0,0,0,.08);
+//   --gradient: linear-gradient(135deg, var(--brand), var(--purple));
+// }
+
+// [data-theme="dark"]{
+//   --bg: #0b1220;
+//   --surface: #0f172a;
+//   --text: #e5e7eb;
+//   --muted: #94a3b8;
+//   --border: #1f2937;
+//   --shadow: 0 10px 30px rgba(0,0,0,.4);
+// }
+
+// *{box-sizing:border-box}
+// html,body{height:100%}
+// body{
+//   margin:0;
+//   font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+//   color: var(--text);
+//   background:
+//     radial-gradient(1200px 500px at 80% -100px, color-mix(in oklab, var(--brand) 24%, transparent), transparent 60%),
+//     linear-gradient(180deg, #fff, var(--bg));
+//   transition: background-color .3s ease, color .3s ease;
+// }
+
+// h1,h2,h3{line-height:1.2;margin:0 0 .5rem}
+// p{margin:0 0 1rem;color:var(--muted)}
+
+// .container{max-width:1200px;margin:0 auto;padding:0 16px}
+
+// .button{
+//   -webkit-tap-highlight-color: transparent;
+//   appearance:none;border:0;border-radius:9999px;
+//   padding:10px 16px;font-weight:600;cursor:pointer;transition:all .2s ease;
+//   background:linear-gradient(135deg,var(--brand),var(--brand-600));color:#fff;box-shadow:0 8px 20px rgba(0,102,255,.25)
+// }
+// .button:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(0,102,255,.28)}
+// .button:active{transform:translateY(0)}
+// .button.secondary{background:#fff;color:var(--text);border:1px solid var(--border);box-shadow:none}
+// .button.ghost{background:transparent;color:var(--brand);border:1px solid rgba(0,102,255,.2)}
+
+// .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+// .glass{background:color-mix(in oklab, var(--surface) 72%, transparent);backdrop-filter:saturate(180%) blur(10px);-webkit-backdrop-filter:saturate(180%) blur(10px)}
+
+// .focus-ring:focus{outline:3px solid color-mix(in oklab, var(--brand) 60%, white);outline-offset:2px;border-radius:10px}
+
+// .skeleton{position:relative;overflow:hidden;background:linear-gradient(90deg,#f2f4f7 25%,#eceff3 37%,#f2f4f7 63%);background-size:400% 100%;animation:shimmer 1.2s ease-in-out infinite}
+// @keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+
+// .hidden-visually{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap}
+
+// /* Forms */
+// label{display:grid;gap:6px;font-size:.9rem;margin-bottom:10px}
+// input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fff;transition:border-color .15s ease, box-shadow .15s ease}
+// [data-theme="dark"] input,[data-theme="dark"] select,[data-theme="dark"] textarea{background:#0b1220;color:var(--text)}
+// input:focus,select:focus,textarea:focus{outline:none;border-color:color-mix(in oklab, var(--brand) 60%, white);box-shadow:0 0 0 4px rgba(0,102,255,.08)}
+// textarea{min-height:96px;resize:vertical}
+
+// .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+// @media(max-width:760px){.form-grid{grid-template-columns:1fr}}
+
+// /* Switch */
+// .switch{position:relative;display:inline-flex;align-items:center;gap:.5rem}
+// .switch input{position:absolute;opacity:0;width:0;height:0}
+// .switch .track{width:44px;height:26px;border-radius:9999px;background:color-mix(in oklab, var(--brand) 12%, var(--border));position:relative;transition:all .2s ease}
+// .switch .thumb{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:9999px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.2);transition:all .2s ease}
+// .switch input:checked + .track{background:var(--gradient)}
+// .switch input:checked + .track .thumb{left:21px}
+
+// /* Pills */
+// .pill{display:inline-flex;align-items:center;gap:.375rem;padding:.375rem .625rem;border:1px solid var(--border);border-radius:9999px;background:color-mix(in oklab, #fff 90%, transparent)}
+// .pill.active{border-color:color-mix(in oklab, var(--brand) 40%, var(--border));background:color-mix(in oklab, var(--brand) 8%, #fff)}
+
+// /* Device frames */
+// .device-frame{border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);background:var(--surface)}
+// .device-frame.desktop{padding:12px}
+// .device-frame.mobile{padding:10px;border-radius:28px;max-width:360px}
+
+// /* Utility */
+// .mt-2{margin-top:.5rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}
+
+// /* Micro-animations */
+// .animate-fade-in{animation:fadeIn .4s ease both}
+// .animate-rise{animation:rise .35s ease both}
+// @keyframes fadeIn{0%{opacity:0}100%{opacity:1}}
+// @keyframes rise{0%{opacity:0;transform:translateY(6px)}100%{opacity:1;transform:translateY(0)}}
+
+// /* Premium hover effects */
+// .card:hover{transform:translateY(-2px);transition:transform .2s ease, box-shadow .2s ease;box-shadow:0 14px 34px rgba(0,0,0,.10)}
+// .ad-card{transition:transform .2s ease, box-shadow .2s ease}
+// .ad-card:hover{transform:translateY(-3px);box-shadow:0 16px 36px rgba(0,0,0,.12)}
+
+// /* Badges / statuses */
+// [data-status="draft"], .status[data-status="draft"]{background:color-mix(in oklab, #f97316 12%, #fff);border:1px solid color-mix(in oklab, #f97316 40%, #fff);color:#9a3412;border-radius:9999px;padding:.25rem .5rem}
+// [data-status="scheduled"], .status[data-status="scheduled"]{background:color-mix(in oklab, #06b6d4 12%, #fff);border:1px solid color-mix(in oklab, #06b6d4 40%, #fff);color:#115e59;border-radius:9999px;padding:.25rem .5rem}
+// [data-status="active"], .status[data-status="active"]{background:color-mix(in oklab, var(--accent) 12%, #fff);border:1px solid color-mix(in oklab, var(--accent) 40%, #fff);color:#065f46;border-radius:9999px;padding:.25rem .5rem}
+// [data-status="paused"], .status[data-status="paused"]{background:color-mix(in oklab, #a3a3a3 12%, #fff);border:1px solid color-mix(in oklab, #a3a3a3 40%, #fff);color:#404040;border-radius:9999px;padding:.25rem .5rem}
+
+// /* Header tenant selector */
+// .tenant-select{display:inline-flex;align-items:center;margin-inline-start:8px}
+// .tenant-input{height:32px;border-radius:9999px;padding:0 12px;border:1px solid var(--border);background:#fff;min-width:120px}
+// .tenant-input:focus{outline:none;border-color:color-mix(in oklab, var(--brand) 60%, white);box-shadow:0 0 0 4px rgba(0,102,255,.08)}
+
+// /* RTL helpers (document dir is set by i18n service) */
+// [dir="rtl"] .header-inner,[dir="rtl"] .nav-links{direction:rtl}
+// [dir="rtl"] .button{letter-spacing:0}
+:root {
+  /* Primary & Brand Colors */
+  --brand-dark: #001219;   /* داكن جدا - خلفيات أو نص */
+  --brand: #005f73;        /* اللون الرئيسي */
+  --brand-light: #0a9396;  /* ثانوي / accents */
+  --highlight: #94d2bd;    /* ألوان فاتحة للتفاصيل */
+
+  /* Backgrounds */
+  --bg: #f2e9cf;           /* خلفيات فاتحة */
+  --surface: #ffffff;       /* بطاقات / surface */
+  
+  /* Accent & Buttons */
+  --accent: #ee9b00;       /* أزرار CTA */
+  --warning: #ca6702;      /* تحذيرات / hover */
+  --alert: #bb3e03;        /* رسائل alert */
+  --danger: #ae2012;       /* أخطاء */
+  --critical: #9b2226;     /* أخطاء قوية */
+
+  /* Text & Borders */
+  --text: #001219;
   --muted: #64748b;
   --border: #e5e7eb;
-  --accent: #22c55e;
-  --danger: #ef4444;
+
+  /* UI Settings */
   --radius: 12px;
   --shadow: 0 10px 30px rgba(0,0,0,.08);
-  --gradient: linear-gradient(135deg, var(--brand), var(--purple));
+  --gradient: linear-gradient(135deg, var(--brand), var(--brand-light));
 }
 
 [data-theme="dark"]{
@@ -24,97 +156,37 @@
   --shadow: 0 10px 30px rgba(0,0,0,.4);
 }
 
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0;
-  font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-  color: var(--text);
+/* باقي الكود كما هو، مع تحديث المتغيرات للألوان الجديدة */
+body {
   background:
     radial-gradient(1200px 500px at 80% -100px, color-mix(in oklab, var(--brand) 24%, transparent), transparent 60%),
     linear-gradient(180deg, #fff, var(--bg));
+  color: var(--text);
   transition: background-color .3s ease, color .3s ease;
 }
 
-h1,h2,h3{line-height:1.2;margin:0 0 .5rem}
-p{margin:0 0 1rem;color:var(--muted)}
-
-.container{max-width:1200px;margin:0 auto;padding:0 16px}
-
-.button{
-  -webkit-tap-highlight-color: transparent;
-  appearance:none;border:0;border-radius:9999px;
-  padding:10px 16px;font-weight:600;cursor:pointer;transition:all .2s ease;
-  background:linear-gradient(135deg,var(--brand),var(--brand-600));color:#fff;box-shadow:0 8px 20px rgba(0,102,255,.25)
+.button {
+  background: linear-gradient(135deg, var(--brand), var(--brand-light));
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(0,95,115,.25);
 }
-.button:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(0,102,255,.28)}
-.button:active{transform:translateY(0)}
-.button.secondary{background:#fff;color:var(--text);border:1px solid var(--border);box-shadow:none}
-.button.ghost{background:transparent;color:var(--brand);border:1px solid rgba(0,102,255,.2)}
 
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+.button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(0,95,115,.28);
+}
 
-.glass{background:color-mix(in oklab, var(--surface) 72%, transparent);backdrop-filter:saturate(180%) blur(10px);-webkit-backdrop-filter:saturate(180%) blur(10px)}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
 
-.focus-ring:focus{outline:3px solid color-mix(in oklab, var(--brand) 60%, white);outline-offset:2px;border-radius:10px}
+.focus-ring:focus {
+  outline: 3px solid color-mix(in oklab, var(--brand) 60%, white);
+  outline-offset: 2px;
+  border-radius: 10px;
+}
 
-.skeleton{position:relative;overflow:hidden;background:linear-gradient(90deg,#f2f4f7 25%,#eceff3 37%,#f2f4f7 63%);background-size:400% 100%;animation:shimmer 1.2s ease-in-out infinite}
-@keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
-
-.hidden-visually{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap}
-
-/* Forms */
-label{display:grid;gap:6px;font-size:.9rem;margin-bottom:10px}
-input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fff;transition:border-color .15s ease, box-shadow .15s ease}
-[data-theme="dark"] input,[data-theme="dark"] select,[data-theme="dark"] textarea{background:#0b1220;color:var(--text)}
-input:focus,select:focus,textarea:focus{outline:none;border-color:color-mix(in oklab, var(--brand) 60%, white);box-shadow:0 0 0 4px rgba(0,102,255,.08)}
-textarea{min-height:96px;resize:vertical}
-
-.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-@media(max-width:760px){.form-grid{grid-template-columns:1fr}}
-
-/* Switch */
-.switch{position:relative;display:inline-flex;align-items:center;gap:.5rem}
-.switch input{position:absolute;opacity:0;width:0;height:0}
-.switch .track{width:44px;height:26px;border-radius:9999px;background:color-mix(in oklab, var(--brand) 12%, var(--border));position:relative;transition:all .2s ease}
-.switch .thumb{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:9999px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.2);transition:all .2s ease}
-.switch input:checked + .track{background:var(--gradient)}
-.switch input:checked + .track .thumb{left:21px}
-
-/* Pills */
-.pill{display:inline-flex;align-items:center;gap:.375rem;padding:.375rem .625rem;border:1px solid var(--border);border-radius:9999px;background:color-mix(in oklab, #fff 90%, transparent)}
-.pill.active{border-color:color-mix(in oklab, var(--brand) 40%, var(--border));background:color-mix(in oklab, var(--brand) 8%, #fff)}
-
-/* Device frames */
-.device-frame{border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);background:var(--surface)}
-.device-frame.desktop{padding:12px}
-.device-frame.mobile{padding:10px;border-radius:28px;max-width:360px}
-
-/* Utility */
-.mt-2{margin-top:.5rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}
-
-/* Micro-animations */
-.animate-fade-in{animation:fadeIn .4s ease both}
-.animate-rise{animation:rise .35s ease both}
-@keyframes fadeIn{0%{opacity:0}100%{opacity:1}}
-@keyframes rise{0%{opacity:0;transform:translateY(6px)}100%{opacity:1;transform:translateY(0)}}
-
-/* Premium hover effects */
-.card:hover{transform:translateY(-2px);transition:transform .2s ease, box-shadow .2s ease;box-shadow:0 14px 34px rgba(0,0,0,.10)}
-.ad-card{transition:transform .2s ease, box-shadow .2s ease}
-.ad-card:hover{transform:translateY(-3px);box-shadow:0 16px 36px rgba(0,0,0,.12)}
-
-/* Badges / statuses */
-[data-status="draft"], .status[data-status="draft"]{background:color-mix(in oklab, #f97316 12%, #fff);border:1px solid color-mix(in oklab, #f97316 40%, #fff);color:#9a3412;border-radius:9999px;padding:.25rem .5rem}
-[data-status="scheduled"], .status[data-status="scheduled"]{background:color-mix(in oklab, #06b6d4 12%, #fff);border:1px solid color-mix(in oklab, #06b6d4 40%, #fff);color:#115e59;border-radius:9999px;padding:.25rem .5rem}
-[data-status="active"], .status[data-status="active"]{background:color-mix(in oklab, var(--accent) 12%, #fff);border:1px solid color-mix(in oklab, var(--accent) 40%, #fff);color:#065f46;border-radius:9999px;padding:.25rem .5rem}
-[data-status="paused"], .status[data-status="paused"]{background:color-mix(in oklab, #a3a3a3 12%, #fff);border:1px solid color-mix(in oklab, #a3a3a3 40%, #fff);color:#404040;border-radius:9999px;padding:.25rem .5rem}
-
-/* Header tenant selector */
-.tenant-select{display:inline-flex;align-items:center;margin-inline-start:8px}
-.tenant-input{height:32px;border-radius:9999px;padding:0 12px;border:1px solid var(--border);background:#fff;min-width:120px}
-.tenant-input:focus{outline:none;border-color:color-mix(in oklab, var(--brand) 60%, white);box-shadow:0 0 0 4px rgba(0,102,255,.08)}
-
-/* RTL helpers (document dir is set by i18n service) */
-[dir="rtl"] .header-inner,[dir="rtl"] .nav-links{direction:rtl}
-[dir="rtl"] .button{letter-spacing:0}
+/* Switches, Pills, Forms, Headers, Badges, etc. يمكن استخدام نفس المتغيرات الجديدة */

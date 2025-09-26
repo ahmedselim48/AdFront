@@ -1,11 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';   
 import { AdsService } from '../../core/services/ads.service';
+import { I18nService } from '../../core/services/i18n.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-ad-create',
@@ -15,7 +18,9 @@ import { AdsService } from '../../core/services/ads.service';
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
-    MatButtonModule
+    MatButtonModule,
+    MatIconModule,
+    TranslatePipe
   ],
   templateUrl: './ad-create.component.html',
   styleUrls: ['./ad-create.component.scss']
@@ -26,6 +31,7 @@ export class AdCreateComponent {
   previewUrls: string[] = [];
   uploading = false;
   error = '';
+  private t = inject(I18nService);
 
   constructor(
     private fb: FormBuilder,
@@ -35,8 +41,9 @@ export class AdCreateComponent {
     this.form = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(200)]],
       description: ['', [Validators.required, Validators.maxLength(5000)]],
-      price: [0, [Validators.min(0)]],
+      price: [null, [Validators.required, Validators.min(0)]],
       location: ['', [Validators.required, Validators.maxLength(200)]],
+      category: ['', Validators.required],   // ✅ مضافة
       userId: ['', Validators.required]
     });
   }
@@ -55,28 +62,90 @@ export class AdCreateComponent {
     }
   }
 
-  submit() {
-    if (this.form.invalid) return;
+  // submit() {
+  //   if (this.form.invalid) return;
 
-    this.uploading = true;
-    const payload = {
-      ...this.form.value,
-      images: this.selectedFiles
-    };
+  //   this.uploading = true;
+  //   const payload = {
+  //     ...this.form.value,
+  //     images: this.selectedFiles
+  //   };
 
-    this.adsService.createWithFiles(payload).subscribe({
-      next: res => {
-        this.uploading = false;
-        if (res.success) {
-          this.router.navigate(['/ads']);
-        } else {
-          this.error = res.message;
-        }
-      },
-      error: err => {
-        this.uploading = false;
-        this.error = err?.message ?? 'Upload failed';
-      }
-    });
+  //   this.adsService.createWithFiles(payload).subscribe({
+  //     next: res => {
+  //       this.uploading = false;
+  //       if (res.success) {
+  //         this.router.navigate(['/ads']);
+  //       } else {
+  //         this.error = res.message;
+  //       }
+  //     },
+  //     error: err => {
+  //       this.uploading = false;
+  //       this.error = err?.message ?? 'Upload failed';
+  //     }
+  //   });
+  // }
+submit() {
+  if (this.form.invalid) {
+    this.error = this.t.t('ads.formInvalid'); 
+    return;
   }
+
+  this.uploading = true;
+  const payload = {
+    ...this.form.value,
+    images: this.selectedFiles
+  };
+
+  this.adsService.createWithFiles(payload).subscribe({
+    next: res => {
+      this.uploading = false;
+      if (res.success) {
+        this.router.navigate(['/ads']);
+      } else {
+        this.error = this.t.t('ads.uploadFailed'); 
+      }
+    },
+    error: err => {
+      this.uploading = false;
+      this.error = this.t.t('ads.uploadFailed');
+    }
+  });
+}
+// ad-form.component.ts
+onAnalyze() {
+  this.adsService.analyzeImages(this.selectedFiles.map(file => file.name)).subscribe(result => {
+    if (result.isSuccessful) {
+      this.form.patchValue({
+        title: result.title,
+        description: result.description,
+        category: result.category
+      });
+    } else {
+      alert("فشل التحليل: " + result.errorMessage);
+    }
+  });
+}
+
+//   onAnalyzeAd() {
+//     if (!this.selectedFiles.length) return;
+
+//     this.adsService.analyzeAd(this.selectedFiles).subscribe(res => {
+//       this.form.patchValue({
+//         title: res.suggestedTitle,
+//         description: res.suggestedDescription,
+//         category: res.suggestedCategory  
+//       });
+//     });
+//   }
+//   fillWithAI() {
+//   // قيم جاهزة للتجربة
+//   this.form.patchValue({
+//     title: 'Amazing Product Title',
+//     description: 'This product is amazing because it solves your problem efficiently and beautifully.'
+//   });
+// }
+
+
 }

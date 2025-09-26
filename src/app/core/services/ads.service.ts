@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AdDto, PaginationMeta, CreateAdDto, UpdateAdDto } from '../../models/ads.models';
+import { AdDto, PaginationMeta, CreateAdDto, UpdateAdDto, AnalyzeAdImagesResult } from '../../models/ads.models';
 import { GeneralResponse } from '../../models/general-response';
 
 @Injectable({
@@ -90,4 +90,23 @@ export class AdsService {
   delete(id: string) {
     return this.http.delete<GeneralResponse<boolean>>(`${this.base}/${id}`);
   }
+//   analyzeAd(images: File[]): Observable<{ 
+//   suggestedTitle: string, 
+//   suggestedDescription: string, 
+//   suggestedCategory: string 
+// }> {
+//   const formData = new FormData();
+//   images.forEach(img => formData.append('images', img));
+
+//   return this.http.post<{ 
+//     suggestedTitle: string, 
+//     suggestedDescription: string, 
+//     suggestedCategory: string 
+//   }>(`${this.base}/ads/analyze`, formData);
+// }
+// ad.service.ts
+analyzeImages(fileNames: string[]) {
+  return this.http.post<AnalyzeAdImagesResult>('/api/ads/analyze-images', { imageFileNames: fileNames });
+}
+
 }
