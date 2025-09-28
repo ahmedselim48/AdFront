@@ -1,5 +1,42 @@
-.list{list-style:none;padding:0;display:flex;flex-direction:column;gap:.5rem}
-li{display:flex;align-items:center;gap:.5rem;border:1px solid #e5e7eb;border-radius:.5rem;padding:.5rem}
-.badge{width:.75rem;height:.75rem;border-radius:9999px;background:#9ca3af;display:inline-block}
-.badge.info{background:#2b6cb0}.badge.warning{background:#d69e2e}.badge.error{background:#c53030}.badge.success{background:#2f855a}
-.msg{flex:1}
+.notifications {
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.notifications-container {
+  width: 100%;
+}
+
+.notifications-card {
+  border-radius: 1rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.notifications-content {
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-state {
+  text-align: center;
+  color: #666;
+}
+
+.empty-icon {
+  color: #ccc;
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 1rem;
+}

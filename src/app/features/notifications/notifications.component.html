@@ -1,10 +1,19 @@
-<section>
-  <h2>{{ 'notifications.title' | t }}</h2>
-  <ul class="list">
-    <li *ngFor="let n of (notifications.list$ | async)">
-      <span class="badge" [class.info]="n.level==='info'" [class.warning]="n.level==='warning'" [class.error]="n.level==='error'" [class.success]="n.level==='success'"></span>
-      <span class="msg">{{n.message}}</span>
-      <small>{{n.createdAt | date:'short':'': locale}}</small>
-    </li>
-  </ul>
-</section>
+<div class="notifications">
+  <div class="notifications-container">
+    <mat-card class="notifications-card">
+      <mat-card-header>
+        <mat-card-title>الإشعارات</mat-card-title>
+        <mat-card-subtitle>جميع إشعاراتك في مكان واحد</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="notifications-content">
+          <div class="empty-state">
+            <lucide-icon name="bell" size="64" class="empty-icon"></lucide-icon>
+            <h3>لا توجد إشعارات</h3>
+            <p>ستظهر إشعاراتك هنا عند توفرها</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

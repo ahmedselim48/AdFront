@@ -1,9 +1,41 @@
-export type NotificationLevel = 'info' | 'warning' | 'error' | 'success';
+// ===== NOTIFICATIONS MODELS =====
 
-export interface AppNotification {
+export type NotificationType = 
+  | 'AdPublished'
+  | 'AdExpired'
+  | 'ABTesting'
+  | 'NewMessage'
+  | 'ContactRequest'
+  | 'CheaperCompetitor'
+  | 'CompetitionReport'
+  | 'SuspiciousLogin'
+  | 'Payment'
+  | 'SubscriptionExpiring'
+  | 'WeeklySummary';
+
+export interface NotificationDto {
   id: string;
-  level: NotificationLevel;
+  title: string;
   message: string;
-  createdAt: string;
-  read: boolean;
+  type: NotificationType;
+  isRead: boolean;
+  createdAt: Date;
+  data?: any;
+}
+
+export interface NotificationRequest {
+  page?: number;
+  pageSize?: number;
+  type?: NotificationType;
+  isRead?: boolean;
+}
+
+export interface MarkAsReadRequest {
+  notificationId: string;
+}
+
+export interface NotificationStats {
+  total: number;
+  unread: number;
+  byType: Record<NotificationType, number>;
 }

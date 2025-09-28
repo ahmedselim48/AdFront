@@ -1,0 +1,67 @@
+<nav aria-label="صفحات النتائج" *ngIf="totalPages > 1">
+  <ul class="pagination justify-content-center">
+    <!-- First Page -->
+    <li class="page-item" [class.disabled]="currentPage === 1">
+      <button 
+        class="page-link" 
+        (click)="goToPage(1)"
+        [disabled]="currentPage === 1"
+        aria-label="الصفحة الأولى">
+        <lucide-icon name="chevrons-left" size="16"></lucide-icon>
+      </button>
+    </li>
+
+    <!-- Previous Page -->
+    <li class="page-item" [class.disabled]="currentPage === 1">
+      <button 
+        class="page-link" 
+        (click)="goToPage(currentPage - 1)"
+        [disabled]="currentPage === 1"
+        aria-label="الصفحة السابقة">
+        <lucide-icon name="chevron-left" size="16"></lucide-icon>
+      </button>
+    </li>
+
+    <!-- Page Numbers -->
+    <li 
+      class="page-item" 
+      *ngFor="let page of visiblePages" 
+      [class.active]="page === currentPage">
+      <button 
+        class="page-link" 
+        (click)="goToPage(page)"
+        [class.active]="page === currentPage">
+        {{ page }}
+      </button>
+    </li>
+
+    <!-- Next Page -->
+    <li class="page-item" [class.disabled]="currentPage === totalPages">
+      <button 
+        class="page-link" 
+        (click)="goToPage(currentPage + 1)"
+        [disabled]="currentPage === totalPages"
+        aria-label="الصفحة التالية">
+        <lucide-icon name="chevron-right" size="16"></lucide-icon>
+      </button>
+    </li>
+
+    <!-- Last Page -->
+    <li class="page-item" [class.disabled]="currentPage === totalPages">
+      <button 
+        class="page-link" 
+        (click)="goToPage(totalPages)"
+        [disabled]="currentPage === totalPages"
+        aria-label="الصفحة الأخيرة">
+        <lucide-icon name="chevrons-right" size="16"></lucide-icon>
+      </button>
+    </li>
+  </ul>
+
+  <!-- Page Info -->
+  <div class="pagination-info text-center mt-2">
+    <small class="text-muted">
+      عرض {{ startItem }} - {{ endItem }} من {{ totalItems }} نتيجة
+    </small>
+  </div>
+</nav>

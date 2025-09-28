@@ -1,0 +1,41 @@
+.error-message {
+  margin-bottom: 1rem;
+}
+
+.alert {
+  border: none;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+  border-left: 4px solid #dc3545;
+}
+
+.alert-heading {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.alert ul {
+  margin-bottom: 0;
+  padding-left: 1.5rem;
+}
+
+.alert li {
+  margin-bottom: 0.25rem;
+}
+
+.btn-outline-danger {
+  border-color: #dc3545;
+  color: #dc3545;
+}
+
+.btn-outline-danger:hover {
+  background-color: #dc3545;
+  border-color: #dc3545;
+  color: white;
+}

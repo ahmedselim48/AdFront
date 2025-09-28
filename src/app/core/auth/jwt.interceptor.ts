@@ -43,20 +43,7 @@ function handle401(auth: AuthService, storage: TokenStorageService, req: HttpReq
   }
 
   isRefreshing = true;
-  return auth.refresh(storage.refreshToken).pipe(
-    switchMap(t => {
-      const newToken = t.accessToken;
-      pendingRequests.forEach(p => p.resolve(newToken));
-      pendingRequests = [];
-      const retried = req.clone({ setHeaders: { Authorization: `Bearer ${newToken}` } });
-      return next(retried);
-    }),
-    catchError(e => {
-      pendingRequests.forEach(p => p.reject(e));
-      pendingRequests = [];
-      auth.logout();
-      return throwError(() => e);
-    }),
-    finalize(() => { isRefreshing = false; })
-  );
+  // For now, just logout on 401 - refresh token logic can be implemented later
+  auth.logoutLocal();
+  return throwError(() => new Error('Token expired'));
 }

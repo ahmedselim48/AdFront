@@ -1,0 +1,158 @@
+.page-not-found {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+}
+
+.not-found-container {
+  width: 100%;
+  max-width: 600px;
+}
+
+.not-found-card {
+  border-radius: 2rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.not-found-content {
+  text-align: center;
+  padding: 3rem 2rem;
+}
+
+.error-icon {
+  margin-bottom: 2rem;
+  color: #667eea;
+  opacity: 0.8;
+}
+
+.error-message {
+  margin-bottom: 3rem;
+}
+
+.error-code {
+  font-size: 6rem;
+  font-weight: 900;
+  color: #667eea;
+  margin: 0 0 1rem 0;
+  line-height: 1;
+  text-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.error-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 1rem 0;
+}
+
+.error-description {
+  font-size: 1.1rem;
+  color: #666;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+}
+
+.home-button,
+.back-button {
+  min-width: 160px;
+  height: 48px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.me-2 {
+  margin-left: 0.5rem;
+}
+
+.help-text {
+  color: #666;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.help-text p {
+  margin: 0 0 1rem 0;
+  font-weight: 500;
+}
+
+.help-text ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.help-text li {
+  margin-bottom: 0.5rem;
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.help-text li::before {
+  content: '•';
+  color: #667eea;
+  font-weight: bold;
+  position: absolute;
+  left: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .page-not-found {
+    padding: 1rem;
+  }
+
+  .not-found-content {
+    padding: 2rem 1rem;
+  }
+
+  .error-code {
+    font-size: 4rem;
+  }
+
+  .error-title {
+    font-size: 1.5rem;
+  }
+
+  .error-description {
+    font-size: 1rem;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .home-button,
+  .back-button {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .error-code {
+    font-size: 3rem;
+  }
+
+  .error-title {
+    font-size: 1.2rem;
+  }
+
+  .action-buttons {
+    gap: 0.75rem;
+  }
+}

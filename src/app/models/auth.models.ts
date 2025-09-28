@@ -1,3 +1,5 @@
+// ===== AUTH MODELS =====
+
 export interface LoginRequest {
   email: string;
   password: string;
@@ -22,6 +24,31 @@ export interface ResetPasswordRequest {
   newPassword: string;
 }
 
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface ResendConfirmationRequest {
+  email: string;
+}
+
+export interface VerifyEmailRequest {
+  userId: string;
+  token: string;
+}
+
+export interface GoogleLoginRequest {
+  idToken: string;
+}
+
+export interface SocialLoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+  user: UserProfile;
+}
+
 export interface TokenResponse {
   accessToken: string;
   refreshToken: string;
@@ -35,23 +62,38 @@ export interface UserProfile {
   fullName: string;
   roles: string[];
   emailConfirmed: boolean;
+  phoneNumber?: string;
+  profilePicture?: string;
+  createdAt: Date;
+  lastLoginAt?: Date;
 }
 
-// Additional models for new endpoints
-export interface ChangePasswordRequest {
-  currentPassword: string;
-  newPassword: string;
+export interface ProfileUpdateRequest {
+  fullName?: string;
+  phoneNumber?: string;
+  profilePicture?: string;
 }
 
-export interface RefreshTokenRequest {
-  refreshToken: string;
+export interface EmailConfirmationResponse {
+  success: boolean;
+  message: string;
 }
 
-export interface ResendConfirmationRequest {
-  email: string;
+export interface SubscriptionStatus {
+  hasActive: boolean;
+  daysRemaining: number;
+  endDate?: Date;
 }
 
-export interface VerifyEmailRequest {
-  token: string;
-  email: string;
+export interface UserDashboard {
+  totalAds: number;
+  publishedAds: number;
+  draftAds: number;
+  pendingAds: number;
+  totalViews: number;
+  totalClicks: number;
+  totalLikes: number;
+  recentAds: any[];
+  notifications: any[];
+  subscriptionStatus: SubscriptionStatus;
 }

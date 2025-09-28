@@ -1,0 +1,124 @@
+<div class="profile-container">
+  <!-- Header -->
+  <div class="profile-header">
+    <div class="header-content">
+      <div class="header-left">
+        <button mat-icon-button (click)="onBackToDashboard()" class="back-button">
+          <lucide-icon name="arrow-left" size="24"></lucide-icon>
+        </button>
+        <div class="header-text">
+          <h1 class="page-title">الملف الشخصي</h1>
+          <p class="page-subtitle">{{ getGreeting() }}، {{ currentUser?.fullName || 'مستخدم' }}</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button mat-raised-button color="primary" routerLink="/ads/create">
+          <lucide-icon name="plus" size="18" class="me-2"></lucide-icon>
+          إعلان جديد
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <app-loading-spinner [text]="'جاري تحميل الملف الشخصي...'"></app-loading-spinner>
+  </div>
+
+  <!-- Profile Content -->
+  <div *ngIf="!isLoading && currentUser" class="profile-content">
+    <div class="profile-layout">
+      <!-- Sidebar -->
+      <div class="profile-sidebar">
+        <!-- Profile Picture -->
+        <mat-card class="profile-picture-card">
+          <mat-card-content>
+            <app-profile-picture 
+              [user]="currentUser"
+              (profileUpdated)="onProfileUpdate($event)">
+            </app-profile-picture>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- User Info -->
+        <mat-card class="user-info-card">
+          <mat-card-header>
+            <mat-card-title>معلومات المستخدم</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="user-info">
+              <div class="info-item">
+                <lucide-icon name="user" size="16"></lucide-icon>
+                <span class="info-label">الاسم:</span>
+                <span class="info-value">{{ currentUser.fullName }}</span>
+              </div>
+              <div class="info-item">
+                <lucide-icon name="mail" size="16"></lucide-icon>
+                <span class="info-label">البريد الإلكتروني:</span>
+                <span class="info-value">{{ currentUser.email }}</span>
+              </div>
+              <div class="info-item" *ngIf="currentUser.phoneNumber">
+                <lucide-icon name="phone" size="16"></lucide-icon>
+                <span class="info-label">رقم الهاتف:</span>
+                <span class="info-value">{{ currentUser.phoneNumber }}</span>
+              </div>
+              <div class="info-item">
+                <lucide-icon name="calendar" size="16"></lucide-icon>
+                <span class="info-label">تاريخ الانضمام:</span>
+                <span class="info-value">{{ formatDate(currentUser.createdAt) }}</span>
+              </div>
+              <div class="info-item">
+                <lucide-icon name="check-circle" size="16"></lucide-icon>
+                <span class="info-label">حالة البريد:</span>
+                <span class="info-value" [class]="currentUser.emailConfirmed ? 'confirmed' : 'unconfirmed'">
+                  {{ currentUser.emailConfirmed ? 'مؤكد' : 'غير مؤكد' }}
+                </span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Subscription Status -->
+        <mat-card class="subscription-card" *ngIf="subscriptionStatus">
+          <mat-card-header>
+            <mat-card-title>حالة الاشتراك</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="subscription-info">
+              <div class="subscription-status" [class]="subscriptionStatus.hasActive ? 'active' : 'inactive'">
+                <lucide-icon [name]="subscriptionStatus.hasActive ? 'check-circle' : 'x-circle'" size="20"></lucide-icon>
+                <span>{{ subscriptionStatus.hasActive ? 'نشط' : 'غير نشط' }}</span>
+              </div>
+              <div class="subscription-days" *ngIf="subscriptionStatus.hasActive">
+                <span class="days-label">متبقي:</span>
+                <span class="days-value">{{ subscriptionStatus.daysRemaining }} يوم</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Main Content -->
+      <div class="profile-main">
+        <!-- Navigation Tabs -->
+        <mat-card class="navigation-card">
+          <mat-card-content>
+            <mat-tab-group [(selectedIndex)]="activeTab" (selectedIndexChange)="onTabChange($event)">
+              <mat-tab *ngFor="let item of menuItems; let i = index">
+                <ng-template mat-tab-label>
+                  <div class="tab-label">
+                    <lucide-icon [name]="item.icon" size="18" class="me-2"></lucide-icon>
+                    {{ item.label }}
+                  </div>
+                </ng-template>
+                <div class="tab-content">
+                  <router-outlet></router-outlet>
+                </div>
+              </mat-tab>
+            </mat-tab-group>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+</div>

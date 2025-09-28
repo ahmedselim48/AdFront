@@ -1,0 +1,130 @@
+<div class="admin-container">
+  <!-- Header -->
+  <div class="admin-header">
+    <div class="header-content">
+      <div class="header-left">
+        <button mat-icon-button (click)="onBackToDashboard()" class="back-button">
+          <lucide-icon name="arrow-left" size="24"></lucide-icon>
+        </button>
+        <div class="header-text">
+          <h1 class="page-title">لوحة الإدارة</h1>
+          <p class="page-subtitle">{{ getGreeting() }}، مرحباً بك في لوحة الإدارة</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button mat-stroked-button routerLink="/admin/settings">
+          <lucide-icon name="settings" size="18" class="me-2"></lucide-icon>
+          الإعدادات
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <app-loading-spinner [text]="'جاري تحميل لوحة الإدارة...'"></app-loading-spinner>
+  </div>
+
+  <!-- Admin Content -->
+  <div *ngIf="!isLoading" class="admin-content">
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <div class="admin-sidebar">
+        <!-- Quick Stats -->
+        <mat-card class="quick-stats-card" *ngIf="adminStats">
+          <mat-card-header>
+            <mat-card-title>إحصائيات سريعة</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="quick-stats">
+              <div class="stat-item">
+                <div class="stat-icon">
+                  <lucide-icon name="users" size="20"></lucide-icon>
+                </div>
+                <div class="stat-info">
+                  <h4>{{ adminStats.totalUsers | number }}</h4>
+                  <p>المستخدمين</p>
+                </div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-icon">
+                  <lucide-icon name="file-text" size="20"></lucide-icon>
+                </div>
+                <div class="stat-info">
+                  <h4>{{ adminStats.totalAds | number }}</h4>
+                  <p>الإعلانات</p>
+                </div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-icon">
+                  <lucide-icon name="tag" size="20"></lucide-icon>
+                </div>
+                <div class="stat-info">
+                  <h4>{{ adminStats.totalCategories | number }}</h4>
+                  <p>الفئات</p>
+                </div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-icon">
+                  <lucide-icon name="eye" size="20"></lucide-icon>
+                </div>
+                <div class="stat-info">
+                  <h4>{{ getTotalViews() | number }}</h4>
+                  <p>المشاهدات</p>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Navigation Menu -->
+        <mat-card class="navigation-card">
+          <mat-card-header>
+            <mat-card-title>القائمة</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="navigation-menu">
+              <div 
+                *ngFor="let item of menuItems; let i = index" 
+                class="menu-item"
+                [class.active]="i === activeTab"
+                (click)="onTabChange(i)">
+                <div class="menu-icon">
+                  <lucide-icon [name]="item.icon" size="18"></lucide-icon>
+                </div>
+                <div class="menu-label">
+                  {{ item.label }}
+                </div>
+                <div class="menu-badge" *ngIf="getMenuBadge(item.id)">
+                  <span class="badge">{{ getMenuBadge(item.id) }}</span>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Main Content -->
+      <div class="admin-main">
+        <!-- Navigation Tabs -->
+        <mat-card class="content-card">
+          <mat-card-content>
+            <mat-tab-group [(selectedIndex)]="activeTab" (selectedIndexChange)="onTabChange($event)">
+              <mat-tab *ngFor="let item of menuItems; let i = index">
+                <ng-template mat-tab-label>
+                  <div class="tab-label">
+                    <lucide-icon [name]="item.icon" size="18" class="me-2"></lucide-icon>
+                    {{ item.label }}
+                  </div>
+                </ng-template>
+                <div class="tab-content">
+                  <router-outlet></router-outlet>
+                </div>
+              </mat-tab>
+            </mat-tab-group>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+</div>

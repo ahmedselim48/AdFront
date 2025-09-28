@@ -1,0 +1,107 @@
+<div class="recent-activity">
+  <!-- No Activity -->
+  <div *ngIf="recentAds.length === 0" class="no-activity">
+    <div class="no-activity-content">
+      <lucide-icon name="activity" size="48" class="no-activity-icon"></lucide-icon>
+      <h4>لا يوجد نشاط حديث</h4>
+      <p>لم يتم إنشاء أي إعلانات مؤخراً</p>
+      <button mat-raised-button color="primary" routerLink="/ads/create">
+        <lucide-icon name="plus" size="18" class="me-2"></lucide-icon>
+        إنشاء إعلان جديد
+      </button>
+    </div>
+  </div>
+
+  <!-- Activity List -->
+  <div *ngIf="recentAds.length > 0" class="activity-list">
+    <div *ngFor="let ad of recentAds; let i = index" class="activity-item">
+      <div class="activity-content">
+        <!-- Ad Image -->
+        <div class="activity-image" *ngIf="ad.images && ad.images.length > 0">
+          <img [src]="ad.images[0]" [alt]="ad.title" class="activity-img">
+        </div>
+        <div class="activity-image-placeholder" *ngIf="!ad.images || ad.images.length === 0">
+          <lucide-icon name="image" size="24"></lucide-icon>
+        </div>
+
+        <!-- Ad Info -->
+        <div class="activity-info">
+          <div class="activity-header">
+            <h4 class="activity-title">{{ ad.title }}</h4>
+            <div class="activity-badges">
+              <mat-chip [class]="'status-' + getStatusColor(ad.status)">
+                {{ getStatusText(ad.status) }}
+              </mat-chip>
+              <span *ngIf="ad.isAIGenerated" class="ai-badge">
+                <lucide-icon name="zap" size="12"></lucide-icon>
+                AI
+              </span>
+            </div>
+          </div>
+          
+          <div class="activity-meta">
+            <div class="activity-price">
+              <span class="price-amount">{{ ad.price | currency:'SAR':'symbol':'1.0-0':'ar' }}</span>
+            </div>
+            <div class="activity-location" *ngIf="ad.location">
+              <lucide-icon name="map-pin" size="14"></lucide-icon>
+              <span>{{ ad.location }}</span>
+            </div>
+            <div class="activity-date">
+              <lucide-icon name="calendar" size="14"></lucide-icon>
+              <span>{{ formatDate(ad.createdAt) }}</span>
+            </div>
+          </div>
+
+          <div class="activity-stats">
+            <div class="stat-item">
+              <lucide-icon name="eye" size="14"></lucide-icon>
+              <span>{{ ad.viewsCount | number }}</span>
+            </div>
+            <div class="stat-item">
+              <lucide-icon name="heart" size="14"></lucide-icon>
+              <span>{{ ad.likesCount | number }}</span>
+            </div>
+            <div class="stat-item">
+              <lucide-icon name="message-square" size="14"></lucide-icon>
+              <span>{{ ad.commentsCount | number }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="activity-actions">
+          <button mat-icon-button [matMenuTriggerFor]="activityMenu" matTooltip="المزيد">
+            <lucide-icon name="more-vertical" size="18"></lucide-icon>
+          </button>
+        </div>
+        
+        <!-- Activity Menu -->
+        <mat-menu #activityMenu="matMenu">
+          <button mat-menu-item routerLink="/ads/details/{{ad.id}}">
+            <lucide-icon name="eye" size="16" class="me-2"></lucide-icon>
+            عرض التفاصيل
+          </button>
+          <button mat-menu-item routerLink="/ads/edit/{{ad.id}}">
+            <lucide-icon name="edit" size="16" class="me-2"></lucide-icon>
+            تعديل
+          </button>
+          <mat-divider></mat-divider>
+          <button mat-menu-item class="delete-action">
+            <lucide-icon name="trash-2" size="16" class="me-2"></lucide-icon>
+            حذف
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+
+    <!-- View All Button -->
+    <div class="view-all-section">
+      <button mat-stroked-button routerLink="/ads" class="view-all-button">
+        عرض جميع الإعلانات
+        <lucide-icon name="arrow-left" size="18" class="me-2"></lucide-icon>
+      </button>
+    </div>
+  </div>
+</div>
+

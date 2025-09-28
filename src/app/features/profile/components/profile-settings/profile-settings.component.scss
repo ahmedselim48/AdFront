@@ -1,0 +1,145 @@
+.profile-settings {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 4rem 2rem;
+}
+
+.loading-container p {
+  color: #666;
+  margin: 0;
+}
+
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.settings-card {
+  border-radius: 1rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.settings-card mat-card-header {
+  margin-bottom: 1.5rem;
+}
+
+.settings-card mat-card-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.settings-card mat-card-subtitle {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.half-width {
+  flex: 1;
+}
+
+.preferences-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.preference-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 0.5rem;
+  border: 1px solid #e9ecef;
+}
+
+.preference-item mat-checkbox {
+  font-weight: 500;
+  color: #333;
+}
+
+.preference-description {
+  color: #666;
+  font-size: 0.8rem;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 2rem 0;
+  border-top: 1px solid #e9ecef;
+}
+
+.me-2 {
+  margin-left: 0.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .profile-settings {
+    padding: 0 1rem;
+  }
+
+  .form-row {
+    flex-direction: column;
+  }
+
+  .half-width {
+    width: 100%;
+  }
+
+  .preferences-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .action-buttons button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-card {
+    margin: 0 -0.5rem;
+  }
+
+  .preference-item {
+    padding: 0.75rem;
+  }
+}

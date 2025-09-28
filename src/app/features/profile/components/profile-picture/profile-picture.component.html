@@ -1,0 +1,69 @@
+<div class="profile-picture">
+  <div class="picture-container">
+    <!-- Profile Image -->
+    <div class="image-wrapper">
+      <div class="image-container" [class.has-image]="profileImage">
+        <img *ngIf="profileImage" [src]="profileImage" [alt]="user?.fullName || 'صورة المستخدم'" class="profile-img">
+        <div *ngIf="!profileImage" class="image-placeholder">
+          <lucide-icon name="user" size="48"></lucide-icon>
+        </div>
+        
+        <!-- Upload Overlay -->
+        <div class="upload-overlay" *ngIf="isEditing">
+          <button mat-icon-button (click)="fileInput.click()" class="upload-button">
+            <lucide-icon name="camera" size="20"></lucide-icon>
+          </button>
+          <button mat-icon-button (click)="removeImage()" class="remove-button" *ngIf="profileImage">
+            <lucide-icon name="x" size="20"></lucide-icon>
+          </button>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" *ngIf="isUploading">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+      </div>
+      
+      <!-- User Initials -->
+      <div class="user-initials" *ngIf="!profileImage">
+        {{ getInitials() }}
+      </div>
+    </div>
+
+    <!-- User Info -->
+    <div class="user-info">
+      <h3 class="user-name">{{ user?.fullName || 'مستخدم' }}</h3>
+      <p class="user-email">{{ user?.email || '' }}</p>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button 
+        *ngIf="!isEditing" 
+        mat-stroked-button 
+        (click)="startEditing()" 
+        class="edit-button">
+        <lucide-icon name="camera" size="18" class="me-2"></lucide-icon>
+        تغيير الصورة
+      </button>
+      
+      <div *ngIf="isEditing" class="editing-buttons">
+        <button mat-stroked-button (click)="cancelEditing()" class="cancel-button">
+          إلغاء
+        </button>
+        <button mat-raised-button color="primary" (click)="fileInput.click()" class="upload-button">
+          <lucide-icon name="upload" size="18" class="me-2"></lucide-icon>
+          رفع صورة
+        </button>
+      </div>
+    </div>
+
+    <!-- Hidden File Input -->
+    <input 
+      #fileInput 
+      type="file" 
+      accept="image/*" 
+      (change)="onImageSelect($event)"
+      style="display: none;">
+  </div>
+</div>

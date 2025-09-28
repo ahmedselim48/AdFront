@@ -1,0 +1,148 @@
+<div class="stats-overview">
+  <div class="stats-grid">
+    <!-- Total Ads -->
+    <mat-card class="stat-card total-ads">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon">
+            <lucide-icon name="file-text" size="24"></lucide-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{ totalAds | number }}</h3>
+            <p>إجمالي الإعلانات</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Published Ads -->
+    <mat-card class="stat-card published-ads">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon">
+            <lucide-icon name="check-circle" size="24"></lucide-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{ publishedAds | number }}</h3>
+            <p>الإعلانات المنشورة</p>
+            <div class="stat-percentage">
+              <span class="percentage">{{ getPublishedPercentage() }}%</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Draft Ads -->
+    <mat-card class="stat-card draft-ads">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon">
+            <lucide-icon name="file-text" size="24"></lucide-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{ draftAds | number }}</h3>
+            <p>المسودات</p>
+            <div class="stat-percentage">
+              <span class="percentage">{{ getDraftPercentage() }}%</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Pending Ads -->
+    <mat-card class="stat-card pending-ads">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon">
+            <lucide-icon name="clock" size="24"></lucide-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{ pendingAds | number }}</h3>
+            <p>في الانتظار</p>
+            <div class="stat-percentage">
+              <span class="percentage">{{ getPendingPercentage() }}%</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Total Views -->
+    <mat-card class="stat-card total-views">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon">
+            <lucide-icon name="eye" size="24"></lucide-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{ totalViews | number }}</h3>
+            <p>إجمالي المشاهدات</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Total Clicks -->
+    <mat-card class="stat-card total-clicks">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon">
+            <lucide-icon name="mouse-pointer" size="24"></lucide-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{ totalClicks | number }}</h3>
+            <p>إجمالي النقرات</p>
+            <div class="stat-percentage">
+              <span class="percentage">CTR: {{ getCTR() }}%</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Total Likes -->
+    <mat-card class="stat-card total-likes">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon">
+            <lucide-icon name="heart" size="24"></lucide-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{ totalLikes | number }}</h3>
+            <p>إجمالي الإعجابات</p>
+            <div class="stat-percentage">
+              <span class="percentage">تفاعل: {{ getEngagementRate() }}%</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Performance Summary -->
+    <mat-card class="stat-card performance-summary">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon">
+            <lucide-icon name="trending-up" size="24"></lucide-icon>
+          </div>
+          <div class="stat-info">
+            <h3>الأداء</h3>
+            <p>ملخص الأداء</p>
+            <div class="performance-metrics">
+              <div class="metric">
+                <span class="metric-label">معدل النقر:</span>
+                <span class="metric-value">{{ getCTR() }}%</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">معدل التفاعل:</span>
+                <span class="metric-value">{{ getEngagementRate() }}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

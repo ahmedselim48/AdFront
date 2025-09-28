@@ -1,0 +1,48 @@
+.privacy {
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.privacy-container {
+  width: 100%;
+}
+
+.privacy-card {
+  border-radius: 1rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.privacy-content {
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.privacy-info {
+  text-align: center;
+  color: #666;
+}
+
+.privacy-icon {
+  color: #667eea;
+  margin-bottom: 1rem;
+}
+
+.privacy-info h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 1rem 0;
+}
+
+.privacy-info p {
+  font-size: 1.1rem;
+  margin: 0 0 2rem 0;
+}
+
+.privacy-details p {
+  font-size: 0.9rem;
+  color: #999;
+}

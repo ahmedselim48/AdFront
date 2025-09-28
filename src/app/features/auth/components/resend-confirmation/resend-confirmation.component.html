@@ -1,0 +1,83 @@
+<div class="resend-confirmation-container">
+  <div class="resend-confirmation-card">
+    <mat-card class="resend-confirmation-mat-card">
+      <mat-card-header>
+        <div class="resend-confirmation-header">
+          <lucide-icon name="mail" size="32" class="resend-confirmation-icon"></lucide-icon>
+          <h2 class="resend-confirmation-title">إعادة إرسال رابط التأكيد</h2>
+          <p class="resend-confirmation-subtitle">أدخل بريدك الإلكتروني وسنرسل لك رابط تأكيد جديد</p>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content>
+        <!-- Success State -->
+        <div *ngIf="isSuccess" class="success-state">
+          <lucide-icon name="check-circle" size="48" class="success-icon"></lucide-icon>
+          <h3 class="success-title">تم إرسال الرابط بنجاح!</h3>
+          <p class="success-message">
+            تم إرسال رابط تأكيد البريد الإلكتروني إلى بريدك الإلكتروني.
+            يرجى التحقق من صندوق الوارد أو مجلد الرسائل المزعجة.
+          </p>
+          <div class="success-actions">
+            <button mat-raised-button color="primary" (click)="resendAgain()" class="resend-again-button">
+              إرسال رابط آخر
+            </button>
+            <button mat-stroked-button (click)="goBackToLogin()" class="back-button">
+              <lucide-icon name="arrow-left" size="16" class="me-2"></lucide-icon>
+              العودة لتسجيل الدخول
+            </button>
+          </div>
+        </div>
+
+        <!-- Form State -->
+        <form *ngIf="!isSuccess" [formGroup]="resendForm" (ngSubmit)="onSubmit()" class="resend-confirmation-form">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>البريد الإلكتروني</mat-label>
+            <input
+              matInput
+              type="email"
+              formControlName="email"
+              placeholder="أدخل بريدك الإلكتروني"
+              autocomplete="email">
+            <mat-icon matPrefix>
+              <lucide-icon name="mail" size="20"></lucide-icon>
+            </mat-icon>
+            <mat-error *ngIf="resendForm.get('email')?.hasError('required')">
+              البريد الإلكتروني مطلوب
+            </mat-error>
+            <mat-error *ngIf="resendForm.get('email')?.hasError('email')">
+              يرجى إدخال بريد إلكتروني صحيح
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Error Message -->
+          <div class="error-message" *ngIf="errorMessage">
+            <mat-icon class="error-icon">
+              <lucide-icon name="alert-circle" size="20"></lucide-icon>
+            </mat-icon>
+            <span>{{ errorMessage }}</span>
+          </div>
+
+          <!-- Submit Button -->
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            class="resend-confirmation-button full-width"
+            [disabled]="resendForm.invalid || isLoading">
+            <mat-spinner *ngIf="isLoading" diameter="20" class="resend-confirmation-spinner"></mat-spinner>
+            <span *ngIf="!isLoading">إرسال رابط التأكيد</span>
+          </button>
+
+          <!-- Back to Login -->
+          <div class="back-to-login">
+            <button mat-button type="button" (click)="goBackToLogin()" class="back-link">
+              <lucide-icon name="arrow-left" size="16" class="me-2"></lucide-icon>
+              العودة لتسجيل الدخول
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
