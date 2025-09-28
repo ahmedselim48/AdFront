@@ -18,12 +18,16 @@ export class RegisterComponent {
   loading = false;
   error = '';
   success = '';
+  showConfirmationMessage = false;
+  userEmail = '';
 
   constructor(private fb: FormBuilder, private auth: AuthService, private router: Router) {
     this.form = this.fb.group({ 
       userName: ['', [Validators.required, this.userNameValidator]], 
-      fullName: ['', [Validators.required, this.fullNameValidator]], 
+      firstName: ['', [Validators.required, this.nameValidator]], 
+      lastName: ['', [Validators.required, this.nameValidator]], 
       email: ['', [Validators.required, Validators.email]], 
+      phoneNumber: ['', [Validators.pattern(/^[0-9+\-\s()]+$/)]],
       password: ['', [Validators.required, Validators.minLength(6), this.passwordValidator]],
       confirmPassword: ['', Validators.required]
     }, { validators: this.passwordMatchValidator });
@@ -45,16 +49,16 @@ export class RegisterComponent {
     return null;
   }
 
-  fullNameValidator(control: AbstractControl): ValidationErrors | null {
+  nameValidator(control: AbstractControl): ValidationErrors | null {
     const value = control.value;
     if (!value) return null;
     
     if (value.length < 2) {
-      return { fullNameMinLength: true };
+      return { nameMinLength: true };
     }
     
     if (!/^[a-zA-Z\u0600-\u06FF\s]+$/.test(value)) {
-      return { fullNameInvalid: true };
+      return { nameInvalid: true };
     }
     
     return null;
@@ -118,10 +122,20 @@ export class RegisterComponent {
         if (errors['userNameInvalid']) return 'اسم المستخدم يجب أن يحتوي على أحرف وأرقام و _ فقط';
         break;
       
-      case 'fullName':
-        if (errors['required']) return 'الاسم الكامل مطلوب';
-        if (errors['fullNameMinLength']) return 'الاسم الكامل يجب أن يكون حرفين على الأقل';
-        if (errors['fullNameInvalid']) return 'الاسم الكامل يجب أن يحتوي على أحرف فقط';
+      case 'firstName':
+        if (errors['required']) return 'الاسم الأول مطلوب';
+        if (errors['nameMinLength']) return 'الاسم الأول يجب أن يكون حرفين على الأقل';
+        if (errors['nameInvalid']) return 'الاسم الأول يجب أن يحتوي على أحرف فقط';
+        break;
+      
+      case 'lastName':
+        if (errors['required']) return 'الاسم الأخير مطلوب';
+        if (errors['nameMinLength']) return 'الاسم الأخير يجب أن يكون حرفين على الأقل';
+        if (errors['nameInvalid']) return 'الاسم الأخير يجب أن يحتوي على أحرف فقط';
+        break;
+      
+      case 'phoneNumber':
+        if (errors['pattern']) return 'رقم الهاتف غير صحيح';
         break;
       
       case 'email':
@@ -168,7 +182,7 @@ export class RegisterComponent {
       return field.value.length >= 3 && !field.errors && field.dirty;
     }
     
-    if (fieldName === 'fullName') {
+    if (fieldName === 'firstName' || fieldName === 'lastName') {
       return field.value.length >= 2 && !field.errors && field.dirty;
     }
     
@@ -219,10 +233,11 @@ export class RegisterComponent {
 
     const req: RegisterRequest = { 
       userName: this.form.get('userName')?.value ?? '', 
-      fullName: this.form.get('fullName')?.value ?? '', 
+      firstName: this.form.get('firstName')?.value ?? '', 
+      lastName: this.form.get('lastName')?.value ?? '', 
       email: this.form.get('email')?.value ?? '', 
-      password: this.form.get('password')?.value ?? '',
-      confirmPassword: this.form.get('confirmPassword')?.value ?? ''
+      phoneNumber: this.form.get('phoneNumber')?.value ?? '',
+      password: this.form.get('password')?.value ?? ''
     };
     
     console.log('Register request:', req);
@@ -230,13 +245,9 @@ export class RegisterComponent {
     this.auth.register(req).subscribe({
       next: (response) => {
         this.loading = false;
-        this.success = 'تم إنشاء الحساب بنجاح. يرجى التحقق من بريدك الإلكتروني لتأكيد الحساب.';
+        this.userEmail = req.email || '';
+        this.showConfirmationMessage = true;
         console.log('Register success:', response);
-        
-        // Redirect to login after 3 seconds
-        setTimeout(() => {
-          this.router.navigateByUrl('/auth/login');
-        }, 3000);
       },
       error: (error) => {
         this.loading = false;
@@ -255,6 +266,27 @@ export class RegisterComponent {
         } else {
           this.error = 'حدث خطأ أثناء التسجيل';
         }
+      }
+    });
+  }
+
+  goToLogin() {
+    this.router.navigateByUrl('/auth/login');
+  }
+
+  resendConfirmation() {
+    this.loading = true;
+    this.error = '';
+    
+    this.auth.resendConfirmation({ email: this.userEmail }).subscribe({
+      next: () => {
+        this.loading = false;
+        this.success = 'تم إعادة إرسال رسالة التأكيد بنجاح';
+      },
+      error: (error) => {
+        this.loading = false;
+        this.error = 'فشل في إعادة إرسال رسالة التأكيد';
+        console.error('Resend confirmation error:', error);
       }
     });
   }

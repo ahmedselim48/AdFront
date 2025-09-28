@@ -11,6 +11,7 @@ import { ResetPasswordComponent } from './features/auth/reset-password.component
 import { VerifyEmailComponent } from './features/auth/verify-email.component';
 import { ResendConfirmationComponent } from './features/auth/resend-confirmation.component';
 import { ChangePasswordComponent } from './features/auth/change-password.component';
+import { ConfirmEmailComponent } from './features/auth/confirm-email.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { AdsComponent } from './features/ads/ads.component';
 import { SmartRepliesComponent } from './features/smart-replies/smart-replies.component';
@@ -35,6 +36,7 @@ export const routes: Routes = [
     { path: 'forgot', canActivate: [GuestGuard], component: ForgotPasswordComponent },
     { path: 'reset', canActivate: [GuestGuard], component: ResetPasswordComponent },
     { path: 'verify-email', canActivate: [GuestGuard], component: VerifyEmailComponent },
+    { path: 'confirm-email', canActivate: [GuestGuard], component: ConfirmEmailComponent },
     { path: 'resend-confirmation', canActivate: [GuestGuard], component: ResendConfirmationComponent },
     { path: 'change-password', canActivate: [AuthGuard], component: ChangePasswordComponent },
   ]},

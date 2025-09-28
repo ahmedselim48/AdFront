@@ -42,6 +42,13 @@
       <span *ngIf="!loading">{{ 'auth.login' | t }}</span>
     </button>
   </form>
+  
+  <div class="divider">
+    <span>{{ 'auth.or' | t }}</span>
+  </div>
+  
+  <app-google-login></app-google-login>
+  
   <div class="auth-links">
     <a routerLink="/auth/register">{{ 'auth.createAccount' | t }}</a>
     <a routerLink="/auth/forgot">{{ 'auth.forgot' | t }}</a>

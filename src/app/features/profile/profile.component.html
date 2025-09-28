@@ -3,14 +3,45 @@
   <div class="profile-header">
     <div class="profile-card card glass">
       <div class="profile-info">
-        <div class="avatar" aria-hidden="true">{{ (form.value.name || 'U').slice(0,1) }}</div>
+        <div class="avatar-container">
+        <div class="avatar" aria-hidden="true">
+          <img *ngIf="imagePreview" 
+               [src]="imagePreview" 
+               [alt]="form.value.firstName" 
+               class="profile-avatar-img"
+               (error)="onImageError($event)">
+          <span *ngIf="!imagePreview">{{ (form.value.firstName || 'U').slice(0,1) }}</span>
+        </div>
+          <div class="avatar-actions">
+            <input type="file" #fileInput accept="image/*" (change)="onImageSelected($event)" style="display: none;">
+            <button type="button" (click)="fileInput.click()" class="btn-icon" [disabled]="uploadingImage">
+              <i class="icon">📷</i>
+            </button>
+            <button type="button" (click)="removeImage()" class="btn-icon danger" *ngIf="imagePreview || selectedImage" [disabled]="uploadingImage">
+              <i class="icon">🗑️</i>
+            </button>
+            <button type="button" (click)="uploadImage()" class="btn-upload" *ngIf="selectedImage" [disabled]="uploadingImage">
+              <span *ngIf="uploadingImage" class="loading-spinner"></span>
+              {{ uploadingImage ? 'جاري الرفع...' : 'رفع الصورة' }}
+            </button>
+          </div>
+        </div>
         <div class="info">
-          <h2 class="name">{{ form.value.name || '—' }}</h2>
+          <h2 class="name">{{ (form.value.firstName + ' ' + form.value.lastName) || '—' }}</h2>
           <div class="contact">
             <span class="pill email">{{ form.value.email || '—' }}</span>
             <span class="pill plan" [class]="'plan-' + form.value.plan">{{ form.value.plan | uppercase }}</span>
+            <span class="pill phone" *ngIf="form.value.phoneNumber">{{ form.value.phoneNumber }}</span>
           </div>
           <p class="bio">{{ 'Create, manage, and optimize your ads with AI assistance.' }}</p>
+          <div class="account-status" *ngIf="dashboardData">
+            <span class="status-badge" [class.confirmed]="isEmailConfirmed">
+              {{ isEmailConfirmed ? 'البريد الإلكتروني مؤكد' : 'البريد الإلكتروني غير مؤكد' }}
+            </span>
+            <span class="status-badge member-since" *ngIf="memberSince">
+              عضو منذ {{ memberSince | date:'short' }}
+            </span>
+          </div>
         </div>
       </div>
       
@@ -52,12 +83,17 @@
           <div class="stat-label">{{ 'profile.activeAds' | t }}</div>
         </div>
         <div class="stat-item">
+          <div class="stat-number">{{ totalViews }}</div>
+          <div class="stat-label">{{ 'profile.totalViews' | t }}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">{{ totalClicks }}</div>
+          <div class="stat-label">{{ 'profile.totalClicks' | t }}</div>
+        </div>
+        <div class="stat-item">
           <div class="stat-number">{{ unreadMessages }}</div>
           <div class="stat-label">{{ 'profile.unreadMessages' | t }}</div>
         </div>
-        <!-- fab-plus.component.html -->
-
-
       </div>
     </div>
   </div>
@@ -86,24 +122,58 @@
         <h3>{{ 'profile.editProfile' | t }}</h3>
         <form [formGroup]="form" (ngSubmit)="save()" class="edit-form">
           <div class="form-row">
-            <label>{{ 'common.name' | t }}
-              <input type="text" formControlName="name" class="field-input" 
-                     [class.error]="hasFieldError('name')" 
-                     [class.success]="hasFieldSuccess('name')">
-              <div class="field-error" *ngIf="hasFieldError('name')">{{ getFieldError('name') }}</div>
+            <label>{{ 'profile.firstName' | t }}
+              <input type="text" formControlName="firstName" class="field-input" 
+                     [class]="'field-input ' + getFieldStatus('firstName')"
+                     placeholder="الاسم الأول">
+              <div class="field-error" *ngIf="hasFieldError('firstName')">{{ getFieldError('firstName') }}</div>
             </label>
+            <label>{{ 'profile.lastName' | t }}
+              <input type="text" formControlName="lastName" class="field-input" 
+                     [class]="'field-input ' + getFieldStatus('lastName')"
+                     placeholder="الاسم الأخير">
+              <div class="field-error" *ngIf="hasFieldError('lastName')">{{ getFieldError('lastName') }}</div>
+            </label>
+          </div>
+          <div class="form-row">
             <label>{{ 'common.email' | t }}
               <input type="email" formControlName="email" class="field-input" [attr.disabled]="true">
               <small class="field-hint">{{ 'profile.emailCannotChange' | t }}</small>
             </label>
+            <label>{{ 'profile.phoneNumber' | t }}
+              <input type="tel" formControlName="phoneNumber" class="field-input" 
+                     [class]="'field-input ' + getFieldStatus('phoneNumber')"
+                     placeholder="رقم الهاتف">
+              <div class="field-error" *ngIf="hasFieldError('phoneNumber')">{{ getFieldError('phoneNumber') }}</div>
+            </label>
           </div>
           <div class="form-row">
+            <label>{{ 'profile.address' | t }}
+              <textarea formControlName="address" class="field-input" 
+                        [class]="'field-input ' + getFieldStatus('address')"
+                        placeholder="العنوان" rows="3"></textarea>
+              <div class="field-error" *ngIf="hasFieldError('address')">{{ getFieldError('address') }}</div>
+            </label>
             <label>{{ 'profile.plan' | t }}
               <select formControlName="plan" class="field-input">
                 <option value="free">{{ 'plan.free' | t }}</option>
                 <option value="pro">{{ 'plan.pro' | t }}</option>
                 <option value="enterprise">{{ 'plan.enterprise' | t }}</option>
               </select>
+            </label>
+          </div>
+          <div class="form-row">
+            <label>{{ 'profile.accountStatus' | t }}
+              <div class="status-display">
+                <span class="status-item" [class.confirmed]="isEmailConfirmed">
+                  <i class="icon">{{ isEmailConfirmed ? '✓' : '✗' }}</i>
+                  {{ isEmailConfirmed ? 'البريد الإلكتروني مؤكد' : 'البريد الإلكتروني غير مؤكد' }}
+                </span>
+                <span class="status-item member-since" *ngIf="memberSince">
+                  <i class="icon">📅</i>
+                  عضو منذ {{ memberSince | date:'short' }}
+                </span>
+              </div>
             </label>
           </div>
           <div class="form-actions">

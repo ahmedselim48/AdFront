@@ -5,11 +5,12 @@ import { RouterLink } from '@angular/router';
 import { Router } from '@angular/router';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 import { AuthService } from '../../core/auth/auth.service';
-import { UserProfile } from '../../models/auth.models';
+import { UserProfile, UserDashboardDto, UpdateProfileRequest } from '../../models/auth.models';
 import { AdsService } from '../ads/ads.service';
 import { AdItem } from '../../models/ads.models';
 import { ChatService } from '../../core/services/chat.service';
 import { Conversation } from '../../models/chat.models';
+import { NotificationService } from '../../shared/services/notification.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -25,11 +26,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
   loadingAds = true;
   loadingChats = true;
   saving = false;
+  uploadingImage = false;
   viewMode: 'grid' | 'list' = 'grid';
   filter: 'all' | 'draft' | 'scheduled' | 'active' | 'paused' | 'published' = 'all';
   activeTab: 'profile' | 'ads' | 'chat' = 'profile';
   recentChats: Conversation[] = [];
   unreadMessages = 0;
+  dashboardData: UserDashboardDto | null = null;
+  selectedImage: File | null = null;
+  imagePreview: string | null = null;
   private VIEW_KEY = 'profile_view_mode';
   private FILTER_KEY = 'profile_ads_filter';
   private TAB_KEY = 'profile_active_tab';
@@ -40,12 +45,16 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private auth: AuthService, 
     private adsSvc: AdsService, 
     private chatSvc: ChatService,
-    private router: Router
+    private router: Router,
+    private notificationService: NotificationService
   ){
     this.form = this.fb.group({ 
       id: [''], 
       email: [''], 
-      name: ['', [Validators.required, this.nameValidator]], 
+      firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]], 
+      lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]], 
+      phoneNumber: ['', [Validators.pattern(/^[\+]?[0-9\s\-\(\)]{10,}$/)]],
+      address: ['', [Validators.maxLength(200)]],
       plan: ['free', Validators.required] 
     });
     
@@ -67,8 +76,29 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
   // Load methods
   private loadProfile() {
-    const sub = this.auth.loadProfile().subscribe((u: UserProfile) => {
-      this.form.patchValue(u);
+    // Use dashboard data for more comprehensive profile information
+    const sub = this.auth.getMyDashboard().subscribe((dashboard: UserDashboardDto) => {
+      // Map dashboard data to form
+      this.form.patchValue({
+        id: dashboard.id,
+        email: dashboard.email,
+        firstName: dashboard.firstName || '',
+        lastName: dashboard.lastName || '',
+        phoneNumber: dashboard.phoneNumber || '',
+        address: dashboard.address || '',
+        plan: dashboard.subscriptionStatus?.hasActive ? 'pro' : 'free'
+      });
+      
+      // Store additional dashboard data for display
+      this.dashboardData = dashboard;
+      
+      // Set image preview if available
+      if (dashboard.profileImageUrl) {
+        // Ensure the URL is complete with base URL
+        this.imagePreview = this.getFullImageUrl(dashboard.profileImageUrl);
+        console.log('Profile image URL:', dashboard.profileImageUrl);
+        console.log('Full image URL:', this.imagePreview);
+      }
     });
     this.subscriptions.push(sub);
   }
@@ -112,14 +142,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   // Form validation
-  nameValidator(control: AbstractControl): ValidationErrors | null {
-    const value = control.value;
-    if (!value) return null;
-    if (value.length < 2) return { minLength: true };
-    if (value.length > 50) return { maxLength: true };
-    return null;
-  }
-
   getFieldError(fieldName: string): string {
     const field = this.form.get(fieldName);
     if (!field || !field.errors || !field.touched) return '';
@@ -127,10 +149,17 @@ export class ProfileComponent implements OnInit, OnDestroy {
     const errors = field.errors;
 
     switch (fieldName) {
-      case 'name':
-        if (errors['required']) return 'الاسم مطلوب';
-        if (errors['minLength']) return 'الاسم يجب أن يكون حرفين على الأقل';
-        if (errors['maxLength']) return 'الاسم يجب أن يكون أقل من 50 حرف';
+      case 'firstName':
+      case 'lastName':
+        if (errors['required']) return 'هذا الحقل مطلوب';
+        if (errors['minlength']) return 'يجب أن يكون حرفين على الأقل';
+        if (errors['maxlength']) return 'يجب أن يكون أقل من 50 حرف';
+        break;
+      case 'phoneNumber':
+        if (errors['pattern']) return 'رقم الهاتف غير صحيح';
+        break;
+      case 'address':
+        if (errors['maxlength']) return 'العنوان طويل جداً';
         break;
     }
 
@@ -146,23 +175,161 @@ export class ProfileComponent implements OnInit, OnDestroy {
     const field = this.form.get(fieldName);
     if (!field || !field.touched || !field.value) return false;
     
-    if (fieldName === 'name') {
-      return field.value.length >= 2 && field.value.length <= 50 && !field.errors && field.dirty;
-    }
-    
     return !field.errors && field.value.length > 0 && field.dirty;
+  }
+
+  getFieldStatus(fieldName: string): string {
+    if (this.hasFieldError(fieldName)) return 'error';
+    if (this.hasFieldSuccess(fieldName)) return 'success';
+    return '';
   }
 
   // Save profile
   save(){ 
     if(this.form.invalid) return;
     this.saving = true;
-    const formData = this.form.value;
-    console.log('Saving profile:', formData);
-    // TODO: Implement profile update API call
-    setTimeout(() => {
-      this.saving = false;
-    }, 1000);
+    
+    const updateRequest: UpdateProfileRequest = {
+      firstName: this.form.value.firstName,
+      lastName: this.form.value.lastName,
+      phoneNumber: this.form.value.phoneNumber,
+      address: this.form.value.address
+    };
+
+    const sub = this.auth.updateProfileViaDashboard(updateRequest).subscribe({
+      next: (profile) => {
+        this.saving = false;
+        console.log('Profile updated successfully:', profile);
+        // Show success message
+        this.showSuccessMessage('تم حفظ البيانات بنجاح');
+      },
+      error: (error) => {
+        this.saving = false;
+        console.error('Profile update error:', error);
+        this.showErrorMessage('فشل في حفظ البيانات');
+      }
+    });
+    
+    this.subscriptions.push(sub);
+  }
+
+  // Image upload methods
+  onImageSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        this.showErrorMessage('يرجى اختيار ملف صورة صحيح');
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        this.showErrorMessage('حجم الصورة يجب أن يكون أقل من 5 ميجابايت');
+        return;
+      }
+
+      this.selectedImage = file;
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.imagePreview = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  uploadImage(): void {
+    if (!this.selectedImage) return;
+
+    this.uploadingImage = true;
+    
+    const sub = this.auth.uploadProfileImage(this.selectedImage).subscribe({
+      next: (profile) => {
+        this.uploadingImage = false;
+        this.selectedImage = null;
+        this.imagePreview = profile.profileImageUrl ? this.getFullImageUrl(profile.profileImageUrl) : null;
+        this.showSuccessMessage('تم رفع الصورة بنجاح');
+        
+        // Update dashboard data
+        if (this.dashboardData) {
+          this.dashboardData.profileImageUrl = profile.profileImageUrl;
+        }
+      },
+      error: (error) => {
+        this.uploadingImage = false;
+        console.error('Image upload error:', error);
+        this.showErrorMessage('فشل في رفع الصورة');
+      }
+    });
+    
+    this.subscriptions.push(sub);
+  }
+
+  removeImage(): void {
+    if (this.selectedImage) {
+      // If there's a selected image that hasn't been uploaded yet
+      this.selectedImage = null;
+      this.imagePreview = this.dashboardData?.profileImageUrl || null;
+    } else if (this.imagePreview) {
+      // If there's an uploaded image, delete it from server
+      this.uploadingImage = true;
+      
+      const sub = this.auth.deleteProfileImage().subscribe({
+        next: () => {
+          this.uploadingImage = false;
+          this.imagePreview = null;
+          this.showSuccessMessage('تم حذف الصورة بنجاح');
+          
+          // Update dashboard data
+          if (this.dashboardData) {
+            this.dashboardData.profileImageUrl = undefined;
+          }
+        },
+        error: (error) => {
+          this.uploadingImage = false;
+          console.error('Image delete error:', error);
+          this.showErrorMessage('فشل في حذف الصورة');
+        }
+      });
+      
+      this.subscriptions.push(sub);
+    }
+  }
+
+  // Helper methods
+  private getFullImageUrl(relativeUrl: string): string {
+    if (!relativeUrl) return '';
+    
+    // If it's already a full URL, return as is
+    if (relativeUrl.startsWith('http')) {
+      return relativeUrl;
+    }
+    
+    // If it starts with /, it's a relative URL from the backend
+    if (relativeUrl.startsWith('/')) {
+      return `http://localhost:5254${relativeUrl}`;
+    }
+    
+    // Otherwise, assume it's a relative path
+    return `http://localhost:5254/${relativeUrl}`;
+  }
+
+  onImageError(event: any): void {
+    console.error('Image load error:', event);
+    // Hide the image and show the fallback
+    this.imagePreview = null;
+    this.showErrorMessage('فشل في تحميل الصورة');
+  }
+
+  // Message display methods
+  private showSuccessMessage(message: string): void {
+    this.notificationService.showSuccess(message);
+  }
+
+  private showErrorMessage(message: string): void {
+    this.notificationService.showError(message);
   }
 
   // Tab management
@@ -201,11 +368,39 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   get totalAds(): number {
-    return this.ads.length;
+    return this.dashboardData?.totalAds || this.ads.length;
   }
 
   get activeAds(): number {
-    return this.ads.filter(ad => ad.status === 'active').length;
+    return this.dashboardData?.activeAds || this.ads.filter(ad => ad.status === 'active').length;
+  }
+
+  get totalViews(): number {
+    return this.dashboardData?.totalViews || 0;
+  }
+
+  get totalClicks(): number {
+    return this.dashboardData?.totalClicks || 0;
+  }
+
+  get isEmailConfirmed(): boolean {
+    return this.dashboardData?.isEmailConfirmed || false;
+  }
+
+  get memberSince(): string {
+    return this.dashboardData?.createdAt || '';
+  }
+
+  get phoneNumber(): string {
+    return this.dashboardData?.phoneNumber || '';
+  }
+
+  get address(): string {
+    return this.dashboardData?.address || '';
+  }
+
+  get profileImageUrl(): string {
+    return this.dashboardData?.profileImageUrl || '';
   }
 
   editAd(ad: AdItem){

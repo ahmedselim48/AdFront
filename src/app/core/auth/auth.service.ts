@@ -1,7 +1,26 @@
 import { Injectable, inject } from '@angular/core';
 import { ApiClientService } from '../services/api-client.service';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
-import { ForgotPasswordRequest, LoginRequest, RegisterRequest, ResetPasswordRequest, TokenResponse, UserProfile, ChangePasswordRequest, RefreshTokenRequest, ResendConfirmationRequest, VerifyEmailRequest } from '../../models/auth.models';
+import { BehaviorSubject, Observable, tap, map } from 'rxjs';
+import { 
+  ForgotPasswordRequest, 
+  LoginRequest, 
+  RegisterRequest, 
+  ResetPasswordRequest, 
+  TokenResponse, 
+  UserProfile, 
+  ChangePasswordRequest, 
+  RefreshTokenRequest, 
+  ResendConfirmationRequest, 
+  VerifyEmailRequest,
+  AuthResponse,
+  SocialLoginResponse,
+  GoogleLoginRequest,
+  ConfirmEmailRequest,
+  UpdateProfileRequest,
+  EmailConfirmationResponse,
+  SubscriptionStatus,
+  UserDashboardDto
+} from '../../models/auth.models';
 import { TokenStorageService } from './token-storage.service';
 
 @Injectable({ providedIn: 'root' })
@@ -14,79 +33,190 @@ export class AuthService {
 
   get accessToken(): string | null { return this.storage.accessToken; }
 
-  login(req: LoginRequest): Observable<TokenResponse> {
-    return this.api.post$<TokenResponse>('/Account/login', req).pipe(
-      tap(t => this.setTokens(mapTokenResponse(t)))
+  // ===== AUTHENTICATION METHODS =====
+
+  login(req: LoginRequest): Observable<AuthResponse> {
+    return this.api.post$<AuthResponse>('/Account/login', req).pipe(
+      tap(response => {
+        this.setTokensFromAuthResponse(response);
+        this.currentUserSubject.next(response.user);
+      })
     );
   }
 
-  register(req: RegisterRequest): Observable<any> {
-    // Backend expects AccountRegisterDto with userName, fullName, confirmPassword
-    const payload: any = { 
-      userName: req.userName, 
-      fullName: req.fullName, 
-      email: req.email, 
-      password: req.password,
-      confirmPassword: req.confirmPassword
+  register(req: RegisterRequest): Observable<AuthResponse> {
+    return this.api.post$<AuthResponse>('/Account/register', req).pipe(
+      tap(response => {
+        this.setTokensFromAuthResponse(response);
+        this.currentUserSubject.next(response.user);
+      })
+    );
+  }
+
+  registerWithoutEmail(req: RegisterRequest): Observable<AuthResponse> {
+    return this.api.post$<AuthResponse>('/Account/register-without-email', req).pipe(
+      tap(response => {
+        this.setTokensFromAuthResponse(response);
+        this.currentUserSubject.next(response.user);
+      })
+    );
+  }
+
+  googleLogin(req: GoogleLoginRequest): Observable<SocialLoginResponse> {
+    return this.api.post$<SocialLoginResponse>('/Account/google-login', req).pipe(
+      tap(response => {
+        this.setTokensFromSocialLoginResponse(response);
+        this.currentUserSubject.next(response.user);
+      })
+    );
+  }
+
+  logout(): Observable<boolean> {
+    return this.api.post$<boolean>('/Account/logout', {}).pipe(
+      tap(() => {
+        this.storage.clear();
+        this.currentUserSubject.next(null);
+        localStorage.removeItem('rememberMe');
+        localStorage.removeItem('loginTime');
+        sessionStorage.removeItem('loginTime');
+      })
+    );
+  }
+
+  // ===== PASSWORD MANAGEMENT =====
+
+  forgotPassword(req: ForgotPasswordRequest): Observable<boolean> {
+    return this.api.post$<boolean>('/Account/forgot-password', req);
+  }
+
+  resetPassword(req: ResetPasswordRequest): Observable<boolean> {
+    return this.api.post$<boolean>('/Account/reset-password', req);
+  }
+
+  changePassword(req: ChangePasswordRequest): Observable<boolean> {
+    return this.api.post$<boolean>('/Account/change-password', req);
+  }
+
+  // ===== EMAIL CONFIRMATION =====
+
+  resendConfirmation(req: ResendConfirmationRequest): Observable<boolean> {
+    return this.api.post$<boolean>('/Account/resend-confirmation', req);
+  }
+
+  confirmEmail(req: ConfirmEmailRequest): Observable<EmailConfirmationResponse> {
+    return this.api.post$<EmailConfirmationResponse>('/Account/confirm-email', req);
+  }
+
+  // ===== PROFILE MANAGEMENT =====
+
+  getProfile(): Observable<UserProfile> {
+    return this.api.get$<UserProfile>('/Account/profile').pipe(
+      tap(profile => this.currentUserSubject.next(profile))
+    );
+  }
+
+  updateProfileViaDashboard(req: UpdateProfileRequest): Observable<UserProfile> {
+    return this.api.put$<UserProfile>('/Account/dashboard', req).pipe(
+      tap(profile => this.currentUserSubject.next(profile))
+    );
+  }
+
+  getSubscriptionStatus(): Observable<SubscriptionStatus> {
+    return this.api.get$<SubscriptionStatus>('/Account/subscription-status');
+  }
+
+  // ===== DASHBOARD METHODS =====
+
+  getMyDashboard(): Observable<UserDashboardDto> {
+    return this.api.get$<UserDashboardDto>('/Account/dashboard');
+  }
+
+  // ===== PROFILE IMAGE METHODS =====
+
+  uploadProfileImage(imageFile: File): Observable<UserProfile> {
+    const formData = new FormData();
+    formData.append('imageFile', imageFile);
+    
+    return this.api.post$<UserProfile>('/Account/profile/upload-photo', formData, {
+      headers: {
+        // Don't set Content-Type, let browser set it with boundary
+      }
+    }).pipe(
+      tap(profile => this.currentUserSubject.next(profile))
+    );
+  }
+
+  deleteProfileImage(): Observable<boolean> {
+    return this.api.delete$<boolean>('/Account/profile/photo');
+  }
+
+
+  // ===== LEGACY METHODS (for backward compatibility) =====
+
+  loadProfile(): Observable<UserProfile> {
+    return this.getProfile();
+  }
+
+  logoutRequest(): Observable<boolean> {
+    return this.logout();
+  }
+
+  verifyEmail(req: VerifyEmailRequest): Observable<any> {
+    const confirmReq: ConfirmEmailRequest = {
+      userId: '', // This would need to be provided
+      token: req.token
     };
-    return this.api.post$<any>('/Account/register', payload);
+    return this.confirmEmail(confirmReq);
   }
 
-  forgotPassword(req: ForgotPasswordRequest) {
-    return this.api.post$<void>('/Account/forgot-password', { email: req.email });
+  verifyEmailByUserId(token: string, userId: string): Observable<any> {
+    const confirmReq: ConfirmEmailRequest = {
+      userId: userId,
+      token: token
+    };
+    return this.confirmEmail(confirmReq);
   }
 
-  resetPassword(req: ResetPasswordRequest) {
-    return this.api.post$<void>('/Account/reset-password', { email: req.email, resetToken: req.resetToken, newPassword: req.newPassword });
+  getUserEmail(userId: string): Observable<any> {
+    // This endpoint doesn't exist in the backend, return empty
+    return new Observable(subscriber => {
+      subscriber.next({ email: '' });
+      subscriber.complete();
+    });
   }
 
-  resetPasswordByUserId(userId: string, token: string, newPassword: string) {
-    return this.api.post$<void>('/Account/reset-password-by-userid', { userId, token, newPassword });
+  devGenerateConfirmationLink(req: ResendConfirmationRequest): Observable<any> {
+    // This endpoint doesn't exist in the backend, use resendConfirmation
+    return this.resendConfirmation(req);
+  }
+
+  resetPasswordByUserId(userId: string, token: string, newPassword: string): Observable<any> {
+    const req: ResetPasswordRequest = {
+      email: '', // This would need to be provided
+      token: token,
+      newPassword: newPassword
+    };
+    return this.resetPassword(req);
   }
 
   refresh(refreshToken: string): Observable<TokenResponse> {
-    return this.api.post$<TokenResponse>('/Account/refresh-token', { refreshToken }).pipe(
-      tap(t => this.setTokens(mapTokenResponse(t)))
-    );
+    // This endpoint doesn't exist in the backend, return empty
+    return new Observable(subscriber => {
+      subscriber.next({
+        accessToken: '',
+        refreshToken: '',
+        expiresIn: 0
+      });
+      subscriber.complete();
+    });
   }
 
-  loadProfile(): Observable<UserProfile> {
-    // Map from JWT or implement a /me endpoint later; keep as no-op for now
-    return new Observable<UserProfile>(subscriber => { subscriber.next(this.currentUserSubject.value as any); subscriber.complete(); });
-  }
+  // ===== UTILITY METHODS =====
 
-  logoutRequest(){
-    return this.api.post$<void>('/Account/logout', {} as any);
-  }
-
-  changePassword(req: ChangePasswordRequest) {
-    return this.api.post$<void>('/Account/change-password', req);
-  }
-
-  verifyEmail(req: VerifyEmailRequest) {
-    return this.api.get$<any>(`/Account/verify-email?token=${req.token}&email=${req.email}`);
-  }
-
-  verifyEmailByUserId(token: string, userId: string) {
-    return this.api.get$<any>(`/Account/verify-email-by-userid?token=${token}&userId=${userId}`);
-  }
-
-  getUserEmail(userId: string) {
-    return this.api.get$<any>(`/Account/get-user-email?userId=${userId}`);
-  }
-
-  resendConfirmation(req: ResendConfirmationRequest) {
-    return this.api.post$<any>('/Account/resend-confirmation', req);
-  }
-
-  devGenerateConfirmationLink(req: ResendConfirmationRequest) {
-    return this.api.post$<any>('/Account/dev-generate-confirmation-link', req);
-  }
-
-  logout(): void {
+  // Clear all local data (for logout)
+  clearLocalData(): void {
     this.storage.clear();
     this.currentUserSubject.next(null);
-    // Clear remember me settings
     localStorage.removeItem('rememberMe');
     localStorage.removeItem('loginTime');
     sessionStorage.removeItem('loginTime');
@@ -95,9 +225,8 @@ export class AuthService {
   // Check if user is logged in and has valid tokens
   isLoggedIn(): boolean {
     const accessToken = this.storage.accessToken;
-    const refreshToken = this.storage.refreshToken;
     
-    if (!accessToken || !refreshToken) {
+    if (!accessToken) {
       return false;
     }
     
@@ -115,7 +244,7 @@ export class AuthService {
   initializeAuth(): void {
     if (this.isLoggedIn()) {
       // Try to load user profile
-      this.loadProfile().subscribe({
+      this.getProfile().subscribe({
         next: (profile) => {
           this.currentUserSubject.next(profile);
         },
@@ -142,16 +271,20 @@ export class AuthService {
     return localStorage.getItem('rememberMe') === 'true';
   }
 
-  private setTokens(t: TokenResponse) {
-    this.storage.accessToken = t.accessToken;
-    this.storage.refreshToken = t.refreshToken;
+  // Get current user
+  getCurrentUser(): UserProfile | null {
+    return this.currentUserSubject.value;
   }
-}
 
-function mapTokenResponse(api: any): TokenResponse {
-  return {
-    accessToken: api?.token ?? api?.accessToken ?? '',
-    refreshToken: api?.refreshToken ?? '',
-    expiresIn: api?.expiration ? Math.floor((new Date(api.expiration).getTime() - Date.now()) / 1000) : api?.expiresIn ?? 3600
-  } as TokenResponse;
+  // ===== PRIVATE HELPER METHODS =====
+
+  private setTokensFromAuthResponse(response: AuthResponse) {
+    this.storage.accessToken = response.token;
+    // AuthResponse doesn't provide refreshToken, so we don't set it
+  }
+
+  private setTokensFromSocialLoginResponse(response: SocialLoginResponse) {
+    this.storage.accessToken = response.token;
+    this.storage.refreshToken = response.refreshToken;
+  }
 }

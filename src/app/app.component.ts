@@ -1,18 +1,18 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { ToastComponent } from './shared/components/toast/toast.component';
 import { TranslatePipe } from './shared/pipes/translate.pipe';
 import { I18nService } from './core/services/i18n.service';
 import { ChatService } from './core/services/chat.service';
 import { TokenStorageService } from './core/auth/token-storage.service';
 import { AuthService } from './core/auth/auth.service';
 import { Router } from '@angular/router';
+import { NotificationComponent } from './shared/components/notification/notification.component';
 
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, ToastComponent, TranslatePipe],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe, NotificationComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
@@ -57,11 +57,19 @@ export class AppComponent {
   get langLabel(){ return this.i18n.current === 'ar' ? 'EN' : 'AR'; }
 
   logout(){
-    this.auth.logout();
-    // Clear remember me settings
-    localStorage.removeItem('rememberMe');
-    localStorage.removeItem('loginTime');
-    sessionStorage.removeItem('loginTime');
-    this.router.navigateByUrl('/home');
+    this.auth.logout().subscribe({
+      next: () => {
+        console.log('Logout successful');
+        // Clear all local data
+        this.auth.clearLocalData();
+        this.router.navigateByUrl('/home');
+      },
+      error: (error) => {
+        console.error('Logout error:', error);
+        // Even if logout fails on server, clear local data
+        this.auth.clearLocalData();
+        this.router.navigateByUrl('/home');
+      }
+    });
   }
 }

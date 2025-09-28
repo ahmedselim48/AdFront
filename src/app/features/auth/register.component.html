@@ -1,9 +1,42 @@
-<section class="auth-card">
-  <h2>{{ 'auth.register' | t }}</h2>
-  
-  <div *ngIf="success" class="success-message">
-    {{ success }}
+<!-- Email Confirmation Message -->
+<div *ngIf="showConfirmationMessage" class="success-container">
+  <div class="success-card">
+    <div class="icon-container">
+      <i class="icon-email">📧</i>
+    </div>
+    
+    <h2>{{ 'auth.emailConfirmationTitle' | t }}</h2>
+    <p class="success-message">
+      {{ 'auth.emailConfirmationMessage' | t }}
+    </p>
+    
+    <div class="email-display">
+      <strong>{{ userEmail }}</strong>
+    </div>
+    
+    <div class="next-steps">
+      <h3>{{ 'auth.nextSteps' | t }}</h3>
+      <ul>
+        <li>{{ 'auth.checkEmailInbox' | t }}</li>
+        <li>{{ 'auth.lookForConfirmationEmail' | t }}</li>
+        <li>{{ 'auth.clickConfirmationLink' | t }}</li>
+      </ul>
+    </div>
+    
+    <div class="actions">
+      <button class="btn-primary" (click)="goToLogin()">
+        {{ 'auth.goToLogin' | t }}
+      </button>
+      <button class="btn-secondary" (click)="resendConfirmation()">
+        {{ 'auth.resendConfirmation' | t }}
+      </button>
+    </div>
   </div>
+</div>
+
+<!-- Registration Form -->
+<section *ngIf="!showConfirmationMessage" class="auth-card">
+  <h2>{{ 'auth.register' | t }}</h2>
   
   <div *ngIf="error" class="error-message">
     {{ error }}
@@ -26,19 +59,49 @@
       </div>
     </label>
     
+    <div class="name-row">
+      <label>
+        {{ 'auth.firstName' | t }}
+        <input 
+          type="text" 
+          formControlName="firstName" 
+          required
+          [class]="'field-input ' + getFieldStatus('firstName')"
+          placeholder="الاسم الأول">
+        <div *ngIf="hasFieldError('firstName')" class="error">
+          {{ getFieldError('firstName') }}
+        </div>
+        <div *ngIf="hasFieldSuccess('firstName')" class="success">
+          ✓ الاسم الأول صحيح
+        </div>
+      </label>
+      
+      <label>
+        {{ 'auth.lastName' | t }}
+        <input 
+          type="text" 
+          formControlName="lastName" 
+          required
+          [class]="'field-input ' + getFieldStatus('lastName')"
+          placeholder="الاسم الأخير">
+        <div *ngIf="hasFieldError('lastName')" class="error">
+          {{ getFieldError('lastName') }}
+        </div>
+        <div *ngIf="hasFieldSuccess('lastName')" class="success">
+          ✓ الاسم الأخير صحيح
+        </div>
+      </label>
+    </div>
+    
     <label>
-      {{ 'auth.fullName' | t }}
+      {{ 'common.phoneNumber' | t }}
       <input 
-        type="text" 
-        formControlName="fullName" 
-        required
-        [class]="'field-input ' + getFieldStatus('fullName')"
-        placeholder="أدخل الاسم الكامل">
-      <div *ngIf="hasFieldError('fullName')" class="error">
-        {{ getFieldError('fullName') }}
-      </div>
-      <div *ngIf="hasFieldSuccess('fullName')" class="success">
-        ✓ الاسم الكامل صحيح
+        type="tel" 
+        formControlName="phoneNumber" 
+        [class]="'field-input ' + getFieldStatus('phoneNumber')"
+        placeholder="رقم الهاتف (اختياري)">
+      <div *ngIf="hasFieldError('phoneNumber')" class="error">
+        {{ getFieldError('phoneNumber') }}
       </div>
     </label>
     

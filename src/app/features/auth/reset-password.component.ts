@@ -149,7 +149,7 @@ export class ResetPasswordComponent {
       // Use the original endpoint with email
       this.auth.resetPassword({ 
         email: this.email,
-        resetToken: this.token, 
+        token: this.token, 
         newPassword: this.form.value.newPassword! 
       }).subscribe({ 
         next: (response) => {
