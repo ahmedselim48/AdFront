@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { GeneralResponse } from '../../models/general-response';
 
 @Injectable({ providedIn: 'root' })
 export class ApiClientService {
@@ -11,29 +12,48 @@ export class ApiClientService {
     return environment.apiBaseUrl;
   }
 
-  get$<T>(url: string, options?: object) {
+  get$<T>(url: string, options?: object): Observable<T> {
     return this.http.get<T | GeneralResponse<T>>(`${this.baseUrl}${url}`, options).pipe(map(r => unwrapResponse<T>(r)));
   }
 
-  post$<T>(url: string, body: unknown, options?: object) {
+  post$<T>(url: string, body: unknown, options?: object): Observable<T> {
     return this.http.post<T | GeneralResponse<T>>(`${this.baseUrl}${url}`, body, options).pipe(map(r => unwrapResponse<T>(r)));
   }
 
-  put$<T>(url: string, body: unknown, options?: object) {
+  put$<T>(url: string, body: unknown, options?: object): Observable<T> {
     return this.http.put<T | GeneralResponse<T>>(`${this.baseUrl}${url}`, body, options).pipe(map(r => unwrapResponse<T>(r)));
   }
 
-  delete$<T>(url: string, options?: object) {
+  delete$<T>(url: string, options?: object): Observable<T> {
     return this.http.delete<T | GeneralResponse<T>>(`${this.baseUrl}${url}`, options).pipe(map(r => unwrapResponse<T>(r)));
   }
-}
 
-// Types matching backend wrapper
-interface GeneralResponse<T> {
-  success: boolean;
-  message: string;
-  data?: T;
-  errors?: string[];
+  // Get raw response without unwrapping
+  getRaw$<T>(url: string, options?: object): Observable<GeneralResponse<T>> {
+    return this.http.get<GeneralResponse<T>>(`${this.baseUrl}${url}`, options);
+  }
+
+  postRaw$<T>(url: string, body: unknown, options?: object): Observable<GeneralResponse<T>> {
+    return this.http.post<GeneralResponse<T>>(`${this.baseUrl}${url}`, body, options);
+  }
+
+  putRaw$<T>(url: string, body: unknown, options?: object): Observable<GeneralResponse<T>> {
+    return this.http.put<GeneralResponse<T>>(`${this.baseUrl}${url}`, body, options);
+  }
+
+  deleteRaw$<T>(url: string, options?: object): Observable<GeneralResponse<T>> {
+    return this.http.delete<GeneralResponse<T>>(`${this.baseUrl}${url}`, options);
+  }
+
+  // For file downloads
+  getBlob$(url: string, options?: object): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}${url}`, { ...options, responseType: 'blob' });
+  }
+
+  // For file uploads with progress
+  postWithProgress$<T>(url: string, formData: FormData, options?: object): Observable<T> {
+    return this.http.post<T | GeneralResponse<T>>(`${this.baseUrl}${url}`, formData, options).pipe(map(r => unwrapResponse<T>(r)));
+  }
 }
 
 function isWrapped<T>(value: unknown): value is GeneralResponse<T> {

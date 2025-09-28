@@ -1,0 +1,303 @@
+<div class="ads-list-container">
+  <!-- Header Section -->
+  <div class="ads-header">
+    <div class="header-content">
+      <div class="header-left">
+        <h1 class="page-title">الإعلانات</h1>
+        <p class="page-subtitle">تصفح وإدارة إعلاناتك</p>
+      </div>
+      <div class="header-actions">
+        <button mat-raised-button color="primary" routerLink="/ads/create" class="create-button">
+          <lucide-icon name="plus" size="20" class="me-2"></lucide-icon>
+          إعلان جديد
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search and Filters Section -->
+  <div class="search-filters-section">
+    <div class="search-container">
+      <app-search
+        [placeholder]="'البحث في الإعلانات...'"
+        [showAdvancedToggle]="true"
+        [showCategoryFilter]="true"
+        [showPriceFilter]="true"
+        [showLocationFilter]="true"
+        [showStatusFilter]="true"
+        [showSortFilter]="true"
+        [categories]="categories"
+        [statusOptions]="[
+          { value: 'Published', label: 'منشور' },
+          { value: 'Pending', label: 'في الانتظار' },
+          { value: 'Draft', label: 'مسودة' },
+          { value: 'Rejected', label: 'مرفوض' },
+          { value: 'Archived', label: 'مؤرشف' }
+        ]"
+        [sortOptions]="[
+          { value: 'createdAt', label: 'تاريخ الإنشاء' },
+          { value: 'price', label: 'السعر' },
+          { value: 'title', label: 'العنوان' },
+          { value: 'viewsCount', label: 'عدد المشاهدات' },
+          { value: 'likesCount', label: 'عدد الإعجابات' }
+        ]"
+        (search)="onSearch($event)"
+        (advancedSearch)="onAdvancedSearch($event)">
+      </app-search>
+    </div>
+
+    <!-- Quick Filters -->
+    <div class="quick-filters">
+      <div class="filter-chips">
+        <mat-chip-listbox>
+          <mat-chip-option 
+            [selected]="selectedCategory === null"
+            (click)="onCategoryFilter(null)">
+            جميع الفئات
+          </mat-chip-option>
+          <mat-chip-option 
+            *ngFor="let category of categories"
+            [selected]="selectedCategory === category.id"
+            (click)="onCategoryFilter(category.id)">
+            {{ category.name }}
+          </mat-chip-option>
+        </mat-chip-listbox>
+      </div>
+
+      <div class="view-controls">
+        <button 
+          mat-icon-button 
+          [class.active]="viewMode === 'grid'"
+          (click)="toggleViewMode()"
+          matTooltip="عرض الشبكة">
+          <lucide-icon name="grid" size="20"></lucide-icon>
+        </button>
+        <button 
+          mat-icon-button 
+          [class.active]="viewMode === 'list'"
+          (click)="toggleViewMode()"
+          matTooltip="عرض القائمة">
+          <lucide-icon name="list" size="20"></lucide-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <app-loading-spinner [text]="'جاري تحميل الإعلانات...'"></app-loading-spinner>
+  </div>
+
+  <!-- Ads Content -->
+  <div *ngIf="!isLoading" class="ads-content">
+    <!-- No Results -->
+    <div *ngIf="filteredAds.length === 0" class="no-results">
+      <mat-card class="no-results-card">
+        <mat-card-content>
+          <div class="no-results-content">
+            <lucide-icon name="search" size="48" class="no-results-icon"></lucide-icon>
+            <h3>لا توجد إعلانات</h3>
+            <p>لم يتم العثور على إعلانات تطابق معايير البحث الخاصة بك.</p>
+            <button mat-raised-button color="primary" routerLink="/ads/create">
+              <lucide-icon name="plus" size="20" class="me-2"></lucide-icon>
+              إنشاء إعلان جديد
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Grid View -->
+    <div *ngIf="filteredAds.length > 0 && viewMode === 'grid'" class="ads-grid">
+      <div class="ads-grid-container">
+        <div *ngFor="let ad of filteredAds" class="ad-item">
+          <mat-card class="ad-card" (click)="onAdClick(ad)">
+            <!-- Ad Image -->
+            <div class="ad-image" *ngIf="ad.images && ad.images.length > 0">
+              <img [src]="ad.images[0]" [alt]="ad.title" class="ad-image-img">
+              <div class="ad-badges">
+                <span class="status-badge" [class]="'status-' + getStatusColor(ad.status)">
+                  {{ getStatusText(ad.status) }}
+                </span>
+                <span class="ai-badge" *ngIf="ad.isAIGenerated">
+                  <lucide-icon name="zap" size="12"></lucide-icon>
+                  AI
+                </span>
+              </div>
+            </div>
+
+            <!-- Ad Content -->
+            <mat-card-content class="ad-content">
+              <h3 class="ad-title">{{ ad.title }}</h3>
+              <p class="ad-description">{{ ad.description | slice:0:100 }}{{ ad.description.length > 100 ? '...' : '' }}</p>
+              
+              <div class="ad-meta">
+                <div class="ad-price">
+                  <span class="price-amount">{{ ad.price | currency:'SAR':'symbol':'1.0-0':'ar' }}</span>
+                </div>
+                <div class="ad-location" *ngIf="ad.location">
+                  <lucide-icon name="map-pin" size="14"></lucide-icon>
+                  <span>{{ ad.location }}</span>
+                </div>
+              </div>
+
+              <div class="ad-stats">
+                <div class="stat-item">
+                  <lucide-icon name="eye" size="14"></lucide-icon>
+                  <span>{{ ad.viewsCount | number }}</span>
+                </div>
+                <div class="stat-item">
+                  <lucide-icon name="heart" size="14"></lucide-icon>
+                  <span>{{ ad.likesCount | number }}</span>
+                </div>
+                <div class="stat-item">
+                  <lucide-icon name="message-square" size="14"></lucide-icon>
+                  <span>{{ ad.commentsCount | number }}</span>
+                </div>
+              </div>
+            </mat-card-content>
+
+            <!-- Ad Actions -->
+            <mat-card-actions class="ad-actions">
+              <button mat-icon-button (click)="onAdLike(ad); $event.stopPropagation()" matTooltip="إعجاب">
+                <lucide-icon name="heart" size="18"></lucide-icon>
+              </button>
+              <button mat-icon-button (click)="onAdShare(ad); $event.stopPropagation()" matTooltip="مشاركة">
+                <lucide-icon name="share" size="18"></lucide-icon>
+              </button>
+              <button mat-icon-button [matMenuTriggerFor]="adMenu" matTooltip="المزيد">
+                <lucide-icon name="more-vertical" size="18"></lucide-icon>
+              </button>
+            </mat-card-actions>
+          </mat-card>
+          
+          <!-- Ad Menu for Grid View -->
+          <mat-menu #adMenu="matMenu">
+            <button mat-menu-item routerLink="/ads/details/{{ad.id}}">
+              <lucide-icon name="eye" size="16" class="me-2"></lucide-icon>
+              عرض التفاصيل
+            </button>
+            <button mat-menu-item routerLink="/ads/edit/{{ad.id}}">
+              <lucide-icon name="edit" size="16" class="me-2"></lucide-icon>
+              تعديل
+            </button>
+            <button mat-menu-item (click)="onAdShare(ad)">
+              <lucide-icon name="share" size="16" class="me-2"></lucide-icon>
+              مشاركة
+            </button>
+            <mat-divider></mat-divider>
+            <button mat-menu-item class="delete-action">
+              <lucide-icon name="trash-2" size="16" class="me-2"></lucide-icon>
+              حذف
+            </button>
+          </mat-menu>
+        </div>
+      </div>
+    </div>
+
+    <!-- List View -->
+    <div *ngIf="filteredAds.length > 0 && viewMode === 'list'" class="ads-list">
+      <mat-card *ngFor="let ad of filteredAds" class="ad-list-item" (click)="onAdClick(ad)">
+        <div class="ad-list-content">
+          <!-- Ad Image -->
+          <div class="ad-list-image" *ngIf="ad.images && ad.images.length > 0">
+            <img [src]="ad.images[0]" [alt]="ad.title" class="ad-list-image-img">
+          </div>
+
+          <!-- Ad Info -->
+          <div class="ad-list-info">
+            <div class="ad-list-header">
+              <h3 class="ad-list-title">{{ ad.title }}</h3>
+              <div class="ad-list-badges">
+                <span class="status-badge" [class]="'status-' + getStatusColor(ad.status)">
+                  {{ getStatusText(ad.status) }}
+                </span>
+                <span class="ai-badge" *ngIf="ad.isAIGenerated">
+                  <lucide-icon name="zap" size="12"></lucide-icon>
+                  AI
+                </span>
+              </div>
+            </div>
+            
+            <p class="ad-list-description">{{ ad.description | slice:0:150 }}{{ ad.description.length > 150 ? '...' : '' }}</p>
+            
+            <div class="ad-list-meta">
+              <div class="ad-list-price">
+                <span class="price-amount">{{ ad.price | currency:'SAR':'symbol':'1.0-0':'ar' }}</span>
+              </div>
+              <div class="ad-list-location" *ngIf="ad.location">
+                <lucide-icon name="map-pin" size="14"></lucide-icon>
+                <span>{{ ad.location }}</span>
+              </div>
+              <div class="ad-list-date">
+                <lucide-icon name="calendar" size="14"></lucide-icon>
+                <span>{{ ad.createdAt | date:'short' }}</span>
+              </div>
+            </div>
+
+            <div class="ad-list-stats">
+              <div class="stat-item">
+                <lucide-icon name="eye" size="14"></lucide-icon>
+                <span>{{ ad.viewsCount | number }}</span>
+              </div>
+              <div class="stat-item">
+                <lucide-icon name="heart" size="14"></lucide-icon>
+                <span>{{ ad.likesCount | number }}</span>
+              </div>
+              <div class="stat-item">
+                <lucide-icon name="message-square" size="14"></lucide-icon>
+                <span>{{ ad.commentsCount | number }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ad Actions -->
+          <div class="ad-list-actions">
+            <button mat-icon-button (click)="onAdLike(ad); $event.stopPropagation()" matTooltip="إعجاب">
+              <lucide-icon name="heart" size="18"></lucide-icon>
+            </button>
+            <button mat-icon-button (click)="onAdShare(ad); $event.stopPropagation()" matTooltip="مشاركة">
+              <lucide-icon name="share" size="18"></lucide-icon>
+            </button>
+            <button mat-icon-button [matMenuTriggerFor]="adMenu" matTooltip="المزيد">
+              <lucide-icon name="more-vertical" size="18"></lucide-icon>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Ad Menu for List View -->
+        <mat-menu #adMenu="matMenu">
+          <button mat-menu-item routerLink="/ads/details/{{ad.id}}">
+            <lucide-icon name="eye" size="16" class="me-2"></lucide-icon>
+            عرض التفاصيل
+          </button>
+          <button mat-menu-item routerLink="/ads/edit/{{ad.id}}">
+            <lucide-icon name="edit" size="16" class="me-2"></lucide-icon>
+            تعديل
+          </button>
+          <button mat-menu-item (click)="onAdShare(ad)">
+            <lucide-icon name="share" size="16" class="me-2"></lucide-icon>
+            مشاركة
+          </button>
+          <mat-divider></mat-divider>
+          <button mat-menu-item class="delete-action">
+            <lucide-icon name="trash-2" size="16" class="me-2"></lucide-icon>
+            حذف
+          </button>
+        </mat-menu>
+      </mat-card>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="filteredAds.length > 0" class="pagination-container">
+      <app-pagination
+        [currentPage]="currentPage"
+        [totalPages]="totalPages"
+        [totalItems]="totalCount"
+        [pageSize]="pageSize"
+        (pageChange)="onPageChange($event)">
+      </app-pagination>
+    </div>
+  </div>
+</div>
+

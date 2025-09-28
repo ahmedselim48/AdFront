@@ -1,0 +1,99 @@
+<div class="account-settings">
+  <div class="account-content">
+    
+    <!-- Account Information -->
+    <mat-card class="account-card">
+      <mat-card-header>
+        <mat-card-title>معلومات الحساب</mat-card-title>
+        <mat-card-subtitle>قم بتحديث معلومات حسابك الأساسية</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <form [formGroup]="accountForm" (ngSubmit)="onSubmit()" class="account-form">
+          <div class="form-section">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>الاسم الكامل</mat-label>
+              <input matInput formControlName="fullName" placeholder="أدخل اسمك الكامل">
+              <mat-icon matPrefix>
+                <lucide-icon name="user" size="20"></lucide-icon>
+              </mat-icon>
+              <mat-error *ngIf="accountForm.get('fullName')?.hasError('required')">
+                الاسم الكامل مطلوب
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>البريد الإلكتروني</mat-label>
+              <input matInput formControlName="email" placeholder="أدخل بريدك الإلكتروني" readonly>
+              <mat-icon matPrefix>
+                <lucide-icon name="mail" size="20"></lucide-icon>
+              </mat-icon>
+              <mat-hint>لا يمكن تغيير البريد الإلكتروني</mat-hint>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>رقم الهاتف</mat-label>
+              <input matInput formControlName="phoneNumber" placeholder="أدخل رقم هاتفك">
+              <mat-icon matPrefix>
+                <lucide-icon name="phone" size="20"></lucide-icon>
+              </mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>كلمة المرور الحالية</mat-label>
+              <input matInput type="password" formControlName="currentPassword" placeholder="أدخل كلمة المرور للتأكيد">
+              <mat-icon matPrefix>
+                <lucide-icon name="lock" size="20"></lucide-icon>
+              </mat-icon>
+              <mat-error *ngIf="accountForm.get('currentPassword')?.hasError('required')">
+                كلمة المرور مطلوبة للتأكيد
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="action-buttons">
+            <button 
+              mat-raised-button 
+              color="primary" 
+              type="submit" 
+              [disabled]="accountForm.invalid || isSaving">
+              <mat-spinner *ngIf="isSaving" diameter="20" class="me-2"></mat-spinner>
+              <lucide-icon *ngIf="!isSaving" name="save" size="18" class="me-2"></lucide-icon>
+              {{ isSaving ? 'جاري الحفظ...' : 'حفظ التغييرات' }}
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Danger Zone -->
+    <mat-card class="danger-card">
+      <mat-card-header>
+        <mat-card-title>منطقة الخطر</mat-card-title>
+        <mat-card-subtitle>إجراءات لا يمكن التراجع عنها</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="danger-section">
+          <div class="danger-item">
+            <div class="danger-info">
+              <h4>حذف الحساب</h4>
+              <p>حذف حسابك نهائياً وجميع البيانات المرتبطة به</p>
+            </div>
+            <div class="danger-action">
+              <button 
+                mat-stroked-button 
+                color="warn" 
+                (click)="onDeleteAccount()"
+                [disabled]="isDeleting">
+                <mat-spinner *ngIf="isDeleting" diameter="20" class="me-2"></mat-spinner>
+                <lucide-icon *ngIf="!isDeleting" name="trash-2" size="18" class="me-2"></lucide-icon>
+                {{ isDeleting ? 'جاري الحذف...' : 'حذف الحساب' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

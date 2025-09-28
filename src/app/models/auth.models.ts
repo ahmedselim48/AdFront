@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 // ===== REQUEST MODELS =====
+=======
+// ===== AUTH MODELS =====
+>>>>>>> 51bb64ae2cfdd3a2477bdefc0d36fd34dddcd707
 
 export interface LoginRequest {
   email: string;
@@ -34,11 +38,16 @@ export interface ResendConfirmationRequest {
   email: string;
 }
 
+<<<<<<< HEAD
 export interface ConfirmEmailRequest {
+=======
+export interface VerifyEmailRequest {
+>>>>>>> 51bb64ae2cfdd3a2477bdefc0d36fd34dddcd707
   userId: string;
   token: string;
 }
 
+<<<<<<< HEAD
 export interface UpdateProfileRequest {
   firstName: string;
   lastName: string;
@@ -120,12 +129,26 @@ export interface SubscriptionStatus {
 
 // ===== LEGACY MODELS (for backward compatibility) =====
 
+=======
+export interface GoogleLoginRequest {
+  idToken: string;
+}
+
+export interface SocialLoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+  user: UserProfile;
+}
+
+>>>>>>> 51bb64ae2cfdd3a2477bdefc0d36fd34dddcd707
 export interface TokenResponse {
   accessToken: string;
   refreshToken: string;
   expiresIn: number;
 }
 
+<<<<<<< HEAD
 export interface RefreshTokenRequest {
   refreshToken: string;
 }
@@ -133,4 +156,47 @@ export interface RefreshTokenRequest {
 export interface VerifyEmailRequest {
   token: string;
   email: string;
+=======
+export interface UserProfile {
+  id: string;
+  email: string;
+  userName: string;
+  fullName: string;
+  roles: string[];
+  emailConfirmed: boolean;
+  phoneNumber?: string;
+  profilePicture?: string;
+  createdAt: Date;
+  lastLoginAt?: Date;
+}
+
+export interface ProfileUpdateRequest {
+  fullName?: string;
+  phoneNumber?: string;
+  profilePicture?: string;
+}
+
+export interface EmailConfirmationResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface SubscriptionStatus {
+  hasActive: boolean;
+  daysRemaining: number;
+  endDate?: Date;
+}
+
+export interface UserDashboard {
+  totalAds: number;
+  publishedAds: number;
+  draftAds: number;
+  pendingAds: number;
+  totalViews: number;
+  totalClicks: number;
+  totalLikes: number;
+  recentAds: any[];
+  notifications: any[];
+  subscriptionStatus: SubscriptionStatus;
+>>>>>>> 51bb64ae2cfdd3a2477bdefc0d36fd34dddcd707
 }

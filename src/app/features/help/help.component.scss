@@ -1,0 +1,140 @@
+.help-page {
+  padding: 2rem 0;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.help-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  
+  h1 {
+    color: var(--text);
+    margin-bottom: 1rem;
+  }
+  
+  p {
+    color: var(--muted);
+    font-size: 1.1rem;
+  }
+}
+
+.help-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.help-sections {
+  display: grid;
+  gap: 2rem;
+}
+
+.help-section {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 2rem;
+  box-shadow: var(--shadow);
+  
+  h2 {
+    color: var(--text);
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--brand);
+    padding-bottom: 0.5rem;
+  }
+}
+
+.faq-list {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.faq-item {
+  padding: 1.5rem;
+  background: color-mix(in oklab, var(--brand) 5%, var(--surface));
+  border-radius: var(--radius);
+  border-left: 4px solid var(--brand);
+  
+  h3 {
+    color: var(--text);
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+  }
+  
+  p {
+    color: var(--muted);
+    line-height: 1.6;
+  }
+}
+
+.support-info {
+  p {
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+  
+  ul {
+    list-style: none;
+    padding: 0;
+    
+    li {
+      padding: 0.5rem 0;
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+      
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+  }
+}
+
+.guide-links {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.guide-link {
+  display: block;
+  padding: 1.5rem;
+  background: color-mix(in oklab, var(--brand) 8%, var(--surface));
+  border-radius: var(--radius);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  border: 1px solid var(--border);
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    border-color: var(--brand);
+  }
+  
+  h3 {
+    color: var(--text);
+    margin-bottom: 0.5rem;
+  }
+  
+  p {
+    color: var(--muted);
+    margin: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .help-page {
+    padding: 1rem 0;
+  }
+  
+  .help-header {
+    margin-bottom: 2rem;
+  }
+  
+  .help-section {
+    padding: 1.5rem;
+  }
+  
+  .guide-links {
+    grid-template-columns: 1fr;
+  }
+}

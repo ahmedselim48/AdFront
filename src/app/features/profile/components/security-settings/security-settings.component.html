@@ -1,0 +1,146 @@
+<div class="security-settings">
+  <div class="security-content">
+    
+    <!-- Change Password -->
+    <mat-card class="security-card">
+      <mat-card-header>
+        <mat-card-title>تغيير كلمة المرور</mat-card-title>
+        <mat-card-subtitle>قم بتحديث كلمة المرور لحسابك</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <form [formGroup]="passwordForm" (ngSubmit)="onSubmit()" class="password-form">
+          <div class="form-section">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>كلمة المرور الحالية</mat-label>
+              <input 
+                matInput 
+                [type]="showCurrentPassword ? 'text' : 'password'"
+                formControlName="currentPassword" 
+                placeholder="أدخل كلمة المرور الحالية">
+              <mat-icon matPrefix>
+                <lucide-icon name="shield" size="20"></lucide-icon>
+              </mat-icon>
+              <button 
+                mat-icon-button 
+                matSuffix 
+                type="button"
+                (click)="toggleCurrentPasswordVisibility()">
+                <lucide-icon [name]="showCurrentPassword ? 'eye-off' : 'eye'" size="20"></lucide-icon>
+              </button>
+              <mat-error *ngIf="passwordForm.get('currentPassword')?.hasError('required')">
+                كلمة المرور الحالية مطلوبة
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>كلمة المرور الجديدة</mat-label>
+              <input 
+                matInput 
+                [type]="showNewPassword ? 'text' : 'password'"
+                formControlName="newPassword" 
+                placeholder="أدخل كلمة المرور الجديدة">
+              <mat-icon matPrefix>
+                <lucide-icon name="shield" size="20"></lucide-icon>
+              </mat-icon>
+              <button 
+                mat-icon-button 
+                matSuffix 
+                type="button"
+                (click)="toggleNewPasswordVisibility()">
+                <lucide-icon [name]="showNewPassword ? 'eye-off' : 'eye'" size="20"></lucide-icon>
+              </button>
+              <mat-error *ngIf="passwordForm.get('newPassword')?.hasError('required')">
+                كلمة المرور الجديدة مطلوبة
+              </mat-error>
+              <mat-error *ngIf="passwordForm.get('newPassword')?.hasError('minlength')">
+                كلمة المرور يجب أن تكون 6 أحرف على الأقل
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>تأكيد كلمة المرور الجديدة</mat-label>
+              <input 
+                matInput 
+                [type]="showConfirmPassword ? 'text' : 'password'"
+                formControlName="confirmPassword" 
+                placeholder="أعد إدخال كلمة المرور الجديدة">
+              <mat-icon matPrefix>
+                <lucide-icon name="shield" size="20"></lucide-icon>
+              </mat-icon>
+              <button 
+                mat-icon-button 
+                matSuffix 
+                type="button"
+                (click)="toggleConfirmPasswordVisibility()">
+                <lucide-icon [name]="showConfirmPassword ? 'eye-off' : 'eye'" size="20"></lucide-icon>
+              </button>
+              <mat-error *ngIf="passwordForm.get('confirmPassword')?.hasError('required')">
+                تأكيد كلمة المرور مطلوب
+              </mat-error>
+              <mat-error *ngIf="passwordForm.get('confirmPassword')?.hasError('mismatch')">
+                كلمة المرور غير متطابقة
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="action-buttons">
+            <button 
+              mat-raised-button 
+              color="primary" 
+              type="submit" 
+              [disabled]="passwordForm.invalid || isChangingPassword">
+              <mat-spinner *ngIf="isChangingPassword" diameter="20" class="me-2"></mat-spinner>
+              <lucide-icon *ngIf="!isChangingPassword" name="save" size="18" class="me-2"></lucide-icon>
+              {{ isChangingPassword ? 'جاري التغيير...' : 'تغيير كلمة المرور' }}
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Security Tips -->
+    <mat-card class="security-card">
+      <mat-card-header>
+        <mat-card-title>نصائح الأمان</mat-card-title>
+        <mat-card-subtitle>نصائح لحماية حسابك</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="security-tips">
+          <div class="tip-item">
+            <lucide-icon name="shield" size="20" class="tip-icon"></lucide-icon>
+            <div class="tip-content">
+              <h4>استخدم كلمة مرور قوية</h4>
+              <p>تأكد من استخدام مزيج من الأحرف والأرقام والرموز الخاصة</p>
+            </div>
+          </div>
+
+          <div class="tip-item">
+            <lucide-icon name="refresh-cw" size="20" class="tip-icon"></lucide-icon>
+            <div class="tip-content">
+              <h4>غيّر كلمة المرور بانتظام</h4>
+              <p>يُنصح بتغيير كلمة المرور كل 3-6 أشهر</p>
+            </div>
+          </div>
+
+          <div class="tip-item">
+            <lucide-icon name="lock" size="20" class="tip-icon"></lucide-icon>
+            <div class="tip-content">
+              <h4>لا تشارك كلمة المرور</h4>
+              <p>احتفظ بكلمة المرور سرية ولا تشاركها مع أي شخص</p>
+            </div>
+          </div>
+
+          <div class="tip-item">
+            <lucide-icon name="smartphone" size="20" class="tip-icon"></lucide-icon>
+            <div class="tip-content">
+              <h4>استخدم المصادقة الثنائية</h4>
+              <p>فعّل المصادقة الثنائية لحماية إضافية لحسابك</p>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

@@ -1,0 +1,19 @@
+<div class="quick-actions">
+  <div class="actions-grid">
+    <div *ngFor="let action of actions" class="action-item">
+      <mat-card class="action-card" (click)="onActionClick(action)">
+        <mat-card-content>
+          <div class="action-content">
+            <div class="action-icon" [class]="'icon-' + action.color">
+              <lucide-icon [name]="action.icon" size="24"></lucide-icon>
+            </div>
+            <div class="action-info">
+              <h4>{{ action.title }}</h4>
+              <p>{{ action.description }}</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

@@ -1,6 +1,10 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+<<<<<<< HEAD
+=======
+// import { ToastComponent } from './shared/components/toast/toast.component'; // TODO: Use when needed
+>>>>>>> 51bb64ae2cfdd3a2477bdefc0d36fd34dddcd707
 import { TranslatePipe } from './shared/pipes/translate.pipe';
 import { I18nService } from './core/services/i18n.service';
 import { ChatService } from './core/services/chat.service';
@@ -12,7 +16,11 @@ import { NotificationComponent } from './shared/components/notification/notifica
 
 @Component({
   selector: 'app-root',
+<<<<<<< HEAD
   imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe, NotificationComponent],
+=======
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe],
+>>>>>>> 51bb64ae2cfdd3a2477bdefc0d36fd34dddcd707
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
@@ -42,7 +50,8 @@ export class AppComponent {
   private pollUnread(){
     const run = () => {
       if (!this.storage.accessToken) { this.unreadCount = 0; return; }
-      this.chat.unreadCount().subscribe({ next: r => this.unreadCount = r.count, error: () => {} });
+      // TODO: Implement unread count when ChatService is ready
+      this.unreadCount = 0;
     };
     run();
     setInterval(run, 30000);

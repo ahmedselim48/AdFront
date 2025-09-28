@@ -1,0 +1,43 @@
+<div class="notifications-widget">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    <p>جاري تحميل الإشعارات...</p>
+  </div>
+
+  <!-- No Notifications -->
+  <div *ngIf="!isLoading && notifications.length === 0" class="no-notifications">
+    <div class="no-notifications-content">
+      <lucide-icon name="bell" size="48" class="no-notifications-icon"></lucide-icon>
+      <h4>لا توجد إشعارات</h4>
+      <p>ستظهر الإشعارات الجديدة هنا</p>
+    </div>
+  </div>
+
+  <!-- Notifications List -->
+  <div *ngIf="!isLoading && notifications.length > 0" class="notifications-list">
+    <div *ngFor="let notification of notifications; let i = index" class="notification-item" [class.unread]="!notification.isRead">
+      <div class="notification-content">
+        <div class="notification-icon" [class]="'icon-' + getNotificationColor(notification.type)">
+          <lucide-icon [name]="getNotificationIcon(notification.type)" size="18"></lucide-icon>
+        </div>
+        <div class="notification-info">
+          <h5 class="notification-title">{{ notification.title }}</h5>
+          <p class="notification-message">{{ notification.message }}</p>
+          <div class="notification-meta">
+            <span class="notification-date">{{ formatDate(notification.createdAt) }}</span>
+            <span *ngIf="!notification.isRead" class="unread-indicator">جديد</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- View All Button -->
+    <div class="view-all-section">
+      <button mat-stroked-button routerLink="/notifications" class="view-all-button">
+        عرض جميع الإشعارات
+        <lucide-icon name="arrow-left" size="18" class="me-2"></lucide-icon>
+      </button>
+    </div>
+  </div>
+</div>

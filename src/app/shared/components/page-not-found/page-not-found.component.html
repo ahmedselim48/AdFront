@@ -1,0 +1,46 @@
+<div class="page-not-found">
+  <div class="not-found-container">
+    <mat-card class="not-found-card">
+      <mat-card-content>
+        <div class="not-found-content">
+          <!-- 404 Icon -->
+          <div class="error-icon">
+            <lucide-icon name="search" size="120"></lucide-icon>
+          </div>
+
+          <!-- Error Message -->
+          <div class="error-message">
+            <h1 class="error-code">404</h1>
+            <h2 class="error-title">الصفحة غير موجودة</h2>
+            <p class="error-description">
+              عذراً، الصفحة التي تبحث عنها غير موجودة أو تم نقلها إلى مكان آخر.
+            </p>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="action-buttons">
+            <button mat-raised-button color="primary" routerLink="/dashboard" class="home-button">
+              <lucide-icon name="home" size="18" class="me-2"></lucide-icon>
+              العودة للرئيسية
+            </button>
+            
+            <button mat-stroked-button (click)="goBack()" class="back-button">
+              <lucide-icon name="arrow-left" size="18" class="me-2"></lucide-icon>
+              العودة للخلف
+            </button>
+          </div>
+
+          <!-- Help Text -->
+          <div class="help-text">
+            <p>إذا كنت تعتقد أن هذا خطأ، يرجى:</p>
+            <ul>
+              <li>التأكد من صحة الرابط</li>
+              <li>العودة إلى الصفحة السابقة</li>
+              <li>زيارة الصفحة الرئيسية</li>
+            </ul>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

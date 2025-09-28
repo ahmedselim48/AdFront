@@ -1,0 +1,77 @@
+<div class="verify-email-container">
+  <div class="verify-email-card">
+    <mat-card class="verify-email-mat-card">
+      <mat-card-header>
+        <div class="verify-email-header">
+          <!-- Success State -->
+          <lucide-icon 
+            *ngIf="status === 'success'" 
+            name="check-circle" 
+            size="48" 
+            class="success-icon">
+          </lucide-icon>
+          
+          <!-- Error State -->
+          <lucide-icon 
+            *ngIf="status === 'error'" 
+            name="x-circle" 
+            size="48" 
+            class="error-icon">
+          </lucide-icon>
+          
+          <!-- Verifying State -->
+          <lucide-icon 
+            *ngIf="status === 'verifying'" 
+            name="mail" 
+            size="48" 
+            class="verifying-icon">
+          </lucide-icon>
+          
+          <h2 class="verify-email-title">
+            <span *ngIf="status === 'verifying'">جاري التحقق...</span>
+            <span *ngIf="status === 'success'">تم التحقق بنجاح</span>
+            <span *ngIf="status === 'error'">فشل في التحقق</span>
+          </h2>
+          
+          <p class="verify-email-subtitle" *ngIf="status === 'verifying'">
+            جاري التحقق من بريدك الإلكتروني...
+          </p>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content>
+        <!-- Verifying State -->
+        <div *ngIf="status === 'verifying'" class="verifying-state">
+          <mat-spinner diameter="40" class="verifying-spinner"></mat-spinner>
+          <p class="verifying-message">يرجى الانتظار بينما نتحقق من بريدك الإلكتروني...</p>
+        </div>
+
+        <!-- Success State -->
+        <div *ngIf="status === 'success'" class="success-state">
+          <h3 class="success-title">تم تأكيد البريد الإلكتروني بنجاح!</h3>
+          <p class="success-message">{{ message }}</p>
+          <div class="success-actions">
+            <button mat-raised-button color="primary" (click)="goToLogin()" class="login-button">
+              تسجيل الدخول
+            </button>
+          </div>
+        </div>
+
+        <!-- Error State -->
+        <div *ngIf="status === 'error'" class="error-state">
+          <h3 class="error-title">فشل في تأكيد البريد الإلكتروني</h3>
+          <p class="error-message">{{ message }}</p>
+          <div class="error-actions">
+            <button mat-raised-button color="primary" (click)="resendConfirmation()" class="resend-button">
+              إعادة إرسال رابط التأكيد
+            </button>
+            <button mat-stroked-button (click)="goToLogin()" class="back-button">
+              <lucide-icon name="arrow-left" size="16" class="me-2"></lucide-icon>
+              العودة لتسجيل الدخول
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

@@ -1,13 +1,19 @@
-<section class="comp-wrap">
-  <h2>{{ 'comp.title' | t }}</h2>
-  <form [formGroup]="filters" class="filters">
-    <input [placeholder]="('comp.keyword' | t)" formControlName="keyword">
-    <select formControlName="industry"><option value="all">{{ 'common.all' | t }}</option><option>Retail</option><option>SaaS</option></select>
-  </form>
-  <table class="table">
-    <thead><tr><th>{{ 'comp.competitor' | t }}</th><th>{{ 'comp.adCount' | t }}</th><th>{{ 'comp.avgCtr' | t }}</th><th>{{ 'common.actions' | t }}</th></tr></thead>
-    <tbody>
-      <tr *ngFor="let r of rows"><td>{{r.name}}</td><td>{{r.count}}</td><td>{{r.ctr}}%</td><td><button (click)="open(r)">{{ 'common.details' | t }}</button></td></tr>
-    </tbody>
-  </table>
-</section>
+<div class="competition">
+  <div class="competition-container">
+    <mat-card class="competition-card">
+      <mat-card-header>
+        <mat-card-title>تحليل المنافسة</mat-card-title>
+        <mat-card-subtitle>حلل منافسيك وطور استراتيجيتك</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="competition-content">
+          <div class="empty-state">
+            <lucide-icon name="trending-up" size="64" class="empty-icon"></lucide-icon>
+            <h3>تحليل المنافسة</h3>
+            <p>ستظهر أدوات تحليل المنافسة هنا قريباً</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

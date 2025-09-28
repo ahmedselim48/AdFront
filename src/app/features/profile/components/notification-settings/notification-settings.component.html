@@ -1,0 +1,107 @@
+<div class="notification-settings">
+  <div class="notification-content">
+    
+    <!-- Email Notifications -->
+    <mat-card class="notification-card">
+      <mat-card-header>
+        <mat-card-title>إشعارات البريد الإلكتروني</mat-card-title>
+        <mat-card-subtitle>اختر الإشعارات التي تريد تلقيها عبر البريد الإلكتروني</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <form [formGroup]="notificationForm" (ngSubmit)="onSubmit()" class="notification-form">
+          <div class="notification-group">
+            <div class="notification-item">
+              <mat-checkbox formControlName="emailNotifications">
+                <div class="notification-content">
+                  <h4>الإشعارات العامة</h4>
+                  <p>تلقي إشعارات مهمة عبر البريد الإلكتروني</p>
+                </div>
+              </mat-checkbox>
+            </div>
+
+            <div class="notification-item">
+              <mat-checkbox formControlName="adUpdates">
+                <div class="notification-content">
+                  <h4>تحديثات الإعلانات</h4>
+                  <p>إشعارات حول حالة إعلاناتك</p>
+                </div>
+              </mat-checkbox>
+            </div>
+
+            <div class="notification-item">
+              <mat-checkbox formControlName="messageNotifications">
+                <div class="notification-content">
+                  <h4>رسائل جديدة</h4>
+                  <p>إشعارات عند تلقي رسائل جديدة</p>
+                </div>
+              </mat-checkbox>
+            </div>
+
+            <div class="notification-item">
+              <mat-checkbox formControlName="securityAlerts">
+                <div class="notification-content">
+                  <h4>تنبيهات الأمان</h4>
+                  <p>إشعارات حول أنشطة الأمان في حسابك</p>
+                </div>
+              </mat-checkbox>
+            </div>
+
+            <div class="notification-item">
+              <mat-checkbox formControlName="weeklyDigest">
+                <div class="notification-content">
+                  <h4>التلخيص الأسبوعي</h4>
+                  <p>ملخص أسبوعي لأنشطتك</p>
+                </div>
+              </mat-checkbox>
+            </div>
+
+            <div class="notification-item">
+              <mat-checkbox formControlName="marketingEmails">
+                <div class="notification-content">
+                  <h4>رسائل التسويق</h4>
+                  <p>عروض ورسائل تسويقية</p>
+                </div>
+              </mat-checkbox>
+            </div>
+          </div>
+
+          <mat-divider></mat-divider>
+
+          <!-- Other Notifications -->
+          <div class="notification-group">
+            <h3>إشعارات أخرى</h3>
+            
+            <div class="notification-item">
+              <mat-checkbox formControlName="smsNotifications">
+                <div class="notification-content">
+                  <h4>الرسائل النصية</h4>
+                  <p>تلقي إشعارات عاجلة عبر الرسائل النصية</p>
+                </div>
+              </mat-checkbox>
+            </div>
+
+            <div class="notification-item">
+              <mat-checkbox formControlName="pushNotifications">
+                <div class="notification-content">
+                  <h4>الإشعارات المنبثقة</h4>
+                  <p>إشعارات في المتصفح</p>
+                </div>
+              </mat-checkbox>
+            </div>
+          </div>
+
+          <div class="action-buttons">
+            <button 
+              mat-raised-button 
+              color="primary" 
+              type="submit" 
+              [disabled]="isSaving">
+              {{ isSaving ? 'جاري الحفظ...' : 'حفظ الإعدادات' }}
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
