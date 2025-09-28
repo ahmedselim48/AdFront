@@ -18,7 +18,7 @@ export class ChatListComponent implements OnDestroy {
   loading = true;
   sub?: Subscription;
   constructor(private chat: ChatService){
-    this.sub = this.chat.listConversations().subscribe({ next: cs => { this.conversations = cs; this.loading = false; }, error: ()=> this.loading = false });
+    this.sub = this.chat.getConversations().subscribe({ next: cs => { this.conversations = cs.data; this.loading = false; }, error: ()=> this.loading = false });
   }
   ngOnDestroy(){ this.sub?.unsubscribe(); }
 }

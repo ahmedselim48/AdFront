@@ -117,9 +117,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   private loadChats() {
-    const sub = this.chatSvc.listConversations().subscribe({
+    const sub = this.chatSvc.getConversations().subscribe({
       next: conversations => {
-        this.recentChats = conversations.slice(0, 5); // Show only recent 5 chats
+        this.recentChats = conversations.data.slice(0, 5); // Show only recent 5 chats
         this.loadingChats = false;
       },
       error: () => {
@@ -130,9 +130,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   private loadUnreadCount() {
-    const sub = this.chatSvc.unreadCount().subscribe({
+    const sub = this.chatSvc.getUnreadDirectMessageCount().subscribe({
       next: result => {
-        this.unreadMessages = result.count;
+        this.unreadMessages = result.data || 0;
       },
       error: () => {
         this.unreadMessages = 0;
@@ -341,8 +341,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
   // Ads management
   get filteredAds(): AdItem[] {
     if(this.filter === 'all') return this.ads;
-    // map 'published' to 'active' for now
-    const status = this.filter === 'published' ? 'active' : this.filter;
+    // map filter values to actual status values
+    const statusMap: Record<string, string> = {
+      'draft': 'Draft',
+      'scheduled': 'Pending', 
+      'active': 'Published',
+      'paused': 'Archived',
+      'published': 'Published'
+    };
+    const status = statusMap[this.filter] || this.filter;
     return this.ads.filter(a => a.status === status);
   }
 
@@ -359,10 +366,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
   get counts(){
     const c: Record<string, number> = { all: this.ads.length, draft: 0, scheduled: 0, active: 0, paused: 0, published: 0 };
     for(const a of this.ads){
-      if(a.status === 'draft') c['draft']++;
-      else if(a.status === 'scheduled') c['scheduled']++;
-      else if(a.status === 'active') { c['active']++; c['published']++; }
-      else if(a.status === 'paused') c['paused']++;
+      if(a.status === 'Draft') c['draft']++;
+      else if(a.status === 'Pending') c['scheduled']++;
+      else if(a.status === 'Published') { c['active']++; c['published']++; }
+      else if(a.status === 'Archived') c['paused']++;
     }
     return c;
   }
@@ -372,7 +379,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   get activeAds(): number {
-    return this.dashboardData?.activeAds || this.ads.filter(ad => ad.status === 'active').length;
+    return this.dashboardData?.activeAds || this.ads.filter(ad => ad.status === 'Published').length;
   }
 
   get totalViews(): number {

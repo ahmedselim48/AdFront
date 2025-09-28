@@ -7,18 +7,18 @@ export class NotificationService {
   private listSubject = new BehaviorSubject<AppNotification[]>([]);
   list$ = this.listSubject.asObservable();
 
-  push(n: Omit<AppNotification, 'id' | 'createdAt' | 'read'>) {
+  push(n: Omit<AppNotification, 'id' | 'createdAt' | 'isRead'>) {
     const item: AppNotification = {
       id: crypto.randomUUID(),
-      createdAt: new Date().toISOString(),
-      read: false,
+      createdAt: new Date(),
+      isRead: false,
       ...n
     };
     this.listSubject.next([item, ...this.listSubject.value]);
   }
 
   markRead(id: string) {
-    this.listSubject.next(this.listSubject.value.map(n => n.id === id ? { ...n, read: true } : n));
+    this.listSubject.next(this.listSubject.value.map(n => n.id === id ? { ...n, isRead: true } : n));
   }
 
   clear() {

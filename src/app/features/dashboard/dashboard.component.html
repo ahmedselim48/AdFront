@@ -94,7 +94,7 @@
       <h3 class="panel-title">{{ 'notifications.title' | t }}</h3>
       <ul class="n-list">
         <li *ngFor="let n of (notifications$ | async)">
-          <span class="dot" [class.info]="n.level==='info'" [class.warning]="n.level==='warning'" [class.error]="n.level==='error'" [class.success]="n.level==='success'"></span>
+          <span class="dot" [class.info]="n.type==='AdPublished'" [class.warning]="n.type==='SubscriptionExpiring'" [class.error]="n.type==='SuspiciousLogin'" [class.success]="n.type==='Payment'"></span>
           <span class="msg">{{ n.message }}</span>
           <small>{{ n.createdAt | date:'short' }}</small>
         </li>

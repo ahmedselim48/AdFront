@@ -9,8 +9,21 @@ import { TranslatePipe } from '../../shared/pipes/translate.pipe';
   selector: 'app-reset-password',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, TranslatePipe],
-  templateUrl: './reset-password.component.html',
-  styleUrls: ['./reset-password.component.scss']
+  template: `
+    <h2>إعادة تعيين كلمة المرور</h2>
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="form-group">
+        <label for="token">رمز التأكيد</label>
+        <input formControlName="token" id="token" type="text" placeholder="أدخل الرمز">
+      </div>
+      <div class="form-group">
+        <label for="password">كلمة المرور الجديدة</label>
+        <input formControlName="password" id="password" type="password" placeholder="أدخل كلمة المرور الجديدة">
+      </div>
+      <button type="submit" [disabled]="form.invalid">{{ 'common.reset' | t }}</button>
+    </form>
+  `,
+  styleUrls: []
 })
 export class ResetPasswordComponent {
   form!: FormGroup;

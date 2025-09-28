@@ -24,11 +24,11 @@ export class ChatMessagesComponent {
     this.refresh();
   }
   refresh(){
-    this.chat.listMessages(this.id).subscribe({ next: m => { this.messages = m; this.loading = false; }, error: ()=> this.loading=false });
+    this.chat.getConversationMessages(this.id).subscribe({ next: m => { this.messages = m; this.loading = false; }, error: ()=> this.loading=false });
   }
   send(){
     if(this.form.invalid) return;
     const payload = { content: this.form.get('content')?.value ?? '' };
-    this.chat.createMessage(this.id, payload).subscribe({ next: () => { this.form.reset(); this.refresh(); } });
+    this.chat.postSellerReply(this.id, { conversationId: this.id, content: payload.content, userId: '' }).subscribe({ next: () => { this.form.reset(); this.refresh(); } });
   }
 }

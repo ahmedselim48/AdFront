@@ -14,18 +14,22 @@ export class AdsService {
         const ads = response.ads || [];
         return ads.map(ad => ({
           id: ad.id,
-          name: ad.title,
-          category: ad.location,
+          title: ad.title,
+          description: ad.description,
+          location: ad.location,
           price: ad.price,
-          status: ad.status.toLowerCase() as any,
-          scheduleAt: ad.createdAt,
-          variants: [{
-            id: ad.id,
-            title: ad.title,
-            body: ad.description,
-            imageUrl: ad.images?.[0]?.url,
-            isActive: ad.status === 'Active'
-          }]
+          createdAt: new Date(ad.createdAt),
+          viewsCount: ad.viewsCount || 0,
+          clicksCount: ad.clicksCount || 0,
+          likesCount: ad.likesCount || 0,
+          commentsCount: ad.commentsCount || 0,
+          status: ad.status,
+          userName: ad.userName || 'User',
+          images: ad.images || [],
+          keywords: ad.keywords || [],
+          isAIGenerated: ad.isAIGenerated || false,
+          categoryId: ad.categoryId,
+          categoryName: ad.categoryName
         }));
       })
     );
@@ -33,50 +37,58 @@ export class AdsService {
   
   create(ad: Partial<AdItem>): Observable<AdItem> { 
     return this.api.post$('/ads', {
-      Title: ad.name,
-      Description: ad.variants?.[0]?.body || '',
+      Title: ad.title,
+      Description: ad.description || '',
       Price: ad.price || 0,
-      Location: ad.category || ''
+      Location: ad.location || ''
     }).pipe(
       map((response: any) => ({
         id: response.Id,
-        name: response.Title,
-        category: response.Location,
+        title: response.Title,
+        description: response.Description,
+        location: response.Location,
         price: response.Price,
-        status: response.Status.toLowerCase() as any,
-        scheduleAt: response.CreatedAt,
-        variants: [{
-          id: response.Id,
-          title: response.Title,
-          body: response.Description,
-          imageUrl: response.Images?.[0]?.Url,
-          isActive: response.Status === 'Active'
-        }]
+        createdAt: new Date(response.CreatedAt),
+        viewsCount: 0,
+        clicksCount: 0,
+        likesCount: 0,
+        commentsCount: 0,
+        status: response.Status,
+        userName: 'User',
+        images: [],
+        keywords: [],
+        isAIGenerated: false,
+        categoryId: response.CategoryId,
+        categoryName: response.CategoryName
       }))
     );
   }
   
   update(id: string, ad: Partial<AdItem>): Observable<AdItem> { 
     return this.api.put$(`/ads/${id}`, {
-      Title: ad.name,
-      Description: ad.variants?.[0]?.body || '',
+      Title: ad.title,
+      Description: ad.description || '',
       Price: ad.price || 0,
-      Location: ad.category || ''
+      Location: ad.location || ''
     }).pipe(
       map((response: any) => ({
         id: response.Id,
-        name: response.Title,
-        category: response.Location,
+        title: response.Title,
+        description: response.Description,
+        location: response.Location,
         price: response.Price,
-        status: response.Status.toLowerCase() as any,
-        scheduleAt: response.CreatedAt,
-        variants: [{
-          id: response.Id,
-          title: response.Title,
-          body: response.Description,
-          imageUrl: response.Images?.[0]?.Url,
-          isActive: response.Status === 'Active'
-        }]
+        createdAt: new Date(response.CreatedAt),
+        viewsCount: response.ViewsCount || 0,
+        clicksCount: response.ClicksCount || 0,
+        likesCount: response.LikesCount || 0,
+        commentsCount: response.CommentsCount || 0,
+        status: response.Status,
+        userName: response.UserName || 'User',
+        images: response.Images || [],
+        keywords: response.Keywords || [],
+        isAIGenerated: response.IsAIGenerated || false,
+        categoryId: response.CategoryId,
+        categoryName: response.CategoryName
       }))
     );
   }

@@ -228,21 +228,16 @@
               <article class="ad-card" *ngFor="let ad of filteredAds">
                 <header class="ad-head">
                   <span class="ad-icon">📢</span>
-                  <h4>{{ ad.name }}</h4>
+                  <h4>{{ ad.title }}</h4>
                   <span class="status" [attr.data-status]="ad.status">{{ ad.status }}</span>
                 </header>
                 <div class="ad-body">
-                  <ng-container *ngIf="ad.variants && ad.variants.length; else noVar">
-                    <div class="variant" *ngFor="let v of ad.variants">
-                      <img *ngIf="v.imageUrl" [src]="v.imageUrl" alt="ad image" class="ad-image"/>
-                      <div class="title">{{ v.title }}</div>
-                      <p>{{ v.body }}</p>
-                    </div>
-                  </ng-container>
-                  <ng-template #noVar><p class="no-variants">{{ 'profile.noVariants' | t }}</p></ng-template>
+                  <p class="desc">{{ ad.description }}</p>
+                  <div class="price">{{ ad.price | currency }}</div>
+                  <div class="location">{{ ad.location }}</div>
                 </div>
                 <footer class="ad-foot">
-                  <span class="pill" *ngIf="ad.category">#{{ad.category}}</span>
+                  <span class="pill" *ngIf="ad.categoryName">#{{ad.categoryName}}</span>
                   <span class="pill" *ngIf="ad.price">{{ad.price | number:'1.0-0'}} {{ 'profile.currency' | t }}</span>
                   <span class="flex-spacer"></span>
                   <a class="button secondary" [routerLink]="['/chat']">
@@ -284,11 +279,11 @@
                 <div class="chat-avatar">{{ (conversation.adTitle || 'C').slice(0,1) }}</div>
                 <div class="chat-info">
                   <div class="chat-title">{{ conversation.adTitle || 'Untitled Chat' }}</div>
-                  <div class="chat-preview">{{ conversation.lastMessage?.content || 'No messages yet' }}</div>
+                  <div class="chat-preview">{{ conversation.lastMessage || 'No messages yet' }}</div>
                 </div>
                 <div class="chat-meta">
                   <div class="chat-time">{{ conversation.lastMessageAt | date:'short' }}</div>
-                  <span class="unread-badge" *ngIf="conversation.unreadMessageCount > 0">{{ conversation.unreadMessageCount }}</span>
+                  <span class="unread-badge" *ngIf="conversation.unreadCount > 0">{{ conversation.unreadCount }}</span>
                 </div>
               </div>
             </div>
@@ -323,12 +318,12 @@
             </div>
             <div class="chat-info">
               <div class="chat-title">{{ conversation.adTitle || 'Untitled Chat' }}</div>
-              <div class="chat-preview">{{ conversation.lastMessage?.content || 'No messages yet' }}</div>
+              <div class="chat-preview">{{ conversation.lastMessage || 'No messages yet' }}</div>
             </div>
             <div class="chat-meta">
               <div class="chat-time">{{ conversation.lastMessageAt | date:'short' }}</div>
-              <span class="unread-badge" *ngIf="conversation.unreadMessageCount > 0">
-                {{ conversation.unreadMessageCount }}
+              <span class="unread-badge" *ngIf="conversation.unreadCount > 0">
+                {{ conversation.unreadCount }}
               </span>
             </div>
           </div>

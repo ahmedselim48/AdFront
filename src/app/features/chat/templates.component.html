@@ -7,8 +7,8 @@
   </form>
   <ul class="list mt-4">
     <li class="card item" *ngFor="let t of items">
-      <div class="title">{{t.title}}</div>
-      <pre>{{t.body}}</pre>
+      <div class="title">{{t.name}}</div>
+      <pre>{{t.content}}</pre>
       <button class="button secondary" (click)="remove(t.id)">{{ 'common.remove' | t }}</button>
     </li>
   </ul>

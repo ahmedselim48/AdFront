@@ -115,15 +115,15 @@ submit() {
 }
 // ad-form.component.ts
 onAnalyze() {
-  this.adsService.analyzeImages(this.selectedFiles.map(file => file.name)).subscribe(result => {
-    if (result.isSuccessful) {
+  this.adsService.analyzeImages(this.selectedFiles[0].name).subscribe(result => {
+    if (result.data?.isSuccessful) {
       this.form.patchValue({
-        title: result.title,
-        description: result.description,
-        category: result.category
+        title: result.data.title,
+        description: result.data.description,
+        category: result.data.category
       });
     } else {
-      alert("فشل التحليل: " + result.errorMessage);
+      alert("فشل التحليل: " + result.data?.errorMessage);
     }
   });
 }

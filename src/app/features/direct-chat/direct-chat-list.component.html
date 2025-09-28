@@ -6,7 +6,7 @@
       <a [routerLink]="['/direct-chat', c.id]">
         <div class="name">{{ c.user2Name }}</div>
         <small>{{ c.createdAt | date:'short' }}</small>
-        <span *ngIf="c.unreadMessageCount > 0" class="badge">{{ c.unreadMessageCount }}</span>
+        <span *ngIf="c.unreadCount > 0" class="badge">{{ c.unreadCount }}</span>
       </a>
     </li>
   </ul>

@@ -156,3 +156,10 @@ export interface PagedResult<T> {
   pageSize: number;
   totalPages: number;
 }
+
+// Legacy aliases for backward compatibility
+export type Conversation = ConversationDto;
+export type DirectConversation = DirectConversationDto;
+export type Message = ChatMessageDto;
+export type DirectMessage = ChatMessageDto;
+export type ReplyTemplate = TemplateDto;

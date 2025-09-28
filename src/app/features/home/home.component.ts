@@ -36,33 +36,37 @@ export class HomeComponent {
           this.ads = [
             {
               id: '1',
-              name: 'iPhone 14 Pro Max',
-              category: 'Riyadh',
+              title: 'iPhone 14 Pro Max',
+              description: 'Mint condition, 256GB, Space Black',
+              location: 'Riyadh',
               price: 4200,
-              status: 'active',
-              scheduleAt: new Date().toISOString(),
-              variants: [{
-                id: '1',
-                title: 'iPhone 14 Pro Max',
-                body: 'Mint condition, 256GB, Space Black',
-                imageUrl: '',
-                isActive: true
-              }]
+              status: 'Published',
+              createdAt: new Date(),
+              viewsCount: 0,
+              clicksCount: 0,
+              likesCount: 0,
+              commentsCount: 0,
+              userName: 'User',
+              images: ['/assets/iphone.jpg'],
+              keywords: ['iPhone', 'mobile'],
+              isAIGenerated: false
             },
             {
               id: '2',
-              name: 'Toyota Camry 2018',
-              category: 'Jeddah',
+              title: 'Toyota Camry 2018',
+              description: 'Excellent condition, full option',
+              location: 'Jeddah',
               price: 52000,
-              status: 'active',
-              scheduleAt: new Date().toISOString(),
-              variants: [{
-                id: '2',
-                title: 'Toyota Camry 2018',
-                body: 'Excellent condition, full option',
-                imageUrl: '',
-                isActive: true
-              }]
+              status: 'Published',
+              createdAt: new Date(),
+              viewsCount: 0,
+              clicksCount: 0,
+              likesCount: 0,
+              commentsCount: 0,
+              userName: 'User',
+              images: ['/assets/car.jpg'],
+              keywords: ['Toyota', 'car'],
+              isAIGenerated: false
             }
           ];
         }

@@ -180,3 +180,4 @@ export class NotificationComponent implements OnInit, OnDestroy {
     this.notificationService.removeNotification(id);
   }
 }
+

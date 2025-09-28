@@ -39,3 +39,6 @@ export interface NotificationStats {
   unread: number;
   byType: Record<NotificationType, number>;
 }
+
+// Legacy aliases for backward compatibility
+export type AppNotification = NotificationDto;

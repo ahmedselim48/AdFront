@@ -37,12 +37,12 @@ export class SmartRepliesComponent {
   }
 
   saveTemplate(reply: any): void {
-    this.chat.createTemplate({ title: reply.slice(0, 40), body: reply }).subscribe(() => this.loadTemplates());
+    this.chat.createTemplate({ name: reply.slice(0, 40), content: reply, type: 'Manual', intent: 'Other', userId: '' }).subscribe(() => this.loadTemplates());
   }
 
   private loadTemplates(){
-    this.chat.listTemplates().subscribe((list: ReplyTemplate[]) => {
-      this.templates = list.map(t => t.body || t.title);
+    this.chat.getTemplates().subscribe((list: ReplyTemplate[]) => {
+      this.templates = list.map(t => t.content || t.name);
     });
   }
 }

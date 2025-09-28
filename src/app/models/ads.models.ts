@@ -178,3 +178,6 @@ export interface AdminAdDto extends AdDto {
   lastModifiedBy?: string;
   lastModifiedAt?: Date;
 }
+
+// Legacy aliases for backward compatibility
+export type AdItem = AdDto;

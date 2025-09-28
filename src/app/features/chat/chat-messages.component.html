@@ -3,7 +3,7 @@
   <div class="msgs card" *ngIf="!loading; else loadTpl">
     <div class="msg" *ngFor="let m of messages">
       <div class="bubble">{{ m.content }}</div>
-      <small class="time">{{ m.sentAt | date:'short' }}</small>
+      <small class="time">{{ m.createdAt | date:'short' }}</small>
     </div>
   </div>
   <ng-template #loadTpl>
