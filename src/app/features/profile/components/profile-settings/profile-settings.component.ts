@@ -15,7 +15,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 
 import { AuthService } from '../../../../core/auth/auth.service';
-import { UserProfile, ProfileUpdateRequest } from '../../../../models/auth.models';
+import { UserProfile, ProfileUpdateRequest, UpdateProfileRequest } from '../../../../models/auth.models';
 
 @Component({
   selector: 'app-profile-settings',
@@ -140,21 +140,19 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
     if (this.profileForm.valid) {
       this.isSaving = true;
 
-      const updateRequest: ProfileUpdateRequest = {
-        fullName: this.profileForm.get('fullName')?.value,
-        phoneNumber: this.profileForm.get('phoneNumber')?.value,
-        profilePicture: this.currentUser?.profilePicture
+      const updateRequest: UpdateProfileRequest = {
+        firstName: this.profileForm.get('fullName')?.value?.split(' ')[0] || '',
+        lastName: this.profileForm.get('fullName')?.value?.split(' ')[1] || '',
+        phoneNumber: this.profileForm.get('phoneNumber')?.value
       };
 
       this.authService.updateProfile(updateRequest).subscribe({
-        next: (response) => {
+        next: (profile: UserProfile) => {
           this.isSaving = false;
-          if (response.success && response.data) {
-            this.toastr.success('تم تحديث الملف الشخصي بنجاح', 'تم');
-            // The auth service will automatically update the current user
-          }
+          this.toastr.success('تم تحديث الملف الشخصي بنجاح', 'تم');
+          // The auth service will automatically update the current user
         },
-        error: (error) => {
+        error: (error: any) => {
           this.isSaving = false;
           this.toastr.error('حدث خطأ أثناء تحديث الملف الشخصي', 'خطأ');
           console.error('Error updating profile:', error);

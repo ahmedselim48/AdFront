@@ -39,13 +39,11 @@ export class SubscriptionSettingsComponent implements OnInit {
   loadSubscriptionStatus() {
     this.isLoading = true;
     this.authService.getSubscriptionStatus().subscribe({
-      next: (response) => {
-        if (response.success && response.data) {
-          this.subscriptionStatus = response.data;
-        }
+      next: (subscriptionStatus: SubscriptionStatus) => {
+        this.subscriptionStatus = subscriptionStatus;
         this.isLoading = false;
       },
-      error: (error) => {
+      error: (error: any) => {
         this.isLoading = false;
         console.error('Error loading subscription status:', error);
       }
@@ -60,7 +58,8 @@ export class SubscriptionSettingsComponent implements OnInit {
     this.toastr.info('جاري التوجيه لصفحة الإلغاء...', 'قريباً');
   }
 
-  formatDate(date: Date): string {
+  formatDate(date: string): string {
+    if (!date) return '';
     return new Date(date).toLocaleDateString('ar-SA', {
       year: 'numeric',
       month: 'long',

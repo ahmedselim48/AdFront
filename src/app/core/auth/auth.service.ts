@@ -128,6 +128,11 @@ export class AuthService {
     );
   }
 
+  // Alias method for backward compatibility
+  updateProfile(req: UpdateProfileRequest): Observable<UserProfile> {
+    return this.updateProfileViaDashboard(req);
+  }
+
   getSubscriptionStatus(): Observable<SubscriptionStatus> {
     return this.api.get$<SubscriptionStatus>('/Account/subscription-status');
   }

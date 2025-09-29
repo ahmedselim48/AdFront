@@ -369,7 +369,7 @@ export class ResetPasswordComponent implements OnInit {
 
       const resetPasswordRequest: ResetPasswordRequest = {
         email: this.email,
-        resetToken: this.resetToken,
+        token: this.resetToken,
         newPassword: this.resetPasswordForm.value.newPassword
       };
 

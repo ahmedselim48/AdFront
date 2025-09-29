@@ -166,10 +166,10 @@ import { Subject, takeUntil } from 'rxjs';
             <div class="subscription-info">
               <h4>{{ subscriptionStatus.hasActive ? ('profile.subscriptionActive' | t) : ('profile.subscriptionInactive' | t) }}</h4>
               <p *ngIf="subscriptionStatus.hasActive && subscriptionStatus.daysRemaining">
-                {{ 'profile.daysRemaining' | t: {days: subscriptionStatus.daysRemaining} }}
+                {{ 'profile.daysRemaining' | t }}: {{ subscriptionStatus.daysRemaining }}
               </p>
               <p *ngIf="subscriptionStatus.endDate">
-                {{ 'profile.expiresOn' | t: {date: subscriptionStatus.endDate | date:'medium'} }}
+                {{ 'profile.expiresOn' | t }}: {{ subscriptionStatus.endDate | date:'medium' }}
               </p>
             </div>
             <button *ngIf="!subscriptionStatus.hasActive" class="btn-primary">

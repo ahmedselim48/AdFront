@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { ApiClientService } from './api-client.service';
 import { Observable, BehaviorSubject } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { UserProfile, UpdateProfileRequest, SubscriptionStatus } from '../../models/auth.models';
 
 @Injectable({ providedIn: 'root' })
@@ -78,5 +79,3 @@ export class ProfileService {
   }
 }
 
-// Import tap operator
-import { tap } from 'rxjs/operators';

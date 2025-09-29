@@ -1,12 +1,14 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { AdsService } from '../../core/services/ads.service';
 import { AdDto } from '../../models/ads.models';
 
 @Component({
   selector: 'app-ads-list',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './ads-list.component.html',
-  styleUrl: './ads-list.component.scss'
+  styleUrls: ['./ads-list.component.scss']
 })
 export class AdsListComponent implements OnInit {
   ads: AdDto[] = [];
@@ -26,17 +28,17 @@ export class AdsListComponent implements OnInit {
   load() {
     this.loading = true;
     this.adsService.getAll(this.page, this.pageSize).subscribe({
-      next: res => {
+      next: (res: any) => {
         this.loading = false;
-        this.ads = res.data;
+        this.ads = res.data || [];
         if (res.meta) {
-          this.total = res.meta.totalCount;
-          this.page = res.meta.currentPage;
-          this.pageSize = res.meta.pageSize;
-          this.totalPages = res.meta.totalPages;
+          this.total = res.meta.totalCount || 0;
+          this.page = res.meta.currentPage || 1;
+          this.pageSize = res.meta.pageSize || 10;
+          this.totalPages = res.meta.totalPages || 0;
         }
       },
-      error: err => {
+      error: (err: any) => {
         this.loading = false;
         this.error = err?.message ?? 'Error loading ads';
       }

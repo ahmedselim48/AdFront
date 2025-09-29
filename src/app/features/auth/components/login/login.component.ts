@@ -162,40 +162,69 @@ import { LoginRequest } from '../../../../models/auth.models';
       justify-content: center;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       padding: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(120, 200, 255, 0.2) 0%, transparent 50%);
+      z-index: 0;
     }
 
     .login-card {
       width: 100%;
-      max-width: 400px;
+      max-width: 450px;
+      position: relative;
+      z-index: 1;
     }
 
     .login-mat-card {
-      padding: 2rem;
-      border-radius: 1rem;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      padding: 3rem;
+      border-radius: 1.5rem;
+      box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.1),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .login-header {
       text-align: center;
-      margin-bottom: 2rem;
+      margin-bottom: 2.5rem;
     }
 
     .login-icon {
       color: #667eea;
       margin-bottom: 1rem;
+      filter: drop-shadow(0 2px 4px rgba(102, 126, 234, 0.3));
     }
 
     .login-title {
-      font-size: 1.75rem;
-      font-weight: 600;
-      color: #333;
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       margin: 0 0 0.5rem 0;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .login-subtitle {
       color: #666;
       margin: 0;
-      font-size: 0.9rem;
+      font-size: 1rem;
+      font-weight: 400;
     }
 
     .login-form {
@@ -234,12 +263,18 @@ import { LoginRequest } from '../../../../models/auth.models';
     .error-message {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      color: #f44336;
-      background-color: #ffebee;
-      padding: 0.75rem;
-      border-radius: 0.5rem;
-      font-size: 0.9rem;
+      gap: 0.75rem;
+      color: #d32f2f;
+      background: linear-gradient(135deg, #ffebee, #fce4ec);
+      padding: 1rem 1.25rem;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      border: 1px solid rgba(211, 47, 47, 0.2);
+      box-shadow: 
+        0 2px 8px rgba(211, 47, 47, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      margin: 1rem 0;
     }
 
     .error-icon {
@@ -247,10 +282,38 @@ import { LoginRequest } from '../../../../models/auth.models';
     }
 
     .login-button {
-      height: 48px;
-      font-size: 1rem;
-      font-weight: 500;
-      margin-top: 0.5rem;
+      height: 56px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-top: 1rem;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border: none;
+      border-radius: 12px;
+      box-shadow: 
+        0 4px 15px rgba(102, 126, 234, 0.4),
+        0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      text-transform: none;
+      letter-spacing: 0.5px;
+    }
+
+    .login-button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 
+        0 8px 25px rgba(102, 126, 234, 0.5),
+        0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .login-button:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .login-button:disabled {
+      opacity: 0.6;
+      transform: none;
+      box-shadow: 
+        0 2px 8px rgba(102, 126, 234, 0.2),
+        0 1px 2px rgba(0, 0, 0, 0.1);
     }
 
     .login-spinner {
@@ -281,10 +344,23 @@ import { LoginRequest } from '../../../../models/auth.models';
     }
 
     .google-login-button {
-      height: 48px;
+      height: 56px;
       font-size: 1rem;
-      border-color: #dadce0;
+      font-weight: 600;
+      border: 2px solid rgba(102, 126, 234, 0.2);
       color: #3c4043;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      text-transform: none;
+      letter-spacing: 0.5px;
+    }
+
+    .google-login-button:hover:not(:disabled) {
+      border-color: rgba(102, 126, 234, 0.4);
+      background: rgba(255, 255, 255, 0.95);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     .google-icon {
@@ -293,36 +369,88 @@ import { LoginRequest } from '../../../../models/auth.models';
 
     .register-link {
       text-align: center;
-      margin-top: 1.5rem;
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+      border-radius: 12px;
+      border: 1px solid rgba(102, 126, 234, 0.1);
     }
 
     .register-link p {
       margin: 0;
-      color: #666;
-      font-size: 0.9rem;
+      color: #555;
+      font-size: 1rem;
+      font-weight: 400;
     }
 
     .register-link a {
       color: #667eea;
       text-decoration: none;
-      font-weight: 500;
+      font-weight: 600;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      transition: all 0.3s ease;
+      position: relative;
     }
 
     .register-link a:hover {
-      text-decoration: underline;
+      text-decoration: none;
+      filter: brightness(1.2);
     }
 
-    @media (max-width: 480px) {
+    .register-link a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      transition: width 0.3s ease;
+    }
+
+    .register-link a:hover::after {
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
       .login-container {
         padding: 1rem;
       }
 
       .login-mat-card {
+        padding: 2rem;
+      }
+
+      .login-title {
+        font-size: 1.75rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .login-container {
+        padding: 0.5rem;
+      }
+
+      .login-mat-card {
         padding: 1.5rem;
+        border-radius: 1rem;
       }
 
       .login-title {
         font-size: 1.5rem;
+      }
+
+      .login-button {
+        height: 50px;
+        font-size: 1rem;
+      }
+
+      .google-login-button {
+        height: 50px;
+        font-size: 0.95rem;
       }
     }
   `]

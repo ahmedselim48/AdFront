@@ -83,6 +83,7 @@ export interface UserProfile {
   phoneNumber?: string;
   address?: string;
   profileImageUrl?: string;
+  profilePicture?: string; // Alias for profileImageUrl for backward compatibility
   isEmailConfirmed: boolean;
   isActive: boolean;
   createdAt: string;

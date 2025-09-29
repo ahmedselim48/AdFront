@@ -25,7 +25,7 @@ export class MockApiService {
       subscriptionStatus: {
         hasActive: true,
         daysRemaining: 30,
-        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
+        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days from now
       }
     };
 
@@ -41,7 +41,7 @@ export class MockApiService {
     const mockSubscription: SubscriptionStatus = {
       hasActive: true,
       daysRemaining: 30,
-      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
+      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days from now
     };
 
     return of({

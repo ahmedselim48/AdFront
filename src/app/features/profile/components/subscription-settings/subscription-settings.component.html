@@ -10,29 +10,29 @@
       
       <mat-card-content>
         <div class="subscription-info">
-          <div class="subscription-status" [class]="subscriptionStatus.hasActive ? 'active' : 'inactive'">
-            <lucide-icon [name]="subscriptionStatus.hasActive ? 'check-circle' : 'x-circle'" size="24"></lucide-icon>
-            <span>{{ subscriptionStatus.hasActive ? 'نشط' : 'غير نشط' }}</span>
+          <div class="subscription-status" [class]="subscriptionStatus?.hasActive ? 'active' : 'inactive'">
+            <lucide-icon [name]="subscriptionStatus?.hasActive ? 'check-circle' : 'x-circle'" size="24"></lucide-icon>
+            <span>{{ subscriptionStatus?.hasActive ? 'نشط' : 'غير نشط' }}</span>
           </div>
           
-          <div class="subscription-details" *ngIf="subscriptionStatus.hasActive">
+          <div class="subscription-details" *ngIf="subscriptionStatus?.hasActive">
             <div class="detail-item">
               <lucide-icon name="calendar" size="16"></lucide-icon>
-              <span>متبقي: {{ subscriptionStatus.daysRemaining }} يوم</span>
+              <span>متبقي: {{ subscriptionStatus?.daysRemaining }} يوم</span>
             </div>
-            <div class="detail-item" *ngIf="subscriptionStatus.endDate">
+            <div class="detail-item" *ngIf="subscriptionStatus?.endDate">
               <lucide-icon name="calendar" size="16"></lucide-icon>
-              <span>ينتهي في: {{ formatDate(subscriptionStatus.endDate) }}</span>
+              <span>ينتهي في: {{ formatDate(subscriptionStatus?.endDate || '') }}</span>
             </div>
           </div>
 
-          <div class="subscription-progress" *ngIf="subscriptionStatus.hasActive">
+          <div class="subscription-progress" *ngIf="subscriptionStatus?.hasActive">
             <div class="progress-info">
               <span>مدة الاشتراك</span>
-              <span>{{ subscriptionStatus.daysRemaining }} يوم متبقي</span>
+              <span>{{ subscriptionStatus?.daysRemaining }} يوم متبقي</span>
             </div>
             <mat-progress-bar 
-              [value]="(subscriptionStatus.daysRemaining / 30) * 100" 
+              [value]="((subscriptionStatus?.daysRemaining || 0) / 30) * 100" 
               mode="determinate">
             </mat-progress-bar>
           </div>

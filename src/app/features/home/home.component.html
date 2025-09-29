@@ -1,11 +1,18 @@
+<!-- Hero Section -->
 <section class="hero">
   <div class="container hero-inner">
     <div class="hero-copy">
-      <h1 class="headline">{{ 'hero.headline' | t }}</h1>
-      <p class="sub">{{ 'hero.sub' | t }}</p>
+      <h1 class="headline">مرحباً بك في هروج بلس</h1>
+      <p class="sub">منصة الإعلانات الذكية التي تتصل بك الأفضل - اكتشف، تبيع، وأطلق نمو عملك</p>
       <div class="actions">
-        <a routerLink="/ads" class="button focus-ring">{{ 'hero.ctaPrimary' | t }}</a>
-        <a routerLink="/dashboard" class="button secondary focus-ring">{{ 'hero.ctaSecondary' | t }}</a>
+        <a routerLink="/ads/create" class="button primary">
+          <lucide-icon name="plus" size="16"></lucide-icon>
+          إضافة إعلان جديد
+        </a>
+        <a routerLink="/ads" class="button secondary">
+          <lucide-icon name="search" size="16"></lucide-icon>
+          تصفح الإعلانات
+        </a>
       </div>
     </div>
     <div class="hero-visual" aria-hidden="true">
@@ -18,21 +25,99 @@
     </div>
   </div>
 </section>
+<!-- Featured Content Section -->
 <section class="home-wrap container">
-  <h2>{{ 'home.latestAds' | t }}</h2>
+  <div class="section-header">
+    <h2>أحدث الإعلانات</h2>
+    <a routerLink="/ads" class="view-all-link">
+      عرض الكل
+      <lucide-icon name="arrow-left" size="16"></lucide-icon>
+    </a>
+  </div>
+  
+  <!-- Filters Section -->
+  <div class="filters-container">
+    <div class="filters-row">
+      <button class="filter-toggle" (click)="showFilters = !showFilters">
+        <lucide-icon name="filter" size="18"></lucide-icon>
+        فلتر
+      </button>
+      
+      <div class="sort-box">
+        <select [(ngModel)]="sortBy" class="sort-select">
+          <option *ngFor="let opt of sortOptions" [value]="opt.value">{{ opt.label }}</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="filters-section" *ngIf="showFilters">
+      <div class="filter-row">
+        <!-- Category Filter -->
+        <select class="filter-select" [(ngModel)]="selectedCategory">
+          <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+        </select>
+        
+        <!-- Location Filter -->
+        <select class="filter-select" [(ngModel)]="selectedLocation">
+          <option *ngFor="let loc of locations" [value]="loc">{{ loc }}</option>
+        </select>
+        
+        <!-- Price Range -->
+        <div class="price-filter">
+          <span>السعر:</span>
+          <input type="number" class="price-input" [(ngModel)]="priceRange.min" placeholder="من">
+          <input type="number" class="price-input" [(ngModel)]="priceRange.max" placeholder="إلى">
+        </div>
+        
+        <!-- Apply Filters -->
+        <button class="apply-filter" (click)="applyFilters()">
+          تطبيق الفلتر
+        </button>
+      </div>
+    </div>
+  </div>
+  
   <div class="ads-grid" *ngIf="!loading; else loadingTpl">
     <article class="ad-card" *ngFor="let ad of ads">
       <header class="ad-head">
         <h3>{{ad.title}}</h3>
-        <span class="status" [attr.data-status]="ad.status">{{ad.status}}</span>
+        <span class="status" [attr.data-status]="ad.status">{{getStatusText(ad.status)}}</span>
       </header>
       <div class="ad-body">
         <p class="desc">{{ad.description}}</p>
-        <div class="price">{{ad.price | currency}}</div>
-        <div class="location">{{ad.location}}</div>
+        <div class="ad-meta">
+          <div class="price">{{ad.price | currency:'SAR':'symbol':'1.0-0':'ar-SA'}}</div>
+          <div class="location">
+            <lucide-icon name="map-pin" size="14"></lucide-icon>
+            {{ad.location}}
+          </div>
+        </div>
+        <div class="ad-stats">
+          <span class="stat">
+            <lucide-icon name="eye" size="14"></lucide-icon>
+            {{ad.viewsCount || 0}}
+          </span>
+          <span class="stat">
+            <lucide-icon name="heart" size="14"></lucide-icon>
+            {{ad.likesCount || 0}}
+          </span>
+          <span class="stat">
+            <lucide-icon name="upload" size="14"></lucide-icon>
+            {{ad.clicksCount || 0}}
+          </span>
+        </div>
       </div>
     </article>
   </div>
+  
+  <!-- Load More Button -->
+  <div class="load-more-row" *ngIf="hasMoreAds">
+    <button class="load-more-btn" (click)="loadMoreAds()" [disabled]="loading">
+      <lucide-icon name="chevron-down" size="16"></lucide-icon>
+      شاهد المزيد
+    </button>
+  </div>
+  
   <ng-template #loadingTpl>
     <div class="ads-grid">
       <article class="ad-card" *ngFor="let _ of skeletons">
@@ -41,11 +126,22 @@
           <div class="skeleton" style="height:16px;width:80px;border-radius:20px"></div>
         </header>
         <div class="ad-body">
-          <div class="skeleton" style="height:84px;border-radius:12px"></div>
+          <div class="skeleton" style="height:60px;border-radius:8px;margin-bottom:12px"></div>
+          <div class="skeleton" style="height:16px;width:30%;border-radius:4px"></div>
         </div>
       </article>
     </div>
   </ng-template>
-  <p class="empty" *ngIf="!loading && !ads.length && !error">{{ 'home.noAds' | t }}</p>
-  <p class="error" *ngIf="error" style="color: red; text-align: center; padding: 2rem;">{{ error }}</p>
+  
+  <div class="empty-state" *ngIf="!loading && !ads.length && !error">
+    <lucide-icon name="search" size="48" style="opacity: 0.3; margin-bottom: 16px;"></lucide-icon>
+    <p class="empty">لا توجد إعلانات متاحة حالياً</p>
+    <a routerLink="/ads/create" class="button primary">إضافة أول إعلان</a>
+  </div>
+  
+  <div class="error-state" *ngIf="error">
+    <lucide-icon name="alert-circle" size="48" style="color: #dc2626; margin-bottom: 16px;"></lucide-icon>
+    <p class="error">{{ error }}</p>
+    <button (click)="retryLoading()" class="button secondary">إعادة المحاولة</button>
+  </div>
 </section>

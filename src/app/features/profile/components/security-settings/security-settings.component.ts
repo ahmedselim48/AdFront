@@ -74,14 +74,14 @@ export class SecuritySettingsComponent implements OnInit {
       };
 
       this.authService.changePassword(changePasswordRequest).subscribe({
-        next: (response) => {
+        next: (success: boolean) => {
           this.isChangingPassword = false;
-          if (response.success) {
+          if (success) {
             this.toastr.success('تم تغيير كلمة المرور بنجاح', 'تم');
             this.passwordForm.reset();
           }
         },
-        error: (error) => {
+        error: (error: any) => {
           this.isChangingPassword = false;
           this.toastr.error('حدث خطأ أثناء تغيير كلمة المرور', 'خطأ');
         }

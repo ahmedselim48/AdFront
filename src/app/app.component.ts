@@ -1,19 +1,20 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 // import { ToastComponent } from './shared/components/toast/toast.component'; // TODO: Use when needed
-import { TranslatePipe } from './shared/pipes/translate.pipe';
 import { I18nService } from './core/services/i18n.service';
 import { ChatService } from './core/services/chat.service';
 import { TokenStorageService } from './core/auth/token-storage.service';
 import { AuthService } from './core/auth/auth.service';
 import { Router } from '@angular/router';
 import { NotificationComponent } from './shared/components/notification/notification.component';
+import { LucideAngularModule } from 'lucide-angular';
 
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe, NotificationComponent],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, NotificationComponent, FormsModule, LucideAngularModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
@@ -28,6 +29,8 @@ export class AppComponent {
   unreadCount = 0;
   currentUser: any = null;
   dropdownOpen = false;
+  showUserMenu = false;
+  searchQuery = '';
   constructor(){
     // Initialize authentication state from stored tokens
     this.auth.initializeAuth();
@@ -55,8 +58,17 @@ export class AppComponent {
   toggleDropdown(){ this.dropdownOpen = !this.dropdownOpen; }
   closeDropdown(){ this.dropdownOpen = false; }
 
+  toggleUserMenu(){ this.showUserMenu = !this.showUserMenu; }
+  closeUserMenu(){ this.showUserMenu = false; }
+
   toggleLang(){ this.i18n.toggle(); }
   get langLabel(){ return this.i18n.current === 'ar' ? 'EN' : 'AR'; }
+
+  onSearch(){
+    if (this.searchQuery.trim()) {
+      this.router.navigate(['/ads'], { queryParams: { search: this.searchQuery } });
+    }
+  }
 
   logout(){
     this.auth.logout().subscribe({

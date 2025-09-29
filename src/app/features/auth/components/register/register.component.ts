@@ -53,25 +53,47 @@ import { RegisterRequest } from '../../../../models/auth.models';
                 
                 <div class="form-row">
                   <mat-form-field appearance="outline" class="half-width">
-                    <mat-label>الاسم الكامل</mat-label>
+                    <mat-label>الاسم الأول</mat-label>
                     <input
                       matInput
                       type="text"
-                      formControlName="fullName"
-                      placeholder="أدخل اسمك الكامل"
-                      autocomplete="name"
+                      formControlName="firstName"
+                      placeholder="أدخل الاسم الأول"
+                      autocomplete="given-name"
                       class="form-input">
                     <mat-icon matPrefix>
                       <lucide-icon name="user" size="20"></lucide-icon>
                     </mat-icon>
-                    <mat-error *ngIf="registerForm.get('fullName')?.hasError('required')">
-                      الاسم الكامل مطلوب
+                    <mat-error *ngIf="registerForm.get('firstName')?.hasError('required')">
+                      الاسم الأول مطلوب
                     </mat-error>
-                    <mat-error *ngIf="registerForm.get('fullName')?.hasError('minlength')">
-                      الاسم يجب أن يكون 3 أحرف على الأقل
+                    <mat-error *ngIf="registerForm.get('firstName')?.hasError('minlength')">
+                      الاسم الأول يجب أن يكون حرفين على الأقل
                     </mat-error>
                   </mat-form-field>
 
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>الاسم الأخير</mat-label>
+                    <input
+                      matInput
+                      type="text"
+                      formControlName="lastName"
+                      placeholder="أدخل الاسم الأخير"
+                      autocomplete="family-name"
+                      class="form-input">
+                    <mat-icon matPrefix>
+                      <lucide-icon name="user" size="20"></lucide-icon>
+                    </mat-icon>
+                    <mat-error *ngIf="registerForm.get('lastName')?.hasError('required')">
+                      الاسم الأخير مطلوب
+                    </mat-error>
+                    <mat-error *ngIf="registerForm.get('lastName')?.hasError('minlength')">
+                      الاسم الأخير يجب أن يكون حرفين على الأقل
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
                   <mat-form-field appearance="outline" class="half-width">
                     <mat-label>اسم المستخدم</mat-label>
                     <input
@@ -90,6 +112,20 @@ import { RegisterRequest } from '../../../../models/auth.models';
                     <mat-error *ngIf="registerForm.get('userName')?.hasError('minlength')">
                       اسم المستخدم يجب أن يكون 3 أحرف على الأقل
                     </mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>رقم الهاتف (اختياري)</mat-label>
+                    <input
+                      matInput
+                      type="tel"
+                      formControlName="phoneNumber"
+                      placeholder="أدخل رقم الهاتف"
+                      autocomplete="tel"
+                      class="form-input">
+                    <mat-icon matPrefix>
+                      <lucide-icon name="phone" size="20"></lucide-icon>
+                    </mat-icon>
                   </mat-form-field>
                 </div>
               </div>
@@ -230,67 +266,124 @@ import { RegisterRequest } from '../../../../models/auth.models';
       justify-content: center;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       padding: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .register-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(120, 200, 255, 0.2) 0%, transparent 50%);
+      z-index: 0;
     }
 
     .register-card {
       width: 100%;
-      max-width: 600px;
+      max-width: 500px;
+      position: relative;
+      z-index: 1;
     }
 
     .register-mat-card {
       padding: 2rem;
       border-radius: 1rem;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      box-shadow: 
+        0 15px 30px rgba(0, 0, 0, 0.1),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .register-header {
       text-align: center;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
     }
 
     .register-icon {
       color: #667eea;
-      margin-bottom: 1rem;
+      margin-bottom: 0.75rem;
+      filter: drop-shadow(0 2px 4px rgba(102, 126, 234, 0.3));
     }
 
     .register-title {
       font-size: 1.75rem;
-      font-weight: 600;
-      color: #333;
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       margin: 0 0 0.5rem 0;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .register-subtitle {
       color: #666;
       margin: 0;
       font-size: 0.9rem;
+      font-weight: 400;
     }
 
     .register-form {
       display: flex;
       flex-direction: column;
-      gap: 1.5rem;
+      gap: 1rem;
     }
 
     .form-section {
-      border: 1px solid #e0e0e0;
-      border-radius: 0.5rem;
-      padding: 1.5rem;
-      background-color: #fafafa;
+      border: 1px solid rgba(102, 126, 234, 0.15);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(248, 250, 252, 0.9));
+      backdrop-filter: blur(5px);
+      box-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      transition: all 0.3s ease;
+    }
+
+    .form-section:hover {
+      border-color: rgba(102, 126, 234, 0.25);
+      box-shadow: 
+        0 4px 8px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
     }
 
     .section-title {
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: 600;
-      color: #333;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       margin: 0 0 1rem 0;
       padding-bottom: 0.5rem;
-      border-bottom: 2px solid #667eea;
+      border-bottom: 2px solid transparent;
+      border-image: linear-gradient(135deg, #667eea, #764ba2) 1;
+      position: relative;
+    }
+
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 30px;
+      height: 2px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: 1px;
     }
 
     .form-row {
       display: flex;
-      gap: 1rem;
+      gap: 0.75rem;
     }
 
     .full-width {
@@ -302,8 +395,8 @@ import { RegisterRequest } from '../../../../models/auth.models';
     }
 
     .terms-checkbox {
-      font-size: 0.9rem;
-      margin: 1rem 0;
+      font-size: 0.85rem;
+      margin: 0.75rem 0;
     }
 
     .terms-link {
@@ -317,19 +410,25 @@ import { RegisterRequest } from '../../../../models/auth.models';
 
     .terms-error {
       color: #f44336;
-      font-size: 0.8rem;
-      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
     }
 
     .error-message {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      color: #f44336;
-      background-color: #ffebee;
-      padding: 0.75rem;
-      border-radius: 0.5rem;
-      font-size: 0.9rem;
+      gap: 0.75rem;
+      color: #d32f2f;
+      background: linear-gradient(135deg, #ffebee, #fce4ec);
+      padding: 1rem 1.25rem;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      border: 1px solid rgba(211, 47, 47, 0.2);
+      box-shadow: 
+        0 2px 8px rgba(211, 47, 47, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      margin: 1rem 0;
     }
 
     .error-icon {
@@ -339,8 +438,36 @@ import { RegisterRequest } from '../../../../models/auth.models';
     .register-button {
       height: 48px;
       font-size: 1rem;
-      font-weight: 500;
+      font-weight: 600;
       margin-top: 1rem;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border: none;
+      border-radius: 10px;
+      box-shadow: 
+        0 3px 10px rgba(102, 126, 234, 0.3),
+        0 1px 3px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      text-transform: none;
+      letter-spacing: 0.3px;
+    }
+
+    .register-button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 
+        0 8px 25px rgba(102, 126, 234, 0.5),
+        0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .register-button:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .register-button:disabled {
+      opacity: 0.6;
+      transform: none;
+      box-shadow: 
+        0 2px 8px rgba(102, 126, 234, 0.2),
+        0 1px 2px rgba(0, 0, 0, 0.1);
     }
 
     .register-spinner {
@@ -349,37 +476,53 @@ import { RegisterRequest } from '../../../../models/auth.models';
 
     .login-link {
       text-align: center;
-      margin-top: 1.5rem;
+      margin-top: 1.25rem;
+      padding: 1rem;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+      border-radius: 8px;
+      border: 1px solid rgba(102, 126, 234, 0.1);
     }
 
     .login-link p {
       margin: 0;
-      color: #666;
+      color: #555;
       font-size: 0.9rem;
+      font-weight: 400;
     }
 
     .login-link a {
       color: #667eea;
       text-decoration: none;
-      font-weight: 500;
+      font-weight: 600;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      transition: all 0.3s ease;
+      position: relative;
     }
 
     .login-link a:hover {
-      text-decoration: underline;
+      text-decoration: none;
+      filter: brightness(1.2);
+    }
+
+    .login-link a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      transition: width 0.3s ease;
+    }
+
+    .login-link a:hover::after {
+      width: 100%;
     }
 
     @media (max-width: 768px) {
-      .form-row {
-        flex-direction: column;
-        gap: 0;
-      }
-
-      .half-width {
-        width: 100%;
-      }
-    }
-
-    @media (max-width: 480px) {
       .register-container {
         padding: 1rem;
       }
@@ -388,12 +531,42 @@ import { RegisterRequest } from '../../../../models/auth.models';
         padding: 1.5rem;
       }
 
+      .form-row {
+        flex-direction: column;
+        gap: 0;
+      }
+
+      .half-width {
+        width: 100%;
+      }
+
+      .form-section {
+        padding: 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .register-container {
+        padding: 0.5rem;
+      }
+
+      .register-mat-card {
+        padding: 1.25rem;
+        border-radius: 0.75rem;
+      }
+
       .register-title {
         font-size: 1.5rem;
       }
 
       .form-section {
-        padding: 1rem;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+      }
+
+      .register-button {
+        height: 44px;
+        font-size: 0.95rem;
       }
     }
   `]
@@ -412,9 +585,11 @@ export class RegisterComponent implements OnInit {
     private toastr: ToastrService
   ) {
     this.registerForm = this.fb.group({
-      fullName: ['', [Validators.required, Validators.minLength(3)]],
+      firstName: ['', [Validators.required, Validators.minLength(2)]],
+      lastName: ['', [Validators.required, Validators.minLength(2)]],
       userName: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
+      phoneNumber: [''],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]],
       acceptTerms: [false, [Validators.requiredTrue]]
@@ -446,11 +621,12 @@ export class RegisterComponent implements OnInit {
       this.errorMessage = '';
 
       const registerRequest: RegisterRequest = {
-        fullName: this.registerForm.value.fullName,
+        firstName: this.registerForm.value.firstName,
+        lastName: this.registerForm.value.lastName,
         userName: this.registerForm.value.userName,
         email: this.registerForm.value.email,
-        password: this.registerForm.value.password,
-        confirmPassword: this.registerForm.value.confirmPassword
+        phoneNumber: this.registerForm.value.phoneNumber,
+        password: this.registerForm.value.password
       };
 
       this.authService.register(registerRequest).subscribe({
@@ -463,7 +639,22 @@ export class RegisterComponent implements OnInit {
         },
         error: (error) => {
           this.isLoading = false;
-          this.errorMessage = error.error?.message || 'حدث خطأ أثناء إنشاء الحساب';
+          console.error('Registration error:', error);
+          console.error('Error details:', error.error);
+          
+          // Handle validation errors
+          if (error.error?.errors) {
+            const validationErrors = error.error.errors;
+            const errorMessages = Object.values(validationErrors).flat();
+            this.errorMessage = errorMessages.join(', ');
+          } else if (error.error?.message) {
+            this.errorMessage = error.error.message;
+          } else if (error.status === 400) {
+            this.errorMessage = 'البيانات المدخلة غير صحيحة. يرجى التحقق من جميع الحقول';
+          } else {
+            this.errorMessage = 'حدث خطأ أثناء إنشاء الحساب';
+          }
+          
           this.toastr.error(this.errorMessage, 'خطأ');
         }
       });

@@ -1,83 +1,126 @@
-<header class="app-header sticky-top">
-  <div class="container d-flex justify-content-between align-items-center py-2">
+<header class="modern-navbar">
+  <div class="navbar-container">
     <!-- Brand -->
-    <a routerLink="/home" class="navbar-brand fw-bold d-flex align-items-center" aria-label="AdFront home">
-      <i class="bi bi-rocket-takeoff me-2"></i> {{'site.title'| t}}
-    </a>
+    <div class="brand-section">
+      <a routerLink="/home" class="brand-link">
+        <div class="brand-icon">
+          <lucide-icon name="shopping-bag" size="24"></lucide-icon>
+        </div>
+        <span class="brand-text">حراج بلس</span>
+      </a>
+    </div>
 
-    <!-- Toggle Button (mobile) -->
-    <button class="btn btn-outline-light d-lg-none" 
-            type="button" 
-            (click)="toggleMenu()" 
-            [attr.aria-expanded]="mobileOpen" 
-            aria-label="Toggle menu">
-      <i class="bi bi-list"></i>
-    </button>
+    <!-- Search Bar -->
+    <div class="search-section">
+      <div class="search-box">
+        <input type="text" placeholder="ابحث في الإعلانات..." class="search-input" [(ngModel)]="searchQuery" (keyup.enter)="onSearch()">
+        <button type="button" class="search-btn" (click)="onSearch()">
+          <lucide-icon name="search" size="18"></lucide-icon>
+        </button>
+      </div>
+    </div>
 
-    <!-- Navigation -->
-    <nav class="nav-links d-lg-flex align-items-center gap-3"
-         [class.d-none]="!mobileOpen"
-         (click)="closeMenu()">
-
-      <!-- Main Navigation -->
+    <!-- Navigation Links -->
+    <nav class="nav-section">
       <a class="nav-link" routerLink="/home" routerLinkActive="active">
-        <i class="bi bi-house-door"></i> {{ 'nav.home' | t }}
+        <lucide-icon name="home" size="18"></lucide-icon>
+        الرئيسية
       </a>
-      <a class="nav-link" routerLink="/dashboard" *ngIf="storage?.accessToken">
-        <i class="bi bi-speedometer2"></i> {{ 'nav.dashboard' | t }}
+      <a class="nav-link" routerLink="/ads" routerLinkActive="active">
+        <lucide-icon name="megaphone" size="18"></lucide-icon>
+        الإعلانات
       </a>
-      <a class="nav-link" routerLink="/ads" *ngIf="storage?.accessToken">
-        <i class="bi bi-megaphone"></i> {{ 'nav.ads' | t }}
+      <a class="nav-link" routerLink="/dashboard" routerLinkActive="active" *ngIf="storage?.accessToken">
+        <lucide-icon name="bar-chart-3" size="18"></lucide-icon>
+        لوحة التحكم
       </a>
-      <a class="nav-link" routerLink="/smart-replies" *ngIf="storage?.accessToken">
-        <i class="bi bi-robot"></i> {{ 'nav.smartReplies' | t }}
-      </a>
-      <a class="nav-link position-relative" routerLink="/chat" *ngIf="storage?.accessToken">
-        <i class="bi bi-chat-dots"></i> {{ 'nav.chat' | t }}
-        <span class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle"
-              *ngIf="unreadCount > 0">{{ unreadCount }}</span>
-      </a>
-      <a class="nav-link" routerLink="/direct-chat" *ngIf="storage?.accessToken">
-        <i class="bi bi-people"></i> {{ 'nav.directChat' | t }}
-      </a>
-      <a class="nav-link" routerLink="/competition" *ngIf="storage?.accessToken">
-        <i class="bi bi-trophy"></i> {{ 'nav.competition' | t }}
-      </a>
-      <a class="nav-link" routerLink="/reports" *ngIf="storage?.accessToken">
-        <i class="bi bi-graph-up"></i> {{ 'nav.reports' | t }}
-      </a>
-      <a class="nav-link" routerLink="/admin" *ngIf="storage?.accessToken">
-        <i class="bi bi-gear"></i> {{ 'nav.admin' | t }}
-      </a>
+    </nav>
 
-      <!-- User Section -->
-      <div class="dropdown ms-3" *ngIf="storage?.accessToken">
-        <a class="d-flex align-items-center text-decoration-none dropdown-toggle" href="#" role="button"
-           id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
-          <div class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center me-2"
-               style="width: 36px; height: 36px;">
-            {{ currentUser?.name?.slice(0,1) || 'U' }}
-          </div>
-          <span>{{ currentUser?.name || 'User' }}</span>
-        </a>
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-          <li><a class="dropdown-item" routerLink="/profile"><i class="bi bi-person"></i> {{ 'nav.profile' | t }}</a></li>
-          <li><hr class="dropdown-divider"></li>
-          <li><button class="dropdown-item text-danger" (click)="logout()"><i class="bi bi-box-arrow-right"></i> {{ 'auth.logout' | t }}</button></li>
-        </ul>
+    <!-- Actions Section -->
+    <div class="actions-section">
+      <!-- Messages -->
+      <div class="action-item" routerLink="/direct-chat" *ngIf="storage?.accessToken">
+        <lucide-icon name="message-circle" size="20"></lucide-icon>
+        <span class="notification-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+      </div>
+      
+      <!-- Notifications -->
+      <div class="action-item" routerLink="/notifications" *ngIf="storage?.accessToken">
+        <lucide-icon name="bell" size="20"></lucide-icon>
+        <span class="notification-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
       </div>
 
-      <!-- Guest Section -->
-      <div class="d-flex gap-2 ms-3" *ngIf="!storage?.accessToken">
-        <a routerLink="/auth/login" class="btn btn-gradient btn-sm"><i class="bi bi-box-arrow-in-right"></i> {{ 'auth.login' | t }}</a>
-        <a routerLink="/auth/register" class="btn btn-outline-gradient btn-sm"><i class="bi bi-pencil-square"></i> {{ 'auth.register' | t }}</a>
+      <!-- User Menu -->
+      <div class="user-menu" *ngIf="storage?.accessToken">
+        <div class="user-avatar" (click)="toggleUserMenu()">
+          <div class="avatar-circle">
+            {{ currentUser?.name?.slice(0,1) || 'U' }}
+          </div>
+        </div>
+        <div class="user-dropdown" *ngIf="showUserMenu">
+          <a routerLink="/profile" class="dropdown-item">
+            <lucide-icon name="user" size="16"></lucide-icon>
+            الملف الشخصي
+          </a>
+          <a routerLink="/settings" class="dropdown-item">
+            <lucide-icon name="settings" size="16"></lucide-icon>
+            الإعدادات
+          </a>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item logout" (click)="logout()">
+            <lucide-icon name="log-out" size="16"></lucide-icon>
+            تسجيل الخروج
+          </button>
+        </div>
+      </div>
+
+      <!-- Guest Actions -->
+      <div class="guest-actions" *ngIf="!storage?.accessToken">
+        <a routerLink="/auth/login" class="btn-login">
+          تسجيل الدخول
+        </a>
+        <a routerLink="/auth/register" class="btn-register">
+          إنشاء حساب
+        </a>
       </div>
 
       <!-- Language Toggle -->
-      <button type="button" class="btn btn-sm btn-light ms-3" (click)="toggleLang()">
-        <i class="bi bi-globe"></i> {{ langLabel }}
+      <button type="button" class="lang-toggle" (click)="toggleLang()">
+        <lucide-icon name="globe" size="18"></lucide-icon>
+        {{ langLabel }}
       </button>
-    </nav>
+    </div>
+
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-toggle" (click)="toggleMenu()" [attr.aria-expanded]="mobileOpen">
+      <lucide-icon name="menu" size="24"></lucide-icon>
+    </button>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" *ngIf="mobileOpen">
+    <div class="mobile-nav">
+      <a class="mobile-nav-link" routerLink="/home" (click)="closeMenu()">
+        <lucide-icon name="home" size="18"></lucide-icon>
+        الرئيسية
+      </a>
+      <a class="mobile-nav-link" routerLink="/ads" (click)="closeMenu()">
+        <lucide-icon name="megaphone" size="18"></lucide-icon>
+        الإعلانات
+      </a>
+      <a class="mobile-nav-link" routerLink="/dashboard" (click)="closeMenu()" *ngIf="storage?.accessToken">
+        <lucide-icon name="bar-chart-3" size="18"></lucide-icon>
+        لوحة التحكم
+      </a>
+      <a class="mobile-nav-link" routerLink="/direct-chat" (click)="closeMenu()" *ngIf="storage?.accessToken">
+        <lucide-icon name="message-circle" size="18"></lucide-icon>
+        الرسائل
+      </a>
+      <a class="mobile-nav-link" routerLink="/notifications" (click)="closeMenu()" *ngIf="storage?.accessToken">
+        <lucide-icon name="bell" size="18"></lucide-icon>
+        الإشعارات
+      </a>
+    </div>
   </div>
 </header>
 
