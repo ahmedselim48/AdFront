@@ -10,6 +10,7 @@ import { AuthService } from './core/auth/auth.service';
 import { Router } from '@angular/router';
 import { NotificationComponent } from './shared/components/notification/notification.component';
 import { LucideAngularModule } from 'lucide-angular';
+import { environment } from '../environments/environment';
 
 
 @Component({
@@ -31,11 +32,34 @@ export class AppComponent {
   dropdownOpen = false;
   showUserMenu = false;
   searchQuery = '';
+  imageLoadFailed = false;
   constructor(){
     // Initialize authentication state from stored tokens
     this.auth.initializeAuth();
     this.pollUnread();
     this.loadCurrentUser();
+  }
+  get isAdmin(): boolean {
+    const roles: string[] | undefined = this.currentUser?.roles;
+    return Array.isArray(roles) && roles.includes('Admin');
+  }
+
+  get greeting(): string {
+    if (!this.currentUser) return '';
+    return this.isAdmin
+      ? 'Welcome admin'
+      : (this.currentUser?.userName || this.currentUser?.fullName || this.currentUser?.email || 'User');
+  }
+
+  get avatarUrl(): string | null {
+    if (this.isAdmin) return null;
+    const raw = this.currentUser?.profileImageUrl || this.currentUser?.profilePicture;
+    if (!raw) return null;
+    if (/^https?:\/\//i.test(raw)) return raw;
+    // Strip '/api' if apiBaseUrl points to the API route; static files are served from the site root
+    const baseOrigin = (environment.apiBaseUrl || '').replace(/\/$/, '').replace(/\/api$/, '');
+    const path = raw.startsWith('/') ? raw : `/${raw}`;
+    return `${baseOrigin}${path}`;
   }
   private loadCurrentUser() {
     this.auth.currentUser$.subscribe(user => {

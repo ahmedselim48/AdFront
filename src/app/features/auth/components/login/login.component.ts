@@ -475,9 +475,17 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit() {
-    // Check if user is already logged in
+    // Check if user is already logged in and redirect based on role
     if (this.authService.isLoggedIn()) {
-      this.router.navigate(['/dashboard']);
+      this.authService.getProfile().subscribe({
+        next: (profile) => {
+          const isAdmin = Array.isArray(profile.roles) && profile.roles.includes('Admin');
+          this.router.navigate([isAdmin ? '/dashboard' : '/home']);
+        },
+        error: () => {
+          // If failing to load profile, stay on login
+        }
+      });
     }
   }
 
@@ -496,7 +504,9 @@ export class LoginComponent implements OnInit {
         next: (response) => {
           this.isLoading = false;
           this.toastr.success('تم تسجيل الدخول بنجاح', 'مرحباً');
-          this.router.navigate(['/dashboard']);
+          const roles = response?.user?.roles || [];
+          const isAdmin = Array.isArray(roles) && roles.includes('Admin');
+          this.router.navigate([isAdmin ? '/dashboard' : '/profile']);
         },
         error: (error) => {
           this.isLoading = false;

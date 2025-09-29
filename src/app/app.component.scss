@@ -576,6 +576,42 @@
   cursor: pointer;
 }
 
+.user-greeting-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-greeting-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 140px;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #eef2ff, #f5f3ff);
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  animation: slideIn 450ms ease-out;
+}
+
+.greeting-text {
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@keyframes slideIn {
+  0% { opacity: 0; transform: translateY(-6px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 .avatar-circle {
   width: 40px;
   height: 40px;
@@ -589,6 +625,14 @@
   font-size: 1rem;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
   transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.avatar-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .avatar-circle:hover {

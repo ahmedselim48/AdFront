@@ -52,13 +52,23 @@
 
       <!-- User Menu -->
       <div class="user-menu" *ngIf="storage?.accessToken">
-        <div class="user-avatar" (click)="toggleUserMenu()">
-          <div class="avatar-circle">
-            {{ currentUser?.name?.slice(0,1) || 'U' }}
+        <div class="user-greeting-container">
+          <div class="user-greeting-badge" [title]="greeting">
+            <span class="greeting-text">{{ isAdmin ? 'Welcome admin' : (currentUser?.userName || currentUser?.fullName || currentUser?.email) }}</span>
+          </div>
+          <div class="user-avatar" (click)="toggleUserMenu()">
+            <div class="avatar-circle">
+              <ng-container *ngIf="!isAdmin && avatarUrl && !imageLoadFailed; else avatarInitial">
+                <img [src]="avatarUrl" alt="profile" (error)="imageLoadFailed = true" />
+              </ng-container>
+              <ng-template #avatarInitial>
+                {{ isAdmin ? 'A' : (currentUser?.name?.slice(0,1) || currentUser?.userName?.slice(0,1) || currentUser?.fullName?.slice(0,1) || currentUser?.email?.slice(0,1) || 'U') }}
+              </ng-template>
+            </div>
           </div>
         </div>
         <div class="user-dropdown" *ngIf="showUserMenu">
-          <a routerLink="/profile" class="dropdown-item">
+          <a routerLink="/profile" class="dropdown-item" *ngIf="!isAdmin">
             <lucide-icon name="user" size="16"></lucide-icon>
             الملف الشخصي
           </a>

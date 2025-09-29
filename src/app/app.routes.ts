@@ -48,6 +48,9 @@ import { SubscriptionSettingsComponent } from './features/profile/components/sub
 // Import Admin Components
 import { AdminComponent } from './features/admin/admin.component';
 import { AdminDashboardComponent } from './features/admin/components/admin-dashboard/admin-dashboard.component';
+import { inject } from '@angular/core';
+import { AuthService } from './core/auth/auth.service';
+import { Router } from '@angular/router';
 import { AdminComponent as AdminManagementComponent } from './features/admin/components/admin/admin.component';
 
 export const routes: Routes = [
@@ -107,8 +110,15 @@ export const routes: Routes = [
     { path: ':id', component: DirectChatMessagesComponent }
   ] },
   
-  // Profile Management - Available without auth for testing
-  { path: 'profile', children: [
+  // Profile Management - Redirect admins to dashboard
+  { path: 'profile', canActivate: [() => {
+    const auth = inject(AuthService);
+    const router = inject(Router);
+    const user = auth.getCurrentUser();
+    const isAdmin = Array.isArray(user?.roles) && user!.roles.includes('Admin');
+    if (isAdmin) { router.navigateByUrl('/dashboard'); return false; }
+    return true;
+  }], children: [
     { path: '', component: ProfileComponent },
     { path: 'management', component: ProfileManagementComponent },
     { path: 'settings', redirectTo: 'profile-settings', pathMatch: 'full' },
