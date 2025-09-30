@@ -1,0 +1,322 @@
+<!-- التقارير والإحصائيات -->
+<div class="reports-container" dir="rtl">
+  <!-- Header -->
+  <div class="page-header">
+    <h1 class="page-title">
+      <mat-icon>assessment</mat-icon>
+      التقارير والإحصائيات
+    </h1>
+    <div class="header-actions">
+      <button mat-raised-button color="accent" (click)="exportReport('pdf')">
+        <mat-icon>picture_as_pdf</mat-icon>
+        تصدير PDF
+      </button>
+      <button mat-raised-button color="primary" (click)="exportReport('excel')">
+        <mat-icon>table_chart</mat-icon>
+        تصدير Excel
+      </button>
+      <button mat-raised-button color="primary" (click)="refreshReports()" [disabled]="loading">
+        <mat-icon>refresh</mat-icon>
+        تحديث
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters-row">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>الفترة</mat-label>
+          <mat-select [(value)]="selectedPeriod" (selectionChange)="onPeriodChange($event.value)">
+            <mat-option *ngFor="let option of periodOptions" [value]="option.value">
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>من تاريخ</mat-label>
+          <input matInput [matDatepicker]="startPicker" [(ngModel)]="selectedDateRange.start">
+          <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+          <mat-datepicker #startPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>إلى تاريخ</mat-label>
+          <input matInput [matDatepicker]="endPicker" [(ngModel)]="selectedDateRange.end">
+          <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+          <mat-datepicker #endPicker></mat-datepicker>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" (click)="onDateRangeChange()">
+          <mat-icon>filter_list</mat-icon>
+          تطبيق الفلتر
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Statistics Cards -->
+  <div class="stats-grid">
+    <mat-card class="stat-card users-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon">
+            <mat-icon>people</mat-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{ formatNumber(stats.totalUsers) }}</h3>
+            <p>إجمالي المستخدمين</p>
+            <div class="growth-indicator">
+              <mat-icon [class]="getGrowthColor(stats.userGrowth)">{{ getGrowthIcon(stats.userGrowth) }}</mat-icon>
+              <span [class]="getGrowthColor(stats.userGrowth)">
+                {{ stats.userGrowth >= 0 ? '+' : '' }}{{ stats.userGrowth }}%
+              </span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card ads-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon">
+            <mat-icon>campaign</mat-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{ formatNumber(stats.totalAds) }}</h3>
+            <p>إجمالي الإعلانات</p>
+            <div class="growth-indicator">
+              <mat-icon [class]="getGrowthColor(stats.adGrowth)">{{ getGrowthIcon(stats.adGrowth) }}</mat-icon>
+              <span [class]="getGrowthColor(stats.adGrowth)">
+                {{ stats.adGrowth >= 0 ? '+' : '' }}{{ stats.adGrowth }}%
+              </span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card views-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon">
+            <mat-icon>visibility</mat-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{ formatNumber(stats.totalViews) }}</h3>
+            <p>إجمالي المشاهدات</p>
+            <div class="growth-indicator">
+              <mat-icon [class]="getGrowthColor(stats.viewGrowth)">{{ getGrowthIcon(stats.viewGrowth) }}</mat-icon>
+              <span [class]="getGrowthColor(stats.viewGrowth)">
+                {{ stats.viewGrowth >= 0 ? '+' : '' }}{{ stats.viewGrowth }}%
+              </span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card revenue-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon">
+            <mat-icon>attach_money</mat-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{ formatCurrency(stats.totalRevenue) }}</h3>
+            <p>إجمالي الإيرادات</p>
+            <div class="growth-indicator">
+              <mat-icon [class]="getGrowthColor(stats.revenueGrowth)">{{ getGrowthIcon(stats.revenueGrowth) }}</mat-icon>
+              <span [class]="getGrowthColor(stats.revenueGrowth)">
+                {{ stats.revenueGrowth >= 0 ? '+' : '' }}{{ stats.revenueGrowth }}%
+              </span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Charts Section -->
+  <div class="charts-section">
+    <mat-card class="chart-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>show_chart</mat-icon>
+          مخطط النمو الشهري
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="chart-container">
+          <div *ngIf="loading" class="loading-overlay">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>جاري تحميل البيانات...</p>
+          </div>
+          
+          <div *ngIf="!loading" class="chart-placeholder">
+            <div class="chart-info">
+              <h4>مخطط النمو الشهري</h4>
+              <p>عرض إحصائيات المستخدمين والإعلانات والمشاهدات على مدار الأشهر الستة الماضية</p>
+            </div>
+            
+            <!-- Chart Legend -->
+            <div class="chart-legend">
+              <div class="legend-item">
+                <div class="legend-color users-color"></div>
+                <span>المستخدمين</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color ads-color"></div>
+                <span>الإعلانات</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color views-color"></div>
+                <span>المشاهدات</span>
+              </div>
+            </div>
+
+            <!-- Mock Chart Data -->
+            <div class="mock-chart">
+              <div class="chart-bars">
+                <div *ngFor="let month of chartData.labels; let i = index" class="bar-group">
+                  <div class="bar-label">{{ month }}</div>
+                  <div class="bars">
+                    <div class="bar users-bar" [style.height.%]="(chartData.datasets[0].data[i] / 300) * 100">
+                      <span class="bar-value">{{ chartData.datasets[0].data[i] }}</span>
+                    </div>
+                    <div class="bar ads-bar" [style.height.%]="(chartData.datasets[1].data[i] / 300) * 100">
+                      <span class="bar-value">{{ chartData.datasets[1].data[i] }}</span>
+                    </div>
+                    <div class="bar views-bar" [style.height.%]="(chartData.datasets[2].data[i] / 3000) * 100">
+                      <span class="bar-value">{{ chartData.datasets[2].data[i] }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Additional Charts -->
+    <div class="additional-charts">
+      <mat-card class="pie-chart-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>pie_chart</mat-icon>
+            توزيع الإعلانات حسب الفئة
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="pie-chart-container">
+            <div class="pie-chart-placeholder">
+              <div class="pie-segment cars-segment">
+                <span class="segment-label">سيارات</span>
+                <span class="segment-value">35%</span>
+              </div>
+              <div class="pie-segment electronics-segment">
+                <span class="segment-label">إلكترونيات</span>
+                <span class="segment-value">25%</span>
+              </div>
+              <div class="pie-segment real-estate-segment">
+                <span class="segment-label">عقارات</span>
+                <span class="segment-value">20%</span>
+              </div>
+              <div class="pie-segment fashion-segment">
+                <span class="segment-label">أزياء</span>
+                <span class="segment-value">20%</span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="line-chart-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>trending_up</mat-icon>
+            اتجاهات الإيرادات
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="line-chart-container">
+            <div class="line-chart-placeholder">
+              <div class="trend-line">
+                <div class="trend-point" *ngFor="let i of [1,2,3,4,5,6]" [style.left.%]="(i-1) * 16.66">
+                  <div class="point-value">{{ 1000 + (i * 200) }}</div>
+                </div>
+              </div>
+              <div class="trend-labels">
+                <span *ngFor="let month of chartData.labels">{{ month }}</span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Summary Table -->
+  <mat-card class="summary-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>table_chart</mat-icon>
+        ملخص الإحصائيات
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="summary-table">
+        <div class="table-header">
+          <div class="header-cell">المؤشر</div>
+          <div class="header-cell">القيمة الحالية</div>
+          <div class="header-cell">النمو</div>
+          <div class="header-cell">التوقعات</div>
+        </div>
+        <div class="table-row">
+          <div class="table-cell">المستخدمين</div>
+          <div class="table-cell">{{ formatNumber(stats.totalUsers) }}</div>
+          <div class="table-cell">
+            <mat-chip [color]="getGrowthColor(stats.userGrowth)">
+              {{ stats.userGrowth >= 0 ? '+' : '' }}{{ stats.userGrowth }}%
+            </mat-chip>
+          </div>
+          <div class="table-cell">{{ formatNumber(stats.totalUsers * 1.1) }}</div>
+        </div>
+        <div class="table-row">
+          <div class="table-cell">الإعلانات</div>
+          <div class="table-cell">{{ formatNumber(stats.totalAds) }}</div>
+          <div class="table-cell">
+            <mat-chip [color]="getGrowthColor(stats.adGrowth)">
+              {{ stats.adGrowth >= 0 ? '+' : '' }}{{ stats.adGrowth }}%
+            </mat-chip>
+          </div>
+          <div class="table-cell">{{ formatNumber(stats.totalAds * 1.15) }}</div>
+        </div>
+        <div class="table-row">
+          <div class="table-cell">المشاهدات</div>
+          <div class="table-cell">{{ formatNumber(stats.totalViews) }}</div>
+          <div class="table-cell">
+            <mat-chip [color]="getGrowthColor(stats.viewGrowth)">
+              {{ stats.viewGrowth >= 0 ? '+' : '' }}{{ stats.viewGrowth }}%
+            </mat-chip>
+          </div>
+          <div class="table-cell">{{ formatNumber(stats.totalViews * 1.2) }}</div>
+        </div>
+        <div class="table-row">
+          <div class="table-cell">الإيرادات</div>
+          <div class="table-cell">{{ formatCurrency(stats.totalRevenue) }}</div>
+          <div class="table-cell">
+            <mat-chip [color]="getGrowthColor(stats.revenueGrowth)">
+              {{ stats.revenueGrowth >= 0 ? '+' : '' }}{{ stats.revenueGrowth }}%
+            </mat-chip>
+          </div>
+          <div class="table-cell">{{ formatCurrency(stats.totalRevenue * 1.25) }}</div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

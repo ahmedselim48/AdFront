@@ -22,7 +22,7 @@ export class AdminGuard implements CanActivate {
         if (user && user.role === 'Admin') {
           return true;
         } else {
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/admin/dashboard']);
           return false;
         }
       }),

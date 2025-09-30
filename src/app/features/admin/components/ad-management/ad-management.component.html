@@ -1,0 +1,423 @@
+<!-- إدارة الإعلانات -->
+<div class="ad-management">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1 class="page-title">
+          <mat-icon>campaign</mat-icon>
+          إدارة الإعلانات
+        </h1>
+        <p class="page-subtitle">إدارة ومراقبة جميع الإعلانات في النظام</p>
+      </div>
+      <div class="header-actions">
+        <button mat-raised-button color="accent" (click)="loadAds()" [disabled]="loading">
+          <mat-icon>refresh</mat-icon>
+          تحديث
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="stats-grid">
+    <mat-card class="stat-card total-ads">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon">
+            <mat-icon>campaign</mat-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{ stats.totalAds | number }}</h3>
+            <p>إجمالي الإعلانات</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card active-ads">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon">
+            <mat-icon>check_circle</mat-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{ stats.activeAds | number }}</h3>
+            <p>إعلانات مقبولة</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card pending-ads">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon">
+            <mat-icon>schedule</mat-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{ stats.pendingAds | number }}</h3>
+            <p>في الانتظار</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card rejected-ads">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon">
+            <mat-icon>cancel</mat-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{ stats.rejectedAds | number }}</h3>
+            <p>مرفوضة</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Search Card -->
+  <mat-card class="search-card">
+    <mat-card-content>
+      <div class="search-header">
+        <h3>البحث والفلترة</h3>
+        <button mat-icon-button (click)="toggleAdvancedSearch()" [class.expanded]="showAdvancedSearch">
+          <mat-icon>expand_more</mat-icon>
+        </button>
+      </div>
+
+      <form [formGroup]="searchForm" (ngSubmit)="onSearch()" class="search-form">
+        <div class="search-row">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>البحث في الإعلانات</mat-label>
+            <input matInput formControlName="searchTerm" placeholder="ابحث بالعنوان أو الوصف...">
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>الحالة</mat-label>
+            <mat-select formControlName="status">
+              <mat-option *ngFor="let option of statusOptions" [value]="option.value">
+                {{ option.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <div class="action-buttons">
+            <button mat-raised-button color="primary" type="submit" [disabled]="loading">
+              <mat-icon>search</mat-icon>
+              بحث
+            </button>
+            <button mat-button type="button" (click)="clearSearch()">
+              <mat-icon>clear</mat-icon>
+              مسح
+            </button>
+          </div>
+        </div>
+
+        <!-- Advanced Search -->
+        <div class="advanced-search" [class.show]="showAdvancedSearch">
+          <div class="advanced-row">
+            <mat-form-field appearance="outline" class="price-field">
+              <mat-label>السعر من</mat-label>
+              <input matInput type="number" formControlName="priceFrom" placeholder="0">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="price-field">
+              <mat-label>السعر إلى</mat-label>
+              <input matInput type="number" formControlName="priceTo" placeholder="10000">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="date-field">
+              <mat-label>من تاريخ</mat-label>
+              <input matInput [matDatepicker]="dateFromPicker" formControlName="dateFrom">
+              <mat-datepicker-toggle matSuffix [for]="dateFromPicker"></mat-datepicker-toggle>
+              <mat-datepicker #dateFromPicker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="date-field">
+              <mat-label>إلى تاريخ</mat-label>
+              <input matInput [matDatepicker]="dateToPicker" formControlName="dateTo">
+              <mat-datepicker-toggle matSuffix [for]="dateToPicker"></mat-datepicker-toggle>
+              <mat-datepicker #dateToPicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Bulk Actions -->
+  <div class="bulk-actions" *ngIf="selectedAds.size > 0">
+    <mat-card class="bulk-actions-card">
+      <mat-card-content class="bulk-actions-content">
+        <div class="selected-count">
+          <span>{{ selectedAds.size }} إعلان محدد</span>
+        </div>
+        <div class="bulk-buttons">
+          <button mat-raised-button color="primary" (click)="bulkAction('accept')">
+            <mat-icon>check</mat-icon>
+            قبول المحدد
+          </button>
+          <button mat-raised-button color="warn" (click)="bulkAction('reject')">
+            <mat-icon>close</mat-icon>
+            رفض المحدد
+          </button>
+          <button mat-raised-button color="warn" (click)="bulkAction('delete')">
+            <mat-icon>delete</mat-icon>
+            حذف المحدد
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Table Card -->
+  <mat-card class="table-card">
+    <mat-card-content>
+      <div class="table-container">
+        <mat-table [dataSource]="dataSource" class="ads-table" matSort>
+          <!-- Select Column -->
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef>
+              <mat-checkbox 
+                [checked]="isAllSelected()" 
+                [indeterminate]="isIndeterminate()"
+                (change)="selectAllAds()">
+              </mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let ad">
+              <mat-checkbox 
+                [checked]="selectedAds.has(ad.id)"
+                (change)="selectAd(ad.id)">
+              </mat-checkbox>
+            </td>
+          </ng-container>
+
+          <!-- Title Column -->
+          <ng-container matColumnDef="title">
+            <th mat-header-cell *matHeaderCellDef>العنوان</th>
+            <td mat-cell *matCellDef="let ad">
+              <div class="ad-info" (click)="viewAdDetails(ad)">
+                <div class="ad-title">{{ ad.title }}</div>
+                <div class="ad-description">{{ ad.description | slice:0:100 }}{{ ad.description.length > 100 ? '...' : '' }}</div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Owner Column -->
+          <ng-container matColumnDef="owner">
+            <th mat-header-cell *matHeaderCellDef>المالك</th>
+            <td mat-cell *matCellDef="let ad">
+              <div class="owner-info">
+                <div class="owner-name">{{ ad.ownerUserName }}</div>
+                <div class="owner-email">{{ ad.ownerEmail }}</div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Price Column -->
+          <ng-container matColumnDef="price">
+            <th mat-header-cell *matHeaderCellDef>السعر</th>
+            <td mat-cell *matCellDef="let ad">
+              <div class="price-cell">
+                <span class="price-value">{{ formatPrice(ad.price) }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>الحالة</th>
+            <td mat-cell *matCellDef="let ad">
+              <div class="status-cell">
+                <mat-chip [color]="getStatusColor(ad.status)" selected>
+                  {{ getStatusLabel(ad.status) }}
+                </mat-chip>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Created At Column -->
+          <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef>تاريخ الإنشاء</th>
+            <td mat-cell *matCellDef="let ad">
+              <div class="date-cell">
+                {{ formatDate(ad.createdAt) }}
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>الإجراءات</th>
+            <td mat-cell *matCellDef="let ad">
+              <div class="actions-container">
+                <button mat-button 
+                        [matMenuTriggerFor]="actionsMenu"
+                        (click)="openActionsMenu(ad, $event)"
+                        class="actions-button">
+                  <span>إجراءات</span>
+                  <mat-icon>arrow_drop_down</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
+              [class.selected-row]="selectedAds.has(row.id)"></tr>
+        </mat-table>
+
+        <!-- Loading Spinner -->
+        <div class="loading-overlay" *ngIf="loading">
+          <mat-spinner diameter="50"></mat-spinner>
+          <p>جاري تحميل الإعلانات...</p>
+        </div>
+
+        <!-- No Data -->
+        <div class="no-data" *ngIf="!loading && dataSource.data.length === 0">
+          <mat-icon>inbox</mat-icon>
+          <h3>لا توجد إعلانات</h3>
+          <p>لم يتم العثور على أي إعلانات تطابق معايير البحث</p>
+        </div>
+
+        <!-- Pagination -->
+        <mat-paginator 
+          [length]="totalAds"
+          [pageSize]="pageSize"
+          [pageSizeOptions]="[10, 20, 50, 100]"
+          (page)="onPageChange($event)"
+          showFirstLastButtons>
+        </mat-paginator>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Ad Details Modal -->
+  <div class="ad-details-modal" [class.show]="showAdDetails" (click)="closeAdDetails()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>تفاصيل الإعلان</h2>
+        <button mat-icon-button (click)="closeAdDetails()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      
+      <div class="modal-body" *ngIf="selectedAd">
+        <div class="ad-details-grid">
+          <div class="detail-item">
+            <mat-icon>title</mat-icon>
+            <div class="detail-content">
+              <label>العنوان</label>
+              <span>{{ selectedAd.title }}</span>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>description</mat-icon>
+            <div class="detail-content">
+              <label>الوصف</label>
+              <span>{{ selectedAd.description }}</span>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>attach_money</mat-icon>
+            <div class="detail-content">
+              <label>السعر</label>
+              <span>{{ formatPrice(selectedAd.price) }}</span>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>location_on</mat-icon>
+            <div class="detail-content">
+              <label>الموقع</label>
+              <span>{{ selectedAd.location }}</span>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>person</mat-icon>
+            <div class="detail-content">
+              <label>المالك</label>
+              <span>{{ selectedAd.ownerUserName }}</span>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>email</mat-icon>
+            <div class="detail-content">
+              <label>البريد الإلكتروني</label>
+              <span>{{ selectedAd.ownerEmail }}</span>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>schedule</mat-icon>
+            <div class="detail-content">
+              <label>تاريخ الإنشاء</label>
+              <span>{{ formatDate(selectedAd.createdAt) }}</span>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>info</mat-icon>
+            <div class="detail-content">
+              <label>الحالة</label>
+              <span [class]="'status-' + selectedAd.status.toLowerCase()">
+                {{ getStatusLabel(selectedAd.status) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="detail-item" *ngIf="selectedAd.rejectionReason">
+            <mat-icon>cancel</mat-icon>
+            <div class="detail-content">
+              <label>سبب الرفض</label>
+              <span>{{ selectedAd.rejectionReason }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button mat-raised-button color="primary" (click)="acceptAd(selectedAd.id)" *ngIf="selectedAd.status === 'Pending'">
+            <mat-icon>check</mat-icon>
+            قبول الإعلان
+          </button>
+          <button mat-raised-button color="warn" (click)="rejectAd(selectedAd.id)" *ngIf="selectedAd.status === 'Pending'">
+            <mat-icon>close</mat-icon>
+            رفض الإعلان
+          </button>
+          <button mat-raised-button color="warn" (click)="deleteAd(selectedAd.id)">
+            <mat-icon>delete</mat-icon>
+            حذف الإعلان
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Shared Actions Menu -->
+<mat-menu #actionsMenu="matMenu" class="actions-menu">
+  <button mat-menu-item (click)="viewAdDetails(selectedAdForActions!)" *ngIf="selectedAdForActions" class="menu-item">
+    <mat-icon>visibility</mat-icon>
+    <span>عرض التفاصيل</span>
+  </button>
+  <button mat-menu-item (click)="acceptAd(selectedAdForActions!.id)" *ngIf="selectedAdForActions && selectedAdForActions.status === 'Pending'" class="menu-item accept">
+    <mat-icon>check</mat-icon>
+    <span>قبول الإعلان</span>
+  </button>
+  <button mat-menu-item (click)="rejectAd(selectedAdForActions!.id)" *ngIf="selectedAdForActions && selectedAdForActions.status === 'Pending'" class="menu-item reject">
+    <mat-icon>close</mat-icon>
+    <span>رفض الإعلان</span>
+  </button>
+  <button mat-menu-item (click)="deleteAd(selectedAdForActions!.id)" *ngIf="selectedAdForActions" class="menu-item delete">
+    <mat-icon>delete</mat-icon>
+    <span>حذف الإعلان</span>
+  </button>
+</mat-menu>

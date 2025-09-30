@@ -1,81 +1,162 @@
-<div class="admin-dashboard">
-  <!-- Loading State -->
-  <div *ngIf="isLoading" class="loading-container">
-    <app-loading-spinner [text]="'جاري تحميل لوحة الإدارة...'"></app-loading-spinner>
+<!-- لوحة التحكم الإدارية الرئيسية -->
+<div class="admin-dashboard" dir="rtl">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <h1 class="dashboard-title">
+      <mat-icon>dashboard</mat-icon>
+      لوحة التحكم الإدارية
+    </h1>
+    <button mat-raised-button color="primary" (click)="refreshData()" [disabled]="loading">
+      <mat-icon>refresh</mat-icon>
+      تحديث البيانات
+    </button>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>جاري تحميل البيانات...</p>
   </div>
 
   <!-- Dashboard Content -->
-  <div *ngIf="!isLoading" class="dashboard-content">
+  <div *ngIf="!loading" class="dashboard-content">
     
-    <!-- Overview Stats -->
-    <div class="stats-overview">
-      <div class="stats-grid">
-        <mat-card class="stat-card users-card">
-          <mat-card-content>
-            <div class="stat-content">
-              <div class="stat-icon">
-                <lucide-icon name="users" size="24"></lucide-icon>
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+      <!-- إجمالي المستخدمين -->
+      <mat-card class="stat-card users-card">
+        <mat-card-content>
+          <div class="stat-content">
+            <div class="stat-icon">
+              <mat-icon>people</mat-icon>
+            </div>
+            <div class="stat-info">
+              <h3>{{ stats.totalUsers | number }}</h3>
+              <p>إجمالي المستخدمين</p>
+              <span class="growth-indicator positive">
+                <mat-icon>trending_up</mat-icon>
+                +{{ stats.monthlyGrowth }}%
+              </span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- إجمالي الإعلانات -->
+      <mat-card class="stat-card ads-card">
+        <mat-card-content>
+          <div class="stat-content">
+            <div class="stat-icon">
+              <mat-icon>campaign</mat-icon>
+            </div>
+            <div class="stat-info">
+              <h3>{{ stats.totalAds | number }}</h3>
+              <p>إجمالي الإعلانات</p>
+              <div class="stat-details">
+                <span class="active-ads">{{ stats.activeAds }} نشط</span>
+                <span class="pending-ads">{{ stats.pendingAds }} في الانتظار</span>
               </div>
-              <div class="stat-info">
-                <h3>{{ adminStats?.totalUsers | number }}</h3>
-                <p>إجمالي المستخدمين</p>
-                <div class="stat-change" *ngIf="dashboardData">
-                  <lucide-icon name="trending-up" size="14"></lucide-icon>
-                  <span>+{{ getPercentageChange(adminStats?.totalUsers || 0, dashboardData?.previousUsers || 0) }}%</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- إجمالي الفئات -->
+      <mat-card class="stat-card categories-card">
+        <mat-card-content>
+          <div class="stat-content">
+            <div class="stat-icon">
+              <mat-icon>category</mat-icon>
+            </div>
+            <div class="stat-info">
+              <h3>{{ stats.totalCategories | number }}</h3>
+              <p>إجمالي الفئات</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- إجمالي المشاهدات -->
+      <mat-card class="stat-card views-card">
+        <mat-card-content>
+          <div class="stat-content">
+            <div class="stat-icon">
+              <mat-icon>visibility</mat-icon>
+            </div>
+            <div class="stat-info">
+              <h3>{{ stats.totalViews | number }}</h3>
+              <p>إجمالي المشاهدات</p>
+              <span class="likes-count">
+                <mat-icon>favorite</mat-icon>
+                {{ stats.totalLikes | number }} إعجاب
+              </span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Charts and Progress Section -->
+    <div class="charts-section">
+      <div class="chart-container">
+        <mat-card class="chart-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>show_chart</mat-icon>
+              تقارير شهرية
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="chart-placeholder">
+              <mat-icon class="chart-icon">bar_chart</mat-icon>
+              <p>مخطط الإحصائيات الشهرية</p>
+              <div class="chart-data">
+                <div *ngFor="let data of monthlyData" class="month-data">
+                  <span class="month">{{ data.month }}</span>
+                  <div class="data-bars">
+                    <div class="bar users-bar" [style.width.%]="(data.users / 100) * 100">
+                      <span>{{ data.users }}</span>
+                    </div>
+                    <div class="bar ads-bar" [style.width.%]="(data.ads / 200) * 100">
+                      <span>{{ data.ads }}</span>
+                    </div>
+                    <div class="bar views-bar" [style.width.%]="(data.views / 1000) * 100">
+                      <span>{{ data.views }}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </mat-card-content>
         </mat-card>
+      </div>
 
-        <mat-card class="stat-card ads-card">
+      <!-- Progress Goals -->
+      <div class="progress-container">
+        <mat-card class="progress-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>track_changes</mat-icon>
+              أهداف التقدم
+            </mat-card-title>
+          </mat-card-header>
           <mat-card-content>
-            <div class="stat-content">
-              <div class="stat-icon">
-                <lucide-icon name="file-text" size="24"></lucide-icon>
-              </div>
-              <div class="stat-info">
-                <h3>{{ adminStats?.totalAds | number }}</h3>
-                <p>إجمالي الإعلانات</p>
-                <div class="stat-change" *ngIf="dashboardData">
-                  <lucide-icon name="trending-up" size="14"></lucide-icon>
-                  <span>+{{ getPercentageChange(adminStats?.totalAds || 0, dashboardData?.previousAds || 0) }}%</span>
+            <div class="progress-goals">
+              <div *ngFor="let goal of progressGoals" class="progress-item">
+                <div class="progress-header">
+                  <mat-icon [class]="goal.color">{{ goal.icon }}</mat-icon>
+                  <span class="progress-title">{{ goal.title }}</span>
+                  <span class="progress-percentage">
+                    {{ getProgressPercentage(goal.current, goal.target) | number:'1.0-0' }}%
+                  </span>
                 </div>
-              </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-        <mat-card class="stat-card views-card">
-          <mat-card-content>
-            <div class="stat-content">
-              <div class="stat-icon">
-                <lucide-icon name="eye" size="24"></lucide-icon>
-              </div>
-              <div class="stat-info">
-                <h3>{{ adminStats?.totalAds | number }}</h3>
-                <p>إجمالي المشاهدات</p>
-                <div class="stat-change" *ngIf="dashboardData">
-                  <lucide-icon name="trending-up" size="14"></lucide-icon>
-                  <span>+{{ getPercentageChange(adminStats?.totalAds || 0, dashboardData?.previousViews || 0) }}%</span>
-                </div>
-              </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-        <mat-card class="stat-card revenue-card">
-          <mat-card-content>
-            <div class="stat-content">
-              <div class="stat-icon">
-                <lucide-icon name="dollar-sign" size="24"></lucide-icon>
-              </div>
-              <div class="stat-info">
-                <h3>{{ adminStats?.totalRevenue | currency:'SAR':'symbol':'1.0-0':'ar' }}</h3>
-                <p>إجمالي الإيرادات</p>
-                <div class="stat-change" *ngIf="dashboardData">
-                  <lucide-icon name="trending-up" size="14"></lucide-icon>
-                  <span>+{{ getPercentageChange(adminStats?.totalRevenue || 0, dashboardData?.previousRevenue || 0) }}%</span>
+                <mat-progress-bar 
+                  mode="determinate" 
+                  [value]="getProgressPercentage(goal.current, goal.target)"
+                  [color]="goal.color">
+                </mat-progress-bar>
+                <div class="progress-details">
+                  <span>{{ goal.current }} من {{ goal.target }}</span>
                 </div>
               </div>
             </div>
@@ -84,124 +165,36 @@
       </div>
     </div>
 
-    <!-- Main Content Grid -->
-    <div class="main-content">
-      <div class="content-grid">
-        <!-- Left Column -->
-        <div class="left-column">
-          <!-- Recent Activity -->
-          <mat-card class="activity-card">
-            <mat-card-header>
-              <mat-card-title>النشاط الأخير</mat-card-title>
-              <mat-card-subtitle>آخر الأنشطة في النظام</mat-card-subtitle>
-            </mat-card-header>
-            <mat-card-content>
-              <div class="activity-list" *ngIf="dashboardData?.recentActivities">
-                <div *ngFor="let activity of dashboardData.recentActivities" class="activity-item">
-                  <div class="activity-icon">
-                    <lucide-icon [name]="getActivityIcon(activity.type)" size="16"></lucide-icon>
-                  </div>
-                  <div class="activity-content">
-                    <h4>{{ activity.description }}</h4>
-                    <p>{{ formatDate(activity.createdAt) }}</p>
-                  </div>
-                </div>
-              </div>
-              <div *ngIf="!dashboardData?.recentActivities" class="no-activity">
-                <p>لا يوجد نشاط حديث</p>
-              </div>
-            </mat-card-content>
-          </mat-card>
-
-          <!-- System Health -->
-          <mat-card class="health-card">
-            <mat-card-header>
-              <mat-card-title>صحة النظام</mat-card-title>
-              <mat-card-subtitle>حالة النظام والأداء</mat-card-subtitle>
-            </mat-card-header>
-            <mat-card-content>
-              <div class="health-metrics">
-                <div class="health-item">
-                  <div class="health-label">استخدام الخادم</div>
-                  <div class="health-value">85%</div>
-                  <div class="health-bar">
-                    <div class="health-progress" style="width: 85%"></div>
-                  </div>
-                </div>
-                <div class="health-item">
-                  <div class="health-label">استخدام قاعدة البيانات</div>
-                  <div class="health-value">72%</div>
-                  <div class="health-bar">
-                    <div class="health-progress" style="width: 72%"></div>
-                  </div>
-                </div>
-                <div class="health-item">
-                  <div class="health-label">استخدام التخزين</div>
-                  <div class="health-value">45%</div>
-                  <div class="health-bar">
-                    <div class="health-progress" style="width: 45%"></div>
-                  </div>
-                </div>
-              </div>
-            </mat-card-content>
-          </mat-card>
-        </div>
-
-        <!-- Right Column -->
-        <div class="right-column">
-          <!-- Quick Actions -->
-          <mat-card class="actions-card">
-            <mat-card-header>
-              <mat-card-title>إجراءات سريعة</mat-card-title>
-              <mat-card-subtitle>الوصول السريع للميزات المهمة</mat-card-subtitle>
-            </mat-card-header>
-            <mat-card-content>
-              <div class="actions-grid">
-                <button mat-stroked-button routerLink="/admin/users" class="action-button">
-                  <lucide-icon name="users" size="20" class="me-2"></lucide-icon>
-                  إدارة المستخدمين
-                </button>
-                <button mat-stroked-button routerLink="/admin/ads" class="action-button">
-                  <lucide-icon name="file-text" size="20" class="me-2"></lucide-icon>
-                  إدارة الإعلانات
-                </button>
-                <button mat-stroked-button routerLink="/admin/categories" class="action-button">
-                  <lucide-icon name="tag" size="20" class="me-2"></lucide-icon>
-                  إدارة الفئات
-                </button>
-                <button mat-stroked-button routerLink="/admin/reports" class="action-button">
-                  <lucide-icon name="bar-chart-3" size="20" class="me-2"></lucide-icon>
-                  التقارير
-                </button>
-              </div>
-            </mat-card-content>
-          </mat-card>
-
-          <!-- Alerts -->
-          <mat-card class="alerts-card">
-            <mat-card-header>
-              <mat-card-title>التنبيهات</mat-card-title>
-              <mat-card-subtitle>تنبيهات مهمة تتطلب انتباهك</mat-card-subtitle>
-            </mat-card-header>
-            <mat-card-content>
-              <div class="alerts-list">
-                <div class="alert-item warning">
-                  <lucide-icon name="alert-circle" size="16"></lucide-icon>
-                  <span>5 إعلانات في انتظار المراجعة</span>
-                </div>
-                <div class="alert-item info">
-                  <lucide-icon name="info" size="16"></lucide-icon>
-                  <span>3 مستخدمين جدد اليوم</span>
-                </div>
-                <div class="alert-item success">
-                  <lucide-icon name="check-circle" size="16"></lucide-icon>
-                  <span>النظام يعمل بشكل طبيعي</span>
-                </div>
-              </div>
-            </mat-card-content>
-          </mat-card>
-        </div>
-      </div>
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <mat-card class="actions-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>flash_on</mat-icon>
+            إجراءات سريعة
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="action-buttons">
+            <button mat-raised-button color="primary" routerLink="/admin/users">
+              <mat-icon>people</mat-icon>
+              إدارة المستخدمين
+            </button>
+            <button mat-raised-button color="accent" routerLink="/admin/ads">
+              <mat-icon>campaign</mat-icon>
+              إدارة الإعلانات
+            </button>
+            <button mat-raised-button color="warn" routerLink="/admin/categories">
+              <mat-icon>category</mat-icon>
+              إدارة الفئات
+            </button>
+            <button mat-raised-button routerLink="/admin/reports">
+              <mat-icon>assessment</mat-icon>
+              التقارير
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
     </div>
   </div>
 </div>

@@ -480,7 +480,7 @@ export class LoginComponent implements OnInit {
       this.authService.getProfile().subscribe({
         next: (profile) => {
           const isAdmin = Array.isArray(profile.roles) && profile.roles.includes('Admin');
-          this.router.navigate([isAdmin ? '/dashboard' : '/home']);
+          this.router.navigate([isAdmin ? '/admin/dashboard' : '/home']);
         },
         error: () => {
           // If failing to load profile, stay on login
@@ -506,7 +506,7 @@ export class LoginComponent implements OnInit {
           this.toastr.success('تم تسجيل الدخول بنجاح', 'مرحباً');
           const roles = response?.user?.roles || [];
           const isAdmin = Array.isArray(roles) && roles.includes('Admin');
-          this.router.navigate([isAdmin ? '/dashboard' : '/profile']);
+          this.router.navigate([isAdmin ? '/admin/dashboard' : '/profile']);
         },
         error: (error) => {
           this.isLoading = false;

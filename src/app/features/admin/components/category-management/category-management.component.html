@@ -1,0 +1,317 @@
+<!-- إدارة الفئات -->
+<div class="category-management" dir="rtl">
+  <!-- Header -->
+  <div class="page-header">
+    <h1 class="page-title">
+      <mat-icon>category</mat-icon>
+      إدارة الفئات
+    </h1>
+    <div class="header-actions">
+      <button mat-raised-button color="accent" (click)="toggleTreeView()">
+        <mat-icon>{{ showTreeView ? 'view_list' : 'account_tree' }}</mat-icon>
+        {{ showTreeView ? 'عرض جدولي' : 'عرض شجري' }}
+      </button>
+      <button mat-raised-button color="primary" (click)="addCategory()">
+        <mat-icon>add</mat-icon>
+        إضافة فئة
+      </button>
+    </div>
+  </div>
+
+  <!-- Search and Filters -->
+  <mat-card class="search-card">
+    <mat-card-content>
+      <form [formGroup]="searchForm" class="search-form">
+        <div class="search-row">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>البحث في الفئات</mat-label>
+            <input matInput formControlName="searchTerm" placeholder="اسم الفئة، الوصف...">
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>الحالة</mat-label>
+            <mat-select formControlName="isActive">
+              <mat-option value="all">جميع الفئات</mat-option>
+              <mat-option value="true">نشطة</mat-option>
+              <mat-option value="false">غير نشطة</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <button mat-raised-button color="primary" (click)="onSearch()" [disabled]="loading">
+            <mat-icon>search</mat-icon>
+            بحث
+          </button>
+
+          <button mat-button (click)="clearSearch()">
+            <mat-icon>clear</mat-icon>
+            مسح
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Category Form -->
+  <mat-card *ngIf="selectedCategory || !isEditing" class="form-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>{{ isEditing ? 'edit' : 'add' }}</mat-icon>
+        {{ isEditing ? 'تعديل الفئة' : 'إضافة فئة جديدة' }}
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="categoryForm" class="category-form">
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>اسم الفئة</mat-label>
+            <input matInput formControlName="name" placeholder="أدخل اسم الفئة">
+            <mat-error *ngIf="categoryForm.get('name')?.hasError('required')">
+              اسم الفئة مطلوب
+            </mat-error>
+            <mat-error *ngIf="categoryForm.get('name')?.hasError('minlength')">
+              يجب أن يكون الاسم على الأقل حرفين
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>الفئة الأب</mat-label>
+            <mat-select formControlName="parentId">
+              <mat-option [value]="null">لا توجد فئة أب</mat-option>
+              <mat-option *ngFor="let category of parentCategories" [value]="category.id">
+                {{ category.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="form-field full-width">
+            <mat-label>وصف الفئة</mat-label>
+            <textarea matInput formControlName="description" placeholder="أدخل وصف الفئة" rows="3"></textarea>
+            <mat-error *ngIf="categoryForm.get('description')?.hasError('required')">
+              وصف الفئة مطلوب
+            </mat-error>
+            <mat-error *ngIf="categoryForm.get('description')?.hasError('minlength')">
+              يجب أن يكون الوصف على الأقل 5 أحرف
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-slide-toggle formControlName="isActive" color="primary">
+            فئة نشطة
+          </mat-slide-toggle>
+        </div>
+
+        <div class="form-actions">
+          <button mat-raised-button color="primary" (click)="saveCategory()" [disabled]="!categoryForm.valid">
+            <mat-icon>save</mat-icon>
+            {{ isEditing ? 'تحديث' : 'إنشاء' }}
+          </button>
+          <button mat-button (click)="cancelEdit()">
+            <mat-icon>cancel</mat-icon>
+            إلغاء
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Bulk Actions -->
+  <div *ngIf="selectedCategories.size > 0" class="bulk-actions">
+    <mat-card class="bulk-actions-card">
+      <mat-card-content>
+        <div class="bulk-actions-content">
+          <span class="selected-count">
+            تم اختيار {{ selectedCategories.size }} فئة
+          </span>
+          <div class="bulk-buttons">
+            <button mat-button color="primary" (click)="bulkAction('activate')">
+              <mat-icon>check_circle</mat-icon>
+              تفعيل
+            </button>
+            <button mat-button color="accent" (click)="bulkAction('deactivate')">
+              <mat-icon>cancel</mat-icon>
+              إلغاء التفعيل
+            </button>
+            <button mat-button color="warn" (click)="bulkAction('delete')">
+              <mat-icon>delete</mat-icon>
+              حذف
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Tree View -->
+  <mat-card *ngIf="showTreeView" class="tree-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>account_tree</mat-icon>
+        عرض شجري للفئات
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="tree-container">
+        <div *ngFor="let node of treeDataSource" class="tree-node">
+          <div class="node-content" (click)="toggleNode(node)">
+            <mat-icon *ngIf="hasChildren(node)" class="expand-icon">
+              {{ node.isExpanded ? 'expand_less' : 'expand_more' }}
+            </mat-icon>
+            <mat-icon *ngIf="!hasChildren(node)" class="leaf-icon">folder</mat-icon>
+            <span class="node-name">{{ node.name }}</span>
+            <mat-chip *ngIf="node.adsCount" class="ads-count">{{ node.adsCount }}</mat-chip>
+            <mat-slide-toggle [checked]="node.isActive" color="primary" (change)="toggleNode(node)">
+            </mat-slide-toggle>
+          </div>
+          <div *ngIf="node.isExpanded && hasChildren(node)" class="children">
+            <div *ngFor="let child of node.children" class="child-node">
+              <div class="node-content">
+                <mat-icon class="leaf-icon">folder</mat-icon>
+                <span class="node-name">{{ child.name }}</span>
+                <mat-chip *ngIf="child.adsCount" class="ads-count">{{ child.adsCount }}</mat-chip>
+                <mat-slide-toggle [checked]="child.isActive" color="primary">
+                </mat-slide-toggle>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Table View -->
+  <mat-card *ngIf="!showTreeView" class="table-card">
+    <mat-card-content>
+      <div class="table-container">
+        <table mat-table [dataSource]="dataSource" class="categories-table">
+          
+          <!-- Select Column -->
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef>
+              <mat-checkbox 
+                [checked]="isAllSelected()"
+                [indeterminate]="isIndeterminate()"
+                (change)="selectAllCategories()">
+              </mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let category">
+              <mat-checkbox 
+                [checked]="selectedCategories.has(category.id)"
+                (change)="selectCategory(category.id)">
+              </mat-checkbox>
+            </td>
+          </ng-container>
+
+          <!-- Name Column -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>اسم الفئة</th>
+            <td mat-cell *matCellDef="let category">
+              <div class="category-name">
+                <mat-icon class="category-icon">category</mat-icon>
+                <span>{{ category.name }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Description Column -->
+          <ng-container matColumnDef="description">
+            <th mat-header-cell *matHeaderCellDef>الوصف</th>
+            <td mat-cell *matCellDef="let category">
+              <div class="category-description">
+                {{ category.description | slice:0:50 }}...
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Parent Category Column -->
+          <ng-container matColumnDef="parentCategory">
+            <th mat-header-cell *matHeaderCellDef>الفئة الأب</th>
+            <td mat-cell *matCellDef="let category">
+              <span *ngIf="category.parentId; else noParent">
+                {{ getParentCategoryName(category.parentId) }}
+              </span>
+              <ng-template #noParent>
+                <span class="no-parent">لا توجد</span>
+              </ng-template>
+            </td>
+          </ng-container>
+
+          <!-- Ads Count Column -->
+          <ng-container matColumnDef="adsCount">
+            <th mat-header-cell *matHeaderCellDef>عدد الإعلانات</th>
+            <td mat-cell *matCellDef="let category">
+              <mat-chip color="primary">0</mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Is Active Column -->
+          <ng-container matColumnDef="isActive">
+            <th mat-header-cell *matHeaderCellDef>الحالة</th>
+            <td mat-cell *matCellDef="let category">
+              <mat-slide-toggle [checked]="true" color="primary">
+              </mat-slide-toggle>
+            </td>
+          </ng-container>
+
+          <!-- Created At Column -->
+          <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef>تاريخ الإنشاء</th>
+            <td mat-cell *matCellDef="let category">
+              <div class="date-cell">
+                <mat-icon class="date-icon">calendar_today</mat-icon>
+                <span>{{ formatDate(category.createdAt) }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>الإجراءات</th>
+            <td mat-cell *matCellDef="let category">
+              <button mat-icon-button [matMenuTriggerFor]="categoryMenu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #categoryMenu="matMenu">
+                <button mat-menu-item (click)="editCategory(category)">
+                  <mat-icon>edit</mat-icon>
+                  تعديل
+                </button>
+                <button mat-menu-item (click)="deleteCategory(category.id)" class="delete-action">
+                  <mat-icon>delete</mat-icon>
+                  حذف
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+
+        <!-- Loading Spinner -->
+        <div *ngIf="loading" class="loading-overlay">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>جاري تحميل الفئات...</p>
+        </div>
+
+        <!-- No Data -->
+        <div *ngIf="!loading && dataSource.data.length === 0" class="no-data">
+          <mat-icon>category</mat-icon>
+          <p>لا توجد فئات</p>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <mat-paginator 
+        [length]="totalCategories"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="[10, 20, 50, 100]"
+        (page)="onPageChange($event)"
+        showFirstLastButtons>
+      </mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</div>

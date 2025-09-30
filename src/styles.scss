@@ -173,8 +173,31 @@ html, body {
   padding: 0;
 }
 
+/* إزالة الشفافية من جميع القوائم المنسدلة */
+.mat-mdc-menu-panel {
+  background: #ffffff !important;
+  opacity: 1 !important;
+  backdrop-filter: none !important;
+  
+  .mat-mdc-menu-content {
+    background: #ffffff !important;
+    opacity: 1 !important;
+  }
+  
+  .mat-mdc-menu-item {
+    background: transparent !important;
+    opacity: 1 !important;
+    color: #333 !important;
+    
+    &:hover {
+      background: #f5f5f5 !important;
+      opacity: 1 !important;
+    }
+  }
+}
+
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Tajawal', 'Noto Sans Arabic', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 16px;
   line-height: 1.6;
   color: var(--text);

@@ -22,7 +22,7 @@ export class GuestGuard implements CanActivate {
         if (!isAuthenticated) {
           return true;
         } else {
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/admin/dashboard']);
           return false;
         }
       }),

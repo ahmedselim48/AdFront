@@ -48,10 +48,14 @@ import { SubscriptionSettingsComponent } from './features/profile/components/sub
 // Import Admin Components
 import { AdminComponent } from './features/admin/admin.component';
 import { AdminDashboardComponent } from './features/admin/components/admin-dashboard/admin-dashboard.component';
+import { UserManagementComponent } from './features/admin/components/user-management/user-management.component';
+import { AdManagementComponent } from './features/admin/components/ad-management/ad-management.component';
+import { CategoryManagementComponent } from './features/admin/components/category-management/category-management.component';
+import { ReportsComponent as AdminReportsComponent } from './features/admin/components/reports/reports.component';
 import { inject } from '@angular/core';
 import { AuthService } from './core/auth/auth.service';
 import { Router } from '@angular/router';
-import { AdminComponent as AdminManagementComponent } from './features/admin/components/admin/admin.component';
+// Removed duplicate admin component import
 
 export const routes: Routes = [
   // Redirect root to home
@@ -116,7 +120,7 @@ export const routes: Routes = [
     const router = inject(Router);
     const user = auth.getCurrentUser();
     const isAdmin = Array.isArray(user?.roles) && user!.roles.includes('Admin');
-    if (isAdmin) { router.navigateByUrl('/dashboard'); return false; }
+    if (isAdmin) { router.navigateByUrl('/admin/dashboard'); return false; }
     return true;
   }], children: [
     { path: '', component: ProfileComponent },
@@ -138,15 +142,14 @@ export const routes: Routes = [
   ] },
   
   // Admin Management - Available without auth for testing
-  { path: 'admin', children: [
-    { path: '', component: AdminComponent },
+  { path: 'admin', component: AdminComponent, children: [
+    { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     { path: 'dashboard', component: AdminDashboardComponent },
-    { path: 'management', component: AdminManagementComponent },
-    { path: 'users', redirectTo: 'management', pathMatch: 'full' }, // TODO: Create when ready
-    { path: 'ads', redirectTo: 'management', pathMatch: 'full' }, // TODO: Create when ready
-    { path: 'categories', redirectTo: 'management', pathMatch: 'full' }, // TODO: Create when ready
-    { path: 'reports', redirectTo: 'management', pathMatch: 'full' }, // TODO: Create when ready
-    { path: 'notifications', redirectTo: 'management', pathMatch: 'full' } // TODO: Create when ready
+    { path: 'users', component: UserManagementComponent },
+    { path: 'ads', component: AdManagementComponent },
+    { path: 'categories', component: CategoryManagementComponent },
+    { path: 'reports', component: AdminReportsComponent },
+    { path: 'notifications', component: AdminComponent }
   ] },
   
   // Additional Routes for better navigation

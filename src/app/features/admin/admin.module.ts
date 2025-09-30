@@ -35,27 +35,27 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 // import { NgChartsModule } from 'ng2-charts'; // TODO: Install ng2-charts when needed
 
 // Components
-import { AdminComponent } from './components/admin/admin.component';
+import { AdminComponent } from './admin.component';
 import { AdminDashboardComponent } from './components/admin-dashboard/admin-dashboard.component';
+import { UserManagementComponent } from './components/user-management/user-management.component';
+import { AdManagementComponent } from './components/ad-management/ad-management.component';
+import { CategoryManagementComponent } from './components/category-management/category-management.component';
+import { ReportsComponent } from './components/reports/reports.component';
 // TODO: Add other admin components when needed
-// import { UserManagementComponent } from './components/user-management/user-management.component';
-// import { AdManagementComponent } from './components/ad-management/ad-management.component';
-// import { CategoryManagementComponent } from './components/category-management/category-management.component';
-// import { ReportsComponent } from './components/reports/reports.component';
 // import { AdminStatsComponent } from './components/admin-stats/admin-stats.component';
 // import { AdminNotificationsComponent } from './components/admin-notifications/admin-notifications.component';
 
 // Services
 import { AdminService } from '../../core/services/admin.service';
-import { AdsService } from '../../core/services/ads.service';
-import { CategoriesService } from '../../core/services/categories.service';
+import { StatisticsService } from '../../core/services/statistics.service';
+import { CategoryManagementService } from '../../core/services/category-management.service';
 import { NotificationsService } from '../../core/services/notifications.service';
 
 const ADMIN_ROUTES = [
   {
-    path: '',
-    component: AdminComponent,
-    children: [
+          path: '',
+          component: AdminComponent,
+          children: [
       {
         path: '',
         redirectTo: 'dashboard',
@@ -65,23 +65,23 @@ const ADMIN_ROUTES = [
         path: 'dashboard',
         component: AdminDashboardComponent
       },
+      {
+        path: 'users',
+        component: UserManagementComponent
+      },
+      {
+        path: 'ads',
+        component: AdManagementComponent
+      },
+      {
+        path: 'categories',
+        component: CategoryManagementComponent
+      },
+      {
+        path: 'reports',
+        component: ReportsComponent
+      },
       // TODO: Add routes when components are created
-      // {
-      //   path: 'users',
-      //   component: UserManagementComponent
-      // },
-      // {
-      //   path: 'ads',
-      //   component: AdManagementComponent
-      // },
-      // {
-      //   path: 'categories',
-      //   component: CategoryManagementComponent
-      // },
-      // {
-      //   path: 'reports',
-      //   component: ReportsComponent
-      // },
       // {
       //   path: 'notifications',
       //   component: AdminNotificationsComponent
@@ -125,11 +125,11 @@ const ADMIN_ROUTES = [
     MatProgressBarModule,
     // NgChartsModule // TODO: Install ng2-charts when needed
   ],
-  providers: [
-    AdminService,
-    AdsService,
-    CategoriesService,
-    NotificationsService
-  ]
+        providers: [
+          AdminService,
+          StatisticsService,
+          CategoryManagementService,
+          NotificationsService
+        ]
 })
 export class AdminModule { }

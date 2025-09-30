@@ -1,22 +1,83 @@
-<section class="admin-wrap">
-  <h2>{{ 'admin.title' | t }}</h2>
-  <div class="grid">
-    <div>
-      <h3>{{ 'admin.users' | t }}</h3>
-      <ul class="list">
-        <li *ngFor="let u of users">{{u.email}} — {{u.role}}</li>
-      </ul>
+<!-- لوحة التحكم الإدارية -->
+<div class="admin-container">
+  <!-- Sidebar -->
+  <div class="admin-sidebar">
+    <div class="sidebar-header">
+      <h2 class="sidebar-title">
+        <mat-icon>admin_panel_settings</mat-icon>
+        لوحة الإدارة
+      </h2>
     </div>
-    <div>
-      <h3>{{ 'admin.tenants' | t }}</h3>
-      <form [formGroup]="tenants" (ngSubmit)="saveTenants()">
-        <div class="tenant" *ngFor="let t of tArr.controls; let i = index" [formGroup]="$any(t)">
-          <input [placeholder]="('admin.tenantName' | t)" formControlName="name">
-          <button type="button" (click)="removeTenant(i)">{{ 'common.remove' | t }}</button>
+    
+    <nav class="sidebar-nav">
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a routerLink="/admin/dashboard" routerLinkActive="active" class="nav-link">
+            <mat-icon>dashboard</mat-icon>
+            <span>لوحة التحكم</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/admin/users" routerLinkActive="active" class="nav-link">
+            <mat-icon>people</mat-icon>
+            <span>إدارة المستخدمين</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/admin/ads" routerLinkActive="active" class="nav-link">
+            <mat-icon>campaign</mat-icon>
+            <span>إدارة الإعلانات</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/admin/categories" routerLinkActive="active" class="nav-link">
+            <mat-icon>category</mat-icon>
+            <span>إدارة الفئات</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/admin/reports" routerLinkActive="active" class="nav-link">
+            <mat-icon>assessment</mat-icon>
+            <span>التقارير</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/admin/notifications" routerLinkActive="active" class="nav-link">
+            <mat-icon>notifications</mat-icon>
+            <span>الإشعارات</span>
+            <span class="notification-badge">3</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/admin/settings" routerLinkActive="active" class="nav-link">
+            <mat-icon>settings</mat-icon>
+            <span>الإعدادات</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">
+          <mat-icon>person</mat-icon>
         </div>
-        <button type="button" (click)="addTenant()">{{ 'admin.addTenant' | t }}</button>
-        <button type="submit">{{ 'common.save' | t }}</button>
-      </form>
+        <div class="user-details">
+          <span class="user-name">المدير</span>
+          <span class="user-role">مدير النظام</span>
+        </div>
+      </div>
+      <button mat-icon-button class="logout-btn" title="تسجيل الخروج">
+        <mat-icon>logout</mat-icon>
+      </button>
     </div>
   </div>
-</section>
+
+  <!-- Main Content -->
+  <div class="admin-main">
+    <!-- Content Area -->
+    <div class="admin-content">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

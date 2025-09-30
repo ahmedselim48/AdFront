@@ -1,0 +1,431 @@
+<!-- إدارة المستخدمين -->
+<div class="user-management" dir="rtl">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="title-section">
+        <h1 class="page-title">
+          <mat-icon>people</mat-icon>
+          إدارة المستخدمين
+        </h1>
+        <p class="page-subtitle">إدارة شاملة لجميع مستخدمي النظام</p>
+      </div>
+      <div class="header-actions">
+        <button mat-stroked-button (click)="exportUsers()" [disabled]="loading">
+          <mat-icon>download</mat-icon>
+          تصدير
+        </button>
+        <button mat-raised-button color="primary" (click)="loadUsers()" [disabled]="loading">
+          <mat-icon>refresh</mat-icon>
+          تحديث
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="stats-cards">
+    <mat-card class="stat-card total-users">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon">
+            <mat-icon>people</mat-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{ totalUsers }}</h3>
+            <p>إجمالي المستخدمين</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card active-users">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon">
+            <mat-icon>person_check</mat-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{ activeUsersCount }}</h3>
+            <p>المستخدمين النشطين</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card blocked-users">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon">
+            <mat-icon>person_off</mat-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{ blockedUsersCount }}</h3>
+            <p>المستخدمين المحظورين</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card new-users">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-icon">
+            <mat-icon>person_add</mat-icon>
+          </div>
+          <div class="stat-info">
+            <h3>{{ newUsersCount }}</h3>
+            <p>مستخدمين جدد هذا الشهر</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+
+  <!-- Bulk Actions -->
+  <div *ngIf="selectedUsers.size > 0" class="bulk-actions">
+    <mat-card class="bulk-actions-card">
+      <mat-card-content>
+        <div class="bulk-actions-content">
+          <span class="selected-count">
+            تم اختيار {{ selectedUsers.size }} مستخدم
+          </span>
+          <div class="bulk-buttons">
+            <button mat-button color="warn" (click)="bulkAction('ban7days')">
+              <mat-icon>block</mat-icon>
+              حظر 7 أيام
+            </button>
+            <button mat-button color="warn" (click)="bulkAction('banpermanent')">
+              <mat-icon>block</mat-icon>
+              حظر دائم
+            </button>
+            <button mat-button color="accent" (click)="bulkAction('unban')">
+              <mat-icon>check_circle</mat-icon>
+              إلغاء الحظر
+            </button>
+            <button mat-button color="warn" (click)="bulkAction('delete')">
+              <mat-icon>delete</mat-icon>
+              حذف
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Users Table -->
+  <mat-card class="table-card">
+    <mat-card-content>
+      <div class="table-container">
+        <table mat-table [dataSource]="dataSource" class="users-table">
+          
+          <!-- Select Column -->
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef>
+              <mat-checkbox 
+                [checked]="isAllSelected()"
+                [indeterminate]="isIndeterminate()"
+                (change)="selectAllUsers()">
+              </mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let user">
+              <mat-checkbox 
+                [checked]="selectedUsers.has(user.id)"
+                (change)="selectUser(user.id)">
+              </mat-checkbox>
+            </td>
+          </ng-container>
+
+
+          <!-- Name Column -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>الاسم</th>
+            <td mat-cell *matCellDef="let user">
+              <div class="user-info" (click)="viewUserDetails(user)">
+                <div class="user-name">{{ getDisplayName(user) }}</div>
+                <div class="user-id">{{ '@' + user.userName }}</div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Email Column -->
+          <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef>البريد الإلكتروني</th>
+            <td mat-cell *matCellDef="let user">
+              <div class="email-cell">
+                <mat-icon class="email-icon">email</mat-icon>
+                <span>{{ user.email }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+
+          <!-- Subscription Column -->
+          <ng-container matColumnDef="subscription">
+            <th mat-header-cell *matHeaderCellDef>حالة الاشتراك</th>
+            <td mat-cell *matCellDef="let user">
+              <div class="subscription-cell" (click)="viewUserDetails(user)">
+                <div class="subscription-status" [class.active]="user.subscription?.isActive" [class.inactive]="!user.subscription?.isActive">
+                  <mat-icon>{{ user.subscription?.isActive ? 'check_circle' : 'cancel' }}</mat-icon>
+                  <span>{{ user.subscription?.isActive ? 'مشترك' : 'غير مشترك' }}</span>
+                </div>
+                <div class="subscription-details" *ngIf="user.subscription?.isActive">
+                  <small>{{ user.subscription.daysLeft }} يوم متبقي</small>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Role Column -->
+          <ng-container matColumnDef="role">
+            <th mat-header-cell *matHeaderCellDef>الدور</th>
+            <td mat-cell *matCellDef="let user">
+              <mat-chip [color]="isAdminUser(user) ? 'primary' : 'basic'">
+                {{ getRoleLabel(user) }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>الحالة</th>
+            <td mat-cell *matCellDef="let user">
+              <div class="status-cell">
+                <mat-chip [color]="getStatusColor(user.status)">
+                  {{ getStatusLabel(user.status) }}
+                </mat-chip>
+                <div class="status-details" *ngIf="user.status === 'Blocked' && user.blockReason">
+                  <small class="block-reason">{{ user.blockReason }}</small>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>الإجراءات</th>
+            <td mat-cell *matCellDef="let user">
+              <div class="actions-container">
+                <button mat-button class="actions-button" [matMenuTriggerFor]="userActionsMenu" (click)="setSelectedUser(user)">
+                  <span>إجراءات</span>
+                  <mat-icon>keyboard_arrow_down</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+
+        <!-- Loading Spinner -->
+        <div *ngIf="loading" class="loading-overlay">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>جاري تحميل المستخدمين...</p>
+        </div>
+
+        <!-- No Data -->
+        <div *ngIf="!loading && dataSource.data.length === 0" class="no-data">
+          <mat-icon>people_outline</mat-icon>
+          <p>لا توجد بيانات مستخدمين</p>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <mat-paginator 
+        [length]="totalUsers"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="[10, 20, 50, 100]"
+        (page)="onPageChange($event)"
+        showFirstLastButtons>
+      </mat-paginator>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- User Details Modal -->
+  <div class="user-details-modal" [class.show]="showUserDetails" (click)="closeUserDetails()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>تفاصيل المستخدم</h2>
+        <button mat-icon-button (click)="closeUserDetails()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      
+      <div class="modal-body" *ngIf="selectedUser">
+        <div class="user-profile">
+          <div class="user-avatar-large">
+            <img *ngIf="selectedUser.profileImageUrl" [src]="selectedUser.profileImageUrl" [alt]="selectedUser.fullName">
+            <mat-icon *ngIf="!selectedUser.profileImageUrl">person</mat-icon>
+          </div>
+          <div class="user-basic-info">
+            <h3>{{ getDisplayName(selectedUser) }}</h3>
+            <p>{{ selectedUser.email }}</p>
+            <mat-chip [color]="getStatusColor(selectedUser.status)">
+              {{ getStatusLabel(selectedUser.status) }}
+            </mat-chip>
+          </div>
+        </div>
+
+        <div class="user-details-grid">
+          <div class="detail-item">
+            <mat-icon>person</mat-icon>
+            <div class="detail-content">
+              <label>الاسم الكامل</label>
+              <span>{{ getDisplayName(selectedUser) }}</span>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>email</mat-icon>
+            <div class="detail-content">
+              <label>البريد الإلكتروني</label>
+              <span>{{ selectedUser.email }}</span>
+            </div>
+          </div>
+
+
+          <div class="detail-item">
+            <mat-icon>badge</mat-icon>
+            <div class="detail-content">
+              <label>الدور</label>
+              <span>{{ getRoleLabel(selectedUser) }}</span>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>calendar_today</mat-icon>
+            <div class="detail-content">
+              <label>تاريخ التسجيل</label>
+              <span>{{ formatDate(selectedUser.createdAt) }}</span>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>login</mat-icon>
+            <div class="detail-content">
+              <label>آخر دخول</label>
+              <span>{{ selectedUser.refreshTokenExpiryTime ? formatDate(selectedUser.refreshTokenExpiryTime) : 'لم يسجل دخول' }}</span>
+            </div>
+          </div>
+
+
+          <div class="detail-item">
+            <mat-icon>verified</mat-icon>
+            <div class="detail-content">
+              <label>البريد مؤكد</label>
+              <span>{{ selectedUser.emailConfirmed ? 'نعم' : 'لا' }}</span>
+            </div>
+          </div>
+
+          <div class="detail-item">
+            <mat-icon>toggle_on</mat-icon>
+            <div class="detail-content">
+              <label>الحساب نشط</label>
+              <span>{{ selectedUser.isActive ? 'نعم' : 'لا' }}</span>
+            </div>
+          </div>
+
+          <div class="detail-item" *ngIf="selectedUser.blockReason">
+            <mat-icon>block</mat-icon>
+            <div class="detail-content">
+              <label>سبب الحظر</label>
+              <span>{{ selectedUser.blockReason }}</span>
+            </div>
+          </div>
+
+          <div class="detail-item" *ngIf="selectedUser.blockExpiryDate">
+            <mat-icon>schedule</mat-icon>
+            <div class="detail-content">
+              <label>انتهاء الحظر</label>
+              <span>{{ formatDate(selectedUser.blockExpiryDate) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Subscription Details Section -->
+        <div class="subscription-section" *ngIf="selectedUser.subscription">
+          <h4 class="section-title">معلومات الاشتراك</h4>
+          <div class="subscription-details">
+            <div class="detail-item subscription-item">
+              <mat-icon [class.active-icon]="selectedUser.subscription.isActive" [class.inactive-icon]="!selectedUser.subscription.isActive">
+                {{ selectedUser.subscription.isActive ? 'check_circle' : 'cancel' }}
+              </mat-icon>
+              <div class="detail-content">
+                <label>حالة الاشتراك</label>
+                <span [class.active]="selectedUser.subscription.isActive" [class.inactive]="!selectedUser.subscription.isActive">
+                  {{ selectedUser.subscription.isActive ? 'مشترك' : 'غير مشترك' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="detail-item subscription-item" *ngIf="selectedUser.subscription.isActive">
+              <mat-icon>attach_money</mat-icon>
+              <div class="detail-content">
+                <label>المبلغ</label>
+                <span>{{ selectedUser.subscription.amount }} ريال</span>
+              </div>
+            </div>
+
+            <div class="detail-item subscription-item" *ngIf="selectedUser.subscription.isActive">
+              <mat-icon>business</mat-icon>
+              <div class="detail-content">
+                <label>المزود</label>
+                <span>{{ selectedUser.subscription.provider }}</span>
+              </div>
+            </div>
+
+            <div class="detail-item subscription-item" *ngIf="selectedUser.subscription.isActive">
+              <mat-icon>event</mat-icon>
+              <div class="detail-content">
+                <label>تاريخ الانتهاء</label>
+                <span>{{ formatDate(selectedUser.subscription.endDate) }}</span>
+              </div>
+            </div>
+
+            <div class="detail-item subscription-item" *ngIf="selectedUser.subscription.isActive">
+              <mat-icon>schedule</mat-icon>
+              <div class="detail-content">
+                <label>الأيام المتبقية</label>
+                <span class="days-left">{{ selectedUser.subscription.daysLeft }} يوم</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button mat-button (click)="closeUserDetails()">إغلاق</button>
+          <button mat-raised-button color="primary" (click)="editUser(selectedUser)">تعديل</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Shared Actions Menu -->
+<mat-menu #userActionsMenu="matMenu" class="actions-menu">
+  <button mat-menu-item (click)="viewUserDetails(selectedUserForActions!)" *ngIf="selectedUserForActions" class="menu-item">
+    <mat-icon>visibility</mat-icon>
+    <span>عرض التفاصيل</span>
+  </button>
+  <button mat-menu-item (click)="banUser(selectedUserForActions!.id, '7days')" *ngIf="selectedUserForActions && selectedUserForActions.status !== 'Blocked'" class="menu-item">
+    <mat-icon>block</mat-icon>
+    <span>حظر 7 أيام</span>
+  </button>
+  <button mat-menu-item (click)="banUser(selectedUserForActions!.id, 'permanent')" *ngIf="selectedUserForActions && selectedUserForActions.status !== 'Blocked'" class="menu-item">
+    <mat-icon>block</mat-icon>
+    <span>حظر دائم</span>
+  </button>
+  <button mat-menu-item (click)="unbanUser(selectedUserForActions!.id)" *ngIf="selectedUserForActions && selectedUserForActions.status === 'Blocked'" class="menu-item">
+    <mat-icon>check_circle</mat-icon>
+    <span>إلغاء الحظر</span>
+  </button>
+  <mat-divider></mat-divider>
+  <button mat-menu-item (click)="deleteUser(selectedUserForActions!.id)" *ngIf="selectedUserForActions" class="menu-item delete-action">
+    <mat-icon>delete</mat-icon>
+    <span>حذف المستخدم</span>
+  </button>
+</mat-menu>

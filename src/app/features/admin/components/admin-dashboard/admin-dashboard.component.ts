@@ -1,118 +1,195 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatGridListModule } from '@angular/material/grid-list';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatButtonModule } from '@angular/material/button';
 import { MatTabsModule } from '@angular/material/tabs';
-import { LucideAngularModule, Users, FileText, Eye, Heart, MessageSquare, TrendingUp, Calendar, AlertCircle } from 'lucide-angular';
-import { Subject, takeUntil } from 'rxjs';
-import { ToastrService } from 'ngx-toastr';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatBadgeModule } from '@angular/material/badge';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { Subject, takeUntil, forkJoin } from 'rxjs';
+import { AdminService, AdminStatisticsDto } from '../../../../core/services/admin.service';
+import { StatisticsService } from '../../../../core/services/statistics.service';
+import { CategoryManagementService } from '../../../../core/services/category-management.service';
 
-import { AdminService } from '../../../../core/services/admin.service';
-import { AdminStatisticsDto } from '../../../../models/admin.models';
-import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
+interface DashboardStats {
+  totalUsers: number;
+  totalAds: number;
+  totalCategories: number;
+  pendingAds: number;
+  activeAds: number;
+  newUsersThisMonth: number;
+  totalViews: number;
+  totalLikes: number;
+  monthlyGrowth: number;
+}
+
+interface MonthlyData {
+  month: string;
+  users: number;
+  ads: number;
+  views: number;
+}
+
+interface ProgressGoal {
+  title: string;
+  current: number;
+  target: number;
+  color: string;
+  icon: string;
+}
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     MatCardModule,
-    MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
-    MatGridListModule,
+    MatProgressBarModule,
+    MatButtonModule,
     MatTabsModule,
-    LucideAngularModule,
-    LoadingSpinnerComponent
+    MatGridListModule,
+    MatChipsModule,
+    MatBadgeModule,
+    MatProgressSpinnerModule
   ],
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.scss']
 })
 export class AdminDashboardComponent implements OnInit, OnDestroy {
-  // Data
-  adminStats: AdminStatisticsDto | null = null;
-  dashboardData: any | null = null;
-  
-  // Loading states
-  isLoading = false;
-  isLoadingDashboard = false;
-
   private destroy$ = new Subject<void>();
+  
+  loading = false;
+  stats: DashboardStats = {
+    totalUsers: 0,
+    totalAds: 0,
+    totalCategories: 0,
+    pendingAds: 0,
+    activeAds: 0,
+    newUsersThisMonth: 0,
+    totalViews: 0,
+    totalLikes: 0,
+    monthlyGrowth: 0
+  };
+
+  monthlyData: MonthlyData[] = [];
+  progressGoals: ProgressGoal[] = [
+    {
+      title: 'إضافة المنتجات إلى العربة',
+      current: 75,
+      target: 100,
+      color: 'primary',
+      icon: 'shopping_cart'
+    },
+    {
+      title: 'إتمام الشراء',
+      current: 60,
+      target: 100,
+      color: 'accent',
+      icon: 'payment'
+    },
+    {
+      title: 'زيارة الصفحة المميزة',
+      current: 45,
+      target: 100,
+      color: 'warn',
+      icon: 'star'
+    },
+    {
+      title: 'إرسال الاستفسارات',
+      current: 80,
+      target: 100,
+      color: 'primary',
+      icon: 'question_answer'
+    }
+  ];
 
   constructor(
     private adminService: AdminService,
-    private toastr: ToastrService
+    private statisticsService: StatisticsService,
+    private categoryService: CategoryManagementService
   ) {}
 
-  ngOnInit() {
-    this.loadAdminStats();
+  ngOnInit(): void {
     this.loadDashboardData();
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
-  loadAdminStats() {
-    this.isLoading = true;
-
-    this.adminService.getStatistics().subscribe({
-      next: (response) => {
-        if (response.success && response.data) {
-          this.adminStats = response.data;
-        }
-        this.isLoading = false;
+  private loadDashboardData(): void {
+    this.loading = true;
+    
+    forkJoin({
+      stats: this.statisticsService.getStatistics(),
+      dashboardStats: this.statisticsService.getDashboardStats(),
+      categories: this.categoryService.getAllCategories()
+    })
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (data) => {
+        this.processStatsData(data);
+        this.generateMonthlyData();
+        this.loading = false;
       },
       error: (error) => {
-        this.isLoading = false;
-        this.toastr.error('حدث خطأ أثناء تحميل الإحصائيات', 'خطأ');
-        console.error('Error loading admin stats:', error);
-      }
-    });
-  }
-
-  loadDashboardData() {
-    this.isLoadingDashboard = true;
-
-    this.adminService.getDashboardStats().subscribe({
-      next: (response) => {
-        if (response.success && response.data) {
-          this.dashboardData = response.data;
-        }
-        this.isLoadingDashboard = false;
-      },
-      error: (error) => {
-        this.isLoadingDashboard = false;
         console.error('Error loading dashboard data:', error);
+        this.loading = false;
       }
     });
   }
 
-  formatDate(date: Date): string {
-    return new Date(date).toLocaleDateString('ar-SA', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  }
-
-  getPercentageChange(current: number, previous: number): number {
-    if (previous === 0) return 0;
-    return Math.round(((current - previous) / previous) * 100);
-  }
-
-  getActivityIcon(type: string): string {
-    switch (type) {
-      case 'user_registration': return 'users';
-      case 'ad_created': return 'file-text';
-      case 'ad_viewed': return 'eye';
-      case 'ad_liked': return 'heart';
-      case 'comment_added': return 'message-square';
-      default: return 'activity';
+  private processStatsData(data: any): void {
+    // معالجة البيانات من الخدمات المختلفة
+    if (data.stats?.data) {
+      const statsData = data.stats.data;
+      this.stats = {
+        totalUsers: statsData.totalUsers || 0,
+        totalAds: statsData.totalAds || 0,
+        totalCategories: statsData.totalCategories || 0,
+        pendingAds: statsData.pendingAds || 0,
+        activeAds: statsData.activeAds || 0,
+        newUsersThisMonth: statsData.newUsersThisMonth || 0,
+        totalViews: statsData.totalViews || 0,
+        totalLikes: statsData.totalLikes || 0,
+        monthlyGrowth: statsData.monthlyGrowth || 0
+      };
     }
+
+    // تحديث أهداف التقدم بناءً على البيانات الفعلية
+    this.updateProgressGoals();
+  }
+
+  private updateProgressGoals(): void {
+    this.progressGoals[0].current = Math.min(75, this.stats.totalAds);
+    this.progressGoals[1].current = Math.min(60, this.stats.activeAds);
+    this.progressGoals[2].current = Math.min(45, Math.floor(this.stats.totalViews / 100));
+    this.progressGoals[3].current = Math.min(80, this.stats.newUsersThisMonth);
+  }
+
+  private generateMonthlyData(): void {
+    // توليد بيانات شهرية وهمية للعرض
+    const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو'];
+    this.monthlyData = months.map((month, index) => ({
+      month,
+      users: Math.floor(Math.random() * 100) + 50,
+      ads: Math.floor(Math.random() * 200) + 100,
+      views: Math.floor(Math.random() * 1000) + 500
+    }));
+  }
+
+  getProgressPercentage(current: number, target: number): number {
+    return Math.min((current / target) * 100, 100);
+  }
+
+  refreshData(): void {
+    this.loadDashboardData();
   }
 }
