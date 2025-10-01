@@ -107,7 +107,7 @@ export interface AdminReportItemDto {
 }
 
 export interface AdminReportDto {
-  period: string; // Weekly | Monthly
+  period: string; // Custom
   from: string;
   to: string;
   items: AdminReportItemDto[];
@@ -151,6 +151,7 @@ export interface UpdateCategoryDto {
 })
 export class AdminService {
   private readonly baseUrl = `${environment.apiUrl}/admin`;
+  private readonly dashboardUrl = `${environment.apiUrl}/admin/dashboard`;
 
   constructor(private http: HttpClient) {}
 
@@ -208,7 +209,11 @@ export class AdminService {
   }
 
   rejectAd(adId: string, reason?: string): Observable<GeneralResponse<any>> {
-    return this.http.put<GeneralResponse<any>>(`${this.baseUrl}/ads/${adId}/reject`, reason);
+    return this.http.put<GeneralResponse<any>>(`${this.baseUrl}/ads/${adId}/reject`, { reason });
+  }
+
+  setPendingAd(adId: string): Observable<GeneralResponse<any>> {
+    return this.http.put<GeneralResponse<any>>(`${this.baseUrl}/ads/${adId}/pending`, {});
   }
 
   deleteAd(adId: string): Observable<GeneralResponse<any>> {
@@ -220,34 +225,67 @@ export class AdminService {
     return this.http.get<GeneralResponse<AdminStatisticsDto>>(`${this.baseUrl}/statistics`);
   }
 
+  // Admin Dashboard
+  getDashboardStats(): Observable<GeneralResponse<any>> {
+    return this.http.get<GeneralResponse<any>>(`${this.dashboardUrl}/stats`);
+  }
+
+  getDashboardCategories(): Observable<GeneralResponse<any>> {
+    return this.http.get<GeneralResponse<any>>(`${this.dashboardUrl}/categories`);
+  }
+
+  getDashboardCategoryAnalytics(categoryId?: number): Observable<GeneralResponse<any>> {
+    const url = categoryId != null
+      ? `${this.dashboardUrl}/categories/analytics?categoryId=${categoryId}`
+      : `${this.dashboardUrl}/categories/analytics`;
+    return this.http.get<GeneralResponse<any>>(url);
+  }
+
   // User Subscription
   getUserSubscription(userId: string): Observable<SubscriptionDto> {
     return this.http.get<SubscriptionDto>(`${this.baseUrl}/users/${userId}/subscription`);
   }
 
-  // Reports
-  getWeeklyReport(): Observable<GeneralResponse<AdminReportDto>> {
-    return this.http.get<GeneralResponse<AdminReportDto>>(`${this.baseUrl}/reports/weekly`);
+  // Reports by date range only
+  getReportByRange(fromUtc: string, toUtc: string): Observable<GeneralResponse<AdminReportDto>> {
+    return this.http.get<GeneralResponse<AdminReportDto>>(`${this.baseUrl}/reports/range`, { params: { fromUtc, toUtc } });
   }
 
-  getMonthlyReport(): Observable<GeneralResponse<AdminReportDto>> {
-    return this.http.get<GeneralResponse<AdminReportDto>>(`${this.baseUrl}/reports/monthly`);
-  }
-
-  exportWeeklyReport(format: string = 'pdf'): Observable<Blob> {
-    return this.http.get(`${this.baseUrl}/reports/weekly/export?format=${format}`, { 
-      responseType: 'blob' 
-    });
-  }
-
-  exportMonthlyReport(format: string = 'pdf'): Observable<Blob> {
-    return this.http.get(`${this.baseUrl}/reports/monthly/export?format=${format}`, { 
-      responseType: 'blob' 
-    });
+  exportReportByRange(format: string, fromUtc: string, toUtc: string): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/reports/range/export?fromUtc=${encodeURIComponent(fromUtc)}&toUtc=${encodeURIComponent(toUtc)}&format=${format}`, { responseType: 'blob' });
   }
 
   // Categories
   getAllCategories(): Observable<GeneralResponse<CategoryDto[]>> {
     return this.http.get<GeneralResponse<CategoryDto[]>>(`${this.baseUrl}/categories`);
+  }
+
+  getCategoryById(id: number): Observable<GeneralResponse<CategoryDto>> {
+    return this.http.get<GeneralResponse<CategoryDto>>(`${this.baseUrl}/categories/${id}`);
+  }
+
+  createCategory(payload: { name: string; description?: string }): Observable<GeneralResponse<CategoryDto>> {
+    return this.http.post<GeneralResponse<CategoryDto>>(`${this.baseUrl}/categories`, payload);
+  }
+
+  updateCategory(id: number, payload: { name: string; description?: string }): Observable<GeneralResponse<CategoryDto>> {
+    return this.http.put<GeneralResponse<CategoryDto>>(`${this.baseUrl}/categories/${id}`, payload);
+  }
+
+  deleteCategory(id: number): Observable<GeneralResponse<boolean>> {
+    return this.http.delete<GeneralResponse<boolean>>(`${this.baseUrl}/categories/${id}`);
+  }
+
+  // Category price ranges (from API CategoriesController)
+  getCategoriesWithPriceRanges(): Observable<GeneralResponse<any>> {
+    return this.http.get<GeneralResponse<any>>(`${environment.apiUrl}/api/Categories/with-price-ranges`);
+  }
+
+  updateCategoryPriceRanges(id: number, payload: { minPrice?: number; maxPrice?: number }): Observable<GeneralResponse<any>> {
+    return this.http.put<GeneralResponse<any>>(`${environment.apiUrl}/api/Categories/${id}/price-ranges`, payload);
+  }
+
+  getCategoryWithAds(id: number): Observable<GeneralResponse<any>> {
+    return this.http.get<GeneralResponse<any>>(`${environment.apiUrl}/api/Categories/${id}/with-ads`);
   }
 }

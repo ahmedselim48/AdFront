@@ -22,6 +22,7 @@ import { ToastrService } from 'ngx-toastr';
 
 import { AdsService } from '../../../../core/services/ads.service';
 import { CategoriesService } from '../../../../core/services/categories.service';
+import { AuthService } from '../../../../core/auth/auth.service';
 import { AdDto, CreateAdWithFilesCommand, AdGenerationResponse } from '../../../../models/ads.models';
 import { CategoryDto } from '../../../../models/categories.models';
 // import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
@@ -86,12 +87,32 @@ export class AdCreateComponent implements OnInit, OnDestroy {
   // Chip input separator keys
   separatorKeysCodes: number[] = [13, 188]; // Enter and comma
 
+  // User role check
+  get isAdmin(): boolean {
+    const user = this.authService.getCurrentUser();
+    if (!user) {
+      // Fallback: check localStorage for user data
+      const storedUser = localStorage.getItem('currentUser');
+      if (storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser) as any;
+          return parsedUser.roles?.includes('Admin') || parsedUser.roles?.includes('admin') || false;
+        } catch (e) {
+          return false;
+        }
+      }
+      return false;
+    }
+    return user.roles?.includes('Admin') || user.roles?.includes('admin') || false;
+  }
+
   private destroy$ = new Subject<void>();
 
   // Inject services using inject() function
   private fb = inject(FormBuilder);
   private adsService = inject(AdsService);
   private categoriesService = inject(CategoriesService);
+  private authService = inject(AuthService);
   private router = inject(Router);
   private toastr = inject(ToastrService);
 
@@ -100,6 +121,12 @@ export class AdCreateComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    // Check if user is admin and redirect
+    if (this.isAdmin) {
+      this.router.navigate(['/ads']);
+      return;
+    }
+    
     this.loadCategories();
   }
 

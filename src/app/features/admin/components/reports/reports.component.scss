@@ -5,56 +5,281 @@
   direction: rtl;
 
   .page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     margin-bottom: 30px;
-    padding: 20px;
+    padding: 0;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 12px;
+    border-radius: 16px;
     color: white;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+    overflow: hidden;
+
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 32px;
+      min-height: 80px;
+
+      @media (max-width: 768px) {
+        flex-direction: column;
+        gap: 20px;
+        padding: 20px;
+      }
+    }
 
     .page-title {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       margin: 0;
-      font-size: 28px;
-      font-weight: 600;
+      font-size: 32px;
+      font-weight: 700;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
       mat-icon {
-        font-size: 32px;
-        width: 32px;
-        height: 32px;
+        font-size: 36px;
+        width: 36px;
+        height: 36px;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
       }
     }
 
     .header-actions {
       display: flex;
-      gap: 15px;
+      gap: 16px;
+      align-items: center;
 
-      button {
-        background: rgba(255, 255, 255, 0.2);
+      @media (max-width: 768px) {
+        flex-direction: column;
+        width: 100%;
+        gap: 12px;
+      }
+
+      .action-group {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        position: relative;
+
+        @media (max-width: 768px) {
+          width: 100%;
+          justify-content: center;
+          flex-wrap: wrap;
+        }
+
+        // إضافة خط فاصل بين مجموعات الأزرار
+        &::after {
+          content: '';
+          position: absolute;
+          right: -8px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 2px;
+          height: 40px;
+          background: rgba(255, 255, 255, 0.2);
+          border-radius: 1px;
+
+          @media (max-width: 768px) {
+            display: none;
+          }
+        }
+      }
+
+      .action-btn {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
         color: white;
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 16px;
+        padding: 14px 24px;
+        font-weight: 700;
+        font-size: 15px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        backdrop-filter: blur(15px);
+        position: relative;
+        overflow: hidden;
+        min-width: 140px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+          transition: left 0.5s;
+        }
         
         &:hover {
-          background: rgba(255, 255, 255, 0.3);
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.2) 100%);
+          border-color: rgba(255, 255, 255, 0.5);
+          transform: translateY(-3px) scale(1.02);
+          box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+          
+          &::before {
+            left: 100%;
+          }
+        }
+
+        &:active {
+          transform: translateY(-1px) scale(0.98);
         }
 
         mat-icon {
-          margin-left: 8px;
+          margin-left: 10px;
+          font-size: 22px;
+          width: 22px;
+          height: 22px;
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
         }
+
+        // تخصيص ألوان مختلفة لكل زر
+        &[color="accent"] {
+          background: linear-gradient(135deg, rgba(255, 193, 7, 0.9) 0%, rgba(255, 152, 0, 0.7) 100%);
+          border-color: rgba(255, 193, 7, 0.5);
+          box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
+          
+          &:hover {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 1) 0%, rgba(255, 152, 0, 0.8) 100%);
+            border-color: rgba(255, 193, 7, 0.7);
+            box-shadow: 0 12px 35px rgba(255, 193, 7, 0.4);
+          }
+
+          mat-icon {
+            color: #fff;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+          }
+        }
+
+        &[color="primary"] {
+          background: linear-gradient(135deg, rgba(33, 150, 243, 0.9) 0%, rgba(30, 136, 229, 0.7) 100%);
+          border-color: rgba(33, 150, 243, 0.5);
+          box-shadow: 0 4px 15px rgba(33, 150, 243, 0.2);
+          
+          &:hover {
+            background: linear-gradient(135deg, rgba(33, 150, 243, 1) 0%, rgba(30, 136, 229, 0.8) 100%);
+            border-color: rgba(33, 150, 243, 0.7);
+            box-shadow: 0 12px 35px rgba(33, 150, 243, 0.4);
+          }
+
+          mat-icon {
+            color: #fff;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+          }
+        }
+
+        // تخصيص إضافي لكل زر
+        &.export-pdf-btn {
+          background: linear-gradient(135deg, rgba(244, 67, 54, 0.9) 0%, rgba(229, 57, 53, 0.7) 100%);
+          border-color: rgba(244, 67, 54, 0.5);
+          box-shadow: 0 4px 15px rgba(244, 67, 54, 0.2);
+          
+          &:hover {
+            background: linear-gradient(135deg, rgba(244, 67, 54, 1) 0%, rgba(229, 57, 53, 0.8) 100%);
+            border-color: rgba(244, 67, 54, 0.7);
+            box-shadow: 0 12px 35px rgba(244, 67, 54, 0.4);
+          }
+        }
+
+        &.export-excel-btn {
+          background: linear-gradient(135deg, rgba(76, 175, 80, 0.9) 0%, rgba(69, 160, 73, 0.7) 100%);
+          border-color: rgba(76, 175, 80, 0.5);
+          box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+          
+          &:hover {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 1) 0%, rgba(69, 160, 73, 0.8) 100%);
+            border-color: rgba(76, 175, 80, 0.7);
+            box-shadow: 0 12px 35px rgba(76, 175, 80, 0.4);
+          }
+        }
+      }
+
+      .print-btn {
+        background: rgba(255, 87, 34, 0.9);
+        color: white;
+        border: 2px solid rgba(255, 87, 34, 0.3);
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-weight: 600;
+        font-size: 13px;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        min-width: 140px;
+        
+        &:hover {
+          background: rgba(255, 87, 34, 1);
+          border-color: rgba(255, 87, 34, 0.6);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(255, 87, 34, 0.3);
+        }
+
+        &:disabled {
+          background: rgba(255, 255, 255, 0.1);
+          border-color: rgba(255, 255, 255, 0.1);
+          color: rgba(255, 255, 255, 0.5);
+          cursor: not-allowed;
+          transform: none;
+        }
+
+        mat-icon {
+          margin-left: 6px;
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+
+        span {
+          font-size: 12px;
+          font-weight: 600;
+        }
+      }
+
+      // إضافة تأثيرات إضافية للأزرار
+      .action-btn {
+        span {
+          font-size: 14px;
+          font-weight: 700;
+          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        // تأثير النبضة عند التحميل
+        &.loading {
+          position: relative;
+          pointer-events: none;
+          
+          &::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+          }
+        }
+      }
+
+      @keyframes spin {
+        0% { transform: translate(-50%, -50%) rotate(0deg); }
+        100% { transform: translate(-50%, -50%) rotate(360deg); }
+      }
       }
     }
   }
 
   .filters-card {
     margin-bottom: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
     border: none;
+    background: white;
+    overflow: hidden;
 
     .filters-row {
       display: grid;
@@ -74,6 +299,14 @@
       button {
         height: 56px;
         min-width: 150px;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
 
         mat-icon {
           margin-left: 8px;
@@ -481,9 +714,11 @@
   }
 
   .summary-card {
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
     border: none;
+    background: white;
+    overflow: hidden;
 
     mat-card-header {
       mat-card-title {
@@ -535,7 +770,6 @@
       }
     }
   }
-}
 
 // RTL Support
 [dir="rtl"] {

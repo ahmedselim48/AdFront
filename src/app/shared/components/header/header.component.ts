@@ -41,7 +41,7 @@ import { NotificationBellComponent } from '../notification-bell/notification-bel
 
         <!-- Navigation -->
         <nav class="header-nav">
-          <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">
+          <a [routerLink]="isAdmin ? '/admin/dashboard' : '/dashboard'" routerLinkActive="active" class="nav-link">
             لوحة التحكم
           </a>
           <a routerLink="/ads" routerLinkActive="active" class="nav-link">
@@ -81,10 +81,6 @@ import { NotificationBellComponent } from '../notification-bell/notification-bel
               الملف الشخصي
             </button>
             
-            <button mat-menu-item routerLink="/settings">
-              <lucide-icon name="settings" size="16" class="menu-icon"></lucide-icon>
-              الإعدادات
-            </button>
             
             <mat-divider></mat-divider>
             
@@ -238,6 +234,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private subscription = new Subscription();
   
   currentUser: any = null;
+
+  get isAdmin(): boolean {
+    const roles: string[] | undefined = this.currentUser?.roles;
+    return Array.isArray(roles) && roles.includes('Admin');
+  }
 
   ngOnInit() {
     // الاشتراك في بيانات المستخدم الحالي

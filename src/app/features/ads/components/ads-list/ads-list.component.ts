@@ -18,6 +18,7 @@ import { ToastrService } from 'ngx-toastr';
 
 import { AdsService } from '../../../../core/services/ads.service';
 import { CategoriesService } from '../../../../core/services/categories.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { AdDto, AdSearchRequest, AdStatus } from '../../../../models/ads.models';
 import { CategoryDto } from '../../../../models/categories.models';
 import { PaginationComponent } from '../../../../shared/components/pagination/pagination.component';
@@ -81,12 +82,42 @@ export class AdsListComponent implements OnInit, OnDestroy {
   sortBy: 'price' | 'date' | 'views' | 'likes' = 'date';
   sortOrder: 'asc' | 'desc' = 'desc';
   
+  // User role check
+  get isAdmin(): boolean {
+    const user = this.authService.getCurrentUser();
+    console.log('Current user:', user);
+    console.log('User roles:', user?.roles);
+    
+    if (!user) {
+      // Fallback: check localStorage for user data
+      const storedUser = localStorage.getItem('currentUser');
+      if (storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser);
+          console.log('Stored user:', parsedUser);
+          const isAdmin = parsedUser.roles?.includes('Admin') || parsedUser.roles?.includes('admin') || false;
+          console.log('isAdmin from stored user:', isAdmin);
+          return isAdmin;
+        } catch (e) {
+          console.log('Error parsing stored user:', e);
+        }
+      }
+      console.log('No user found, not admin');
+      return false;
+    }
+    
+    const isAdmin = user.roles?.includes('Admin') || user.roles?.includes('admin') || false;
+    console.log('isAdmin result:', isAdmin);
+    return isAdmin;
+  }
+  
   private destroy$ = new Subject<void>();
   private searchSubject = new Subject<string>();
 
   // Inject services using inject() function
   private adsService = inject(AdsService);
   private categoriesService = inject(CategoriesService);
+  private authService = inject(AuthService);
   private toastr = inject(ToastrService);
 
   constructor() {
@@ -103,6 +134,14 @@ export class AdsListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    // Initialize auth service
+    this.authService.initializeAuth();
+    
+    // Subscribe to user changes
+    this.authService.currentUser$.subscribe(user => {
+      console.log('User changed:', user);
+    });
+    
     this.loadCategories();
     this.loadAds();
   }

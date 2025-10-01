@@ -292,6 +292,12 @@ export class AuthService {
     return this.currentUserSubject.value;
   }
 
+  // Check if current user is admin
+  isAdmin(): boolean {
+    const user = this.currentUser;
+    return user?.roles?.includes('Admin') || user?.roles?.includes('admin') || false;
+  }
+
   // ===== PRIVATE HELPER METHODS =====
 
   private setTokensFromAuthResponse(response: AuthResponse) {

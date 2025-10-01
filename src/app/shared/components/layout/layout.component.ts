@@ -72,7 +72,7 @@ import {
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" routerLink="/dashboard" (click)="closeMobileMenu()" *ngIf="isLoggedIn">
+                <a class="nav-link" [routerLink]="isAdmin ? '/admin/dashboard' : '/dashboard'" (click)="closeMobileMenu()" *ngIf="isLoggedIn">
                   <lucide-icon name="bar-chart-3" size="20" class="me-2"></lucide-icon>
                   لوحة التحكم
                 </a>
@@ -81,13 +81,6 @@ import {
                 <a class="nav-link" routerLink="/chat" (click)="closeMobileMenu()" *ngIf="isLoggedIn">
                   <lucide-icon name="message-circle" size="20" class="me-2"></lucide-icon>
                   المحادثات
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" routerLink="/notifications" (click)="closeMobileMenu()" *ngIf="isLoggedIn">
-                  <lucide-icon name="bell" size="20" class="me-2"></lucide-icon>
-                  الإشعارات
-                  <span class="badge bg-danger ms-2" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
                 </a>
               </li>
               <li class="nav-item">
@@ -141,7 +134,7 @@ import {
                 </a>
               </li>
               <li class="nav-item" *ngIf="isLoggedIn">
-                <a class="nav-link" routerLink="/dashboard" routerLinkActive="active">
+                <a class="nav-link" [routerLink]="isAdmin ? '/admin/dashboard' : '/dashboard'" routerLinkActive="active">
                   <lucide-icon name="bar-chart-3" size="20" class="me-2"></lucide-icon>
                   لوحة التحكم
                 </a>
@@ -150,13 +143,6 @@ import {
                 <a class="nav-link" routerLink="/chat" routerLinkActive="active">
                   <lucide-icon name="message-circle" size="20" class="me-2"></lucide-icon>
                   المحادثات
-                </a>
-              </li>
-              <li class="nav-item" *ngIf="isLoggedIn">
-                <a class="nav-link" routerLink="/notifications" routerLinkActive="active">
-                  <lucide-icon name="bell" size="20" class="me-2"></lucide-icon>
-                  الإشعارات
-                  <span class="badge bg-danger ms-2" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
                 </a>
               </li>
               <li class="nav-item" *ngIf="isAdmin">

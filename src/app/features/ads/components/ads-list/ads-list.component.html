@@ -6,7 +6,7 @@
         <h1 class="page-title">الإعلانات</h1>
         <p class="page-subtitle">تصفح وإدارة إعلاناتك</p>
       </div>
-      <div class="header-actions">
+      <div class="header-actions" *ngIf="!isAdmin">
         <button mat-raised-button color="primary" routerLink="/ads/create" class="create-button">
           <lucide-icon name="plus" size="20" class="me-2"></lucide-icon>
           إعلان جديد
@@ -98,7 +98,7 @@
             <lucide-icon name="search" size="48" class="no-results-icon"></lucide-icon>
             <h3>لا توجد إعلانات</h3>
             <p>لم يتم العثور على إعلانات تطابق معايير البحث الخاصة بك.</p>
-            <button mat-raised-button color="primary" routerLink="/ads/create">
+            <button mat-raised-button color="primary" routerLink="/ads/create" *ngIf="!isAdmin">
               <lucide-icon name="plus" size="20" class="me-2"></lucide-icon>
               إنشاء إعلان جديد
             </button>

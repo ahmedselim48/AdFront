@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { LucideAngularModule, Home, ArrowLeft, Search } from 'lucide-angular';
+import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-page-not-found',
@@ -21,7 +22,21 @@ import { LucideAngularModule, Home, ArrowLeft, Search } from 'lucide-angular';
   styleUrls: ['./page-not-found.component.scss']
 })
 export class PageNotFoundComponent {
-  constructor(private location: Location) {}
+  private authService = inject(AuthService);
+  private location = inject(Location);
+  
+  currentUser: any = null;
+
+  constructor() {
+    this.authService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+    });
+  }
+
+  get isAdmin(): boolean {
+    const roles: string[] | undefined = this.currentUser?.roles;
+    return Array.isArray(roles) && roles.includes('Admin');
+  }
 
   goBack(): void {
     this.location.back();

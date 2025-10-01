@@ -30,7 +30,7 @@
         <lucide-icon name="megaphone" size="18"></lucide-icon>
         الإعلانات
       </a>
-      <a class="nav-link" routerLink="/dashboard" routerLinkActive="active" *ngIf="storage?.accessToken">
+      <a class="nav-link" [routerLink]="isAdmin ? '/admin/dashboard' : '/dashboard'" routerLinkActive="active" *ngIf="storage?.accessToken">
         <lucide-icon name="bar-chart-3" size="18"></lucide-icon>
         لوحة التحكم
       </a>
@@ -71,10 +71,6 @@
           <a routerLink="/profile" class="dropdown-item" *ngIf="!isAdmin">
             <lucide-icon name="user" size="16"></lucide-icon>
             الملف الشخصي
-          </a>
-          <a routerLink="/settings" class="dropdown-item">
-            <lucide-icon name="settings" size="16"></lucide-icon>
-            الإعدادات
           </a>
           <div class="dropdown-divider"></div>
           <button class="dropdown-item logout" (click)="logout()">
@@ -118,17 +114,13 @@
         <lucide-icon name="megaphone" size="18"></lucide-icon>
         الإعلانات
       </a>
-      <a class="mobile-nav-link" routerLink="/dashboard" (click)="closeMenu()" *ngIf="storage?.accessToken">
+      <a class="mobile-nav-link" [routerLink]="isAdmin ? '/admin/dashboard' : '/dashboard'" (click)="closeMenu()" *ngIf="storage?.accessToken">
         <lucide-icon name="bar-chart-3" size="18"></lucide-icon>
         لوحة التحكم
       </a>
       <a class="mobile-nav-link" routerLink="/direct-chat" (click)="closeMenu()" *ngIf="storage?.accessToken">
         <lucide-icon name="message-circle" size="18"></lucide-icon>
         الرسائل
-      </a>
-      <a class="mobile-nav-link" routerLink="/notifications" (click)="closeMenu()" *ngIf="storage?.accessToken">
-        <lucide-icon name="bell" size="18"></lucide-icon>
-        الإشعارات
       </a>
     </div>
   </div>

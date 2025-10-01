@@ -96,15 +96,13 @@ export class AdManagementComponent implements OnInit, OnDestroy {
     { value: 'all', label: 'جميع الإعلانات' },
     { value: 'Pending', label: 'في الانتظار' },
     { value: 'Approved', label: 'مقبول' },
-    { value: 'Rejected', label: 'مرفوض' }
+    { value: 'Rejected', label: 'مرفوض' },
+    { value: 'Scheduled', label: 'مجدول' },
+    { value: 'Archived', label: 'مؤرشف' }
   ];
 
-  categoryOptions = [
-    { value: 'all', label: 'جميع الفئات' },
-    { value: '1', label: 'سيارات' },
-    { value: '2', label: 'عقارات' },
-    { value: '3', label: 'إلكترونيات' },
-    { value: '4', label: 'أزياء' }
+  categoryOptions: Array<{ value: string; label: string; }> = [
+    { value: 'all', label: 'جميع الفئات' }
   ];
 
   // Statistics
@@ -137,6 +135,7 @@ export class AdManagementComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadAds();
     this.loadStats();
+    this.loadCategories();
     this.setupSearch();
   }
 
@@ -175,7 +174,7 @@ export class AdManagementComponent implements OnInit, OnDestroy {
           this.totalAds = response.data.totalCount;
           this.dataSource.paginator = this.paginator;
           this.dataSource.sort = this.sort;
-          this.calculateStatistics();
+          // Keep stats cards stable: stats come from backend via loadStats()
         }
         this.loading = false;
       },
@@ -195,9 +194,9 @@ export class AdManagementComponent implements OnInit, OnDestroy {
           if (response.success && response.data) {
             this.stats = {
               totalAds: response.data.totalAds || 0,
-              activeAds: response.data.activeAds || 0,
-              pendingAds: response.data.pendingAds || 0,
-              rejectedAds: response.data.rejectedAds || 0,
+              activeAds: response.data.totalAcceptedAds || response.data.activeAds || 0,
+              pendingAds: response.data.totalPendingAds || response.data.pendingAds || 0,
+              rejectedAds: response.data.totalRejectedAds || response.data.rejectedAds || 0,
               totalViews: response.data.totalViews || 0,
               totalLikes: response.data.totalLikes || 0
             };
@@ -205,6 +204,35 @@ export class AdManagementComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading stats:', error);
+        }
+      });
+  }
+
+  filterByStatus(status: 'all' | 'Approved' | 'Pending' | 'Rejected'): void {
+    const mapped = status === 'Approved' ? 'Approved'
+      : status === 'Pending' ? 'Pending'
+      : status === 'Rejected' ? 'Rejected'
+      : 'all';
+    this.searchForm.patchValue({ status: mapped });
+    this.currentPage = 1;
+    this.loadAds();
+  }
+
+  loadCategories(): void {
+    this.adminService.getAllCategories()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response: GeneralResponse<any>) => {
+          if (response.success && response.data) {
+            const backendCategories = response.data as Array<{ id: number; name: string; }>; 
+            this.categoryOptions = [
+              { value: 'all', label: 'جميع الفئات' },
+              ...backendCategories.map(c => ({ value: String(c.id), label: c.name }))
+            ];
+          }
+        },
+        error: (error) => {
+          console.error('Error loading categories:', error);
         }
       });
   }
@@ -458,6 +486,26 @@ export class AdManagementComponent implements OnInit, OnDestroy {
     this.selectedAdForActions = null;
   }
 
+  setPendingAd(adId: string): void {
+    this.adminService.setPendingAd(adId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.snackBar.open('تم تحويل الحالة إلى الانتظار', 'إغلاق', { duration: 3000 });
+            this.loadAds();
+            this.loadStats();
+          } else {
+            this.snackBar.open('خطأ في تحديث الحالة', 'إغلاق', { duration: 3000 });
+          }
+        },
+        error: (error) => {
+          console.error('Error setting pending:', error);
+          this.snackBar.open('خطأ في تحديث الحالة', 'إغلاق', { duration: 3000 });
+        }
+      });
+  }
+
   toggleAdvancedSearch(): void {
     this.showAdvancedSearch = !this.showAdvancedSearch;
   }
@@ -470,6 +518,10 @@ export class AdManagementComponent implements OnInit, OnDestroy {
         return 'accent';
       case 'rejected':
         return 'warn';
+      case 'scheduled':
+        return 'accent';
+      case 'archived':
+        return 'basic';
       default:
         return 'basic';
     }
@@ -483,6 +535,10 @@ export class AdManagementComponent implements OnInit, OnDestroy {
         return 'في الانتظار';
       case 'rejected':
         return 'مرفوض';
+      case 'scheduled':
+        return 'مجدول';
+      case 'archived':
+        return 'مؤرشف';
       default:
         return status;
     }

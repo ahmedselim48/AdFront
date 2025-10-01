@@ -53,19 +53,21 @@
   </mat-card>
 
   <!-- Category Form -->
-  <mat-card *ngIf="selectedCategory || !isEditing" class="form-card">
+  <mat-card *ngIf="selectedCategory || !isEditing" class="form-card mat-elevation-z4">
     <mat-card-header>
       <mat-card-title>
-        <mat-icon>{{ isEditing ? 'edit' : 'add' }}</mat-icon>
+        <mat-icon>{{ isEditing ? 'edit' : 'add_circle' }}</mat-icon>
         {{ isEditing ? 'تعديل الفئة' : 'إضافة فئة جديدة' }}
       </mat-card-title>
     </mat-card-header>
     <mat-card-content>
-      <form [formGroup]="categoryForm" class="category-form">
-        <div class="form-row">
-          <mat-form-field appearance="outline" class="form-field">
+      <form [formGroup]="categoryForm" class="category-form sleek">
+        <div class="form-row two-cols">
+          <mat-form-field appearance="fill" class="form-field">
             <mat-label>اسم الفئة</mat-label>
-            <input matInput formControlName="name" placeholder="أدخل اسم الفئة">
+            <mat-icon matPrefix>sell</mat-icon>
+            <input matInput formControlName="name" placeholder="أدخل اسم الفئة" maxlength="100">
+            <mat-hint align="end">{{ categoryForm.get('name')?.value?.length || 0 }}/100</mat-hint>
             <mat-error *ngIf="categoryForm.get('name')?.hasError('required')">
               اسم الفئة مطلوب
             </mat-error>
@@ -74,21 +76,15 @@
             </mat-error>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="form-field">
-            <mat-label>الفئة الأب</mat-label>
-            <mat-select formControlName="parentId">
-              <mat-option [value]="null">لا توجد فئة أب</mat-option>
-              <mat-option *ngFor="let category of parentCategories" [value]="category.id">
-                {{ category.name }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
+          <!-- Removed parent selector -->
         </div>
 
         <div class="form-row">
-          <mat-form-field appearance="outline" class="form-field full-width">
+          <mat-form-field appearance="fill" class="form-field full-width">
             <mat-label>وصف الفئة</mat-label>
-            <textarea matInput formControlName="description" placeholder="أدخل وصف الفئة" rows="3"></textarea>
+            <mat-icon matPrefix>notes</mat-icon>
+            <textarea matInput formControlName="description" placeholder="أدخل وصف الفئة" rows="4" maxlength="500"></textarea>
+            <mat-hint align="end">{{ categoryForm.get('description')?.value?.length || 0 }}/500</mat-hint>
             <mat-error *ngIf="categoryForm.get('description')?.hasError('required')">
               وصف الفئة مطلوب
             </mat-error>
@@ -98,19 +94,15 @@
           </mat-form-field>
         </div>
 
-        <div class="form-row">
-          <mat-slide-toggle formControlName="isActive" color="primary">
-            فئة نشطة
-          </mat-slide-toggle>
-        </div>
+        <!-- removed active toggle row per request -->
 
         <div class="form-actions">
-          <button mat-raised-button color="primary" (click)="saveCategory()" [disabled]="!categoryForm.valid">
+          <button mat-raised-button color="primary" (click)="saveCategory()" [disabled]="!categoryForm.valid" class="action-primary">
             <mat-icon>save</mat-icon>
-            {{ isEditing ? 'تحديث' : 'إنشاء' }}
+            {{ isEditing ? 'تحديث' : 'إنشاء الفئة' }}
           </button>
-          <button mat-button (click)="cancelEdit()">
-            <mat-icon>cancel</mat-icon>
+          <button mat-stroked-button color="warn" (click)="cancelEdit()" class="action-cancel">
+            <mat-icon>close</mat-icon>
             إلغاء
           </button>
         </div>
@@ -226,54 +218,30 @@
             </td>
           </ng-container>
 
-          <!-- Parent Category Column -->
-          <ng-container matColumnDef="parentCategory">
-            <th mat-header-cell *matHeaderCellDef>الفئة الأب</th>
-            <td mat-cell *matCellDef="let category">
-              <span *ngIf="category.parentId; else noParent">
-                {{ getParentCategoryName(category.parentId) }}
-              </span>
-              <ng-template #noParent>
-                <span class="no-parent">لا توجد</span>
-              </ng-template>
-            </td>
-          </ng-container>
+          <!-- Removed parent column -->
 
           <!-- Ads Count Column -->
           <ng-container matColumnDef="adsCount">
             <th mat-header-cell *matHeaderCellDef>عدد الإعلانات</th>
             <td mat-cell *matCellDef="let category">
-              <mat-chip color="primary">0</mat-chip>
+              <mat-chip color="primary">{{ category?.['adsCount'] || 0 }}</mat-chip>
             </td>
           </ng-container>
 
-          <!-- Is Active Column -->
-          <ng-container matColumnDef="isActive">
-            <th mat-header-cell *matHeaderCellDef>الحالة</th>
-            <td mat-cell *matCellDef="let category">
-              <mat-slide-toggle [checked]="true" color="primary">
-              </mat-slide-toggle>
-            </td>
-          </ng-container>
+          <!-- Removed status column -->
 
-          <!-- Created At Column -->
-          <ng-container matColumnDef="createdAt">
-            <th mat-header-cell *matHeaderCellDef>تاريخ الإنشاء</th>
-            <td mat-cell *matCellDef="let category">
-              <div class="date-cell">
-                <mat-icon class="date-icon">calendar_today</mat-icon>
-                <span>{{ formatDate(category.createdAt) }}</span>
-              </div>
-            </td>
-          </ng-container>
+          <!-- Removed created at column -->
 
           <!-- Actions Column -->
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef>الإجراءات</th>
             <td mat-cell *matCellDef="let category">
-              <button mat-icon-button [matMenuTriggerFor]="categoryMenu">
-                <mat-icon>more_vert</mat-icon>
-              </button>
+              <div class="actions-container">
+                <button mat-button class="actions-button" [matMenuTriggerFor]="categoryMenu">
+                  <span>إجراءات</span>
+                  <mat-icon>arrow_drop_down</mat-icon>
+                </button>
+              </div>
               <mat-menu #categoryMenu="matMenu">
                 <button mat-menu-item (click)="editCategory(category)">
                   <mat-icon>edit</mat-icon>

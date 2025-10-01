@@ -235,6 +235,8 @@
     background-color: #ffffff;
     width: calc(100% - 280px);
     box-sizing: border-box;
+    /* ابدأ المحتوى بعد النافبار الثابت */
+    padding-top: 72px; /* ارتفاع النافبار */
 
     &.sidebar-collapsed {
       margin-left: 70px;
@@ -247,7 +249,8 @@
       overflow-y: auto;
       width: 100%;
       background-color: #ffffff;
-      min-height: 100vh;
+      /* اطرح ارتفاع النافبار حتى لا تختفي خلفه أو يظهر سكرول زائد */
+      min-height: calc(100vh - 72px);
       margin: 0;
       box-sizing: border-box;
     }

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';   
 import { AdsService } from '../../core/services/ads.service';
 import { I18nService } from '../../core/services/i18n.service';
+import { AuthService } from '../../core/auth/auth.service';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
@@ -25,7 +26,7 @@ import { TranslatePipe } from '../../shared/pipes/translate.pipe';
   templateUrl: './ad-create.component.html',
   styleUrls: ['./ad-create.component.scss']
 })
-export class AdCreateComponent {
+export class AdCreateComponent implements OnInit {
   form: FormGroup;
   selectedFiles: File[] = [];
   previewUrls: string[] = [];
@@ -33,9 +34,29 @@ export class AdCreateComponent {
   error = '';
   private t = inject(I18nService);
 
+  // User role check
+  get isAdmin(): boolean {
+    const user = this.authService.getCurrentUser();
+    if (!user) {
+      // Fallback: check localStorage for user data
+      const storedUser = localStorage.getItem('currentUser');
+      if (storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser) as any;
+          return parsedUser.roles?.includes('Admin') || parsedUser.roles?.includes('admin') || false;
+        } catch (e) {
+          return false;
+        }
+      }
+      return false;
+    }
+    return user.roles?.includes('Admin') || user.roles?.includes('admin') || false;
+  }
+
   constructor(
     private fb: FormBuilder,
     private adsService: AdsService,
+    private authService: AuthService,
     private router: Router
   ) {
     this.form = this.fb.group({
@@ -46,6 +67,14 @@ export class AdCreateComponent {
       category: ['', Validators.required],   // ✅ مضافة
       userId: ['', Validators.required]
     });
+  }
+
+  ngOnInit() {
+    // Check if user is admin and redirect
+    if (this.isAdmin) {
+      this.router.navigate(['/ads']);
+      return;
+    }
   }
 
   onFileChange(event: Event) {

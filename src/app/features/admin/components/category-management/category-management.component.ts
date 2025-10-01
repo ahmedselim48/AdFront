@@ -22,7 +22,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatTreeModule } from '@angular/material/tree';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
-import { CategoryManagementService, CategoryDto, CreateCategoryDto, UpdateCategoryDto, GeneralResponse } from '../../../../core/services/category-management.service';
+import { AdminService, CategoryDto, GeneralResponse } from '../../../../core/services/admin.service';
 
 interface TreeNode {
   id: number;
@@ -80,10 +80,7 @@ export class CategoryManagementComponent implements OnInit, OnDestroy {
     'select',
     'name',
     'description',
-    'parentCategory',
     'adsCount',
-    'isActive',
-    'createdAt',
     'actions'
   ];
 
@@ -96,12 +93,12 @@ export class CategoryManagementComponent implements OnInit, OnDestroy {
   isEditing = false;
   showTreeView = false;
 
-  // Parent categories for dropdown
+  // Parent categories removed per request
   parentCategories: CategoryDto[] = [];
 
   constructor(
     private fb: FormBuilder,
-    private categoryService: CategoryManagementService,
+    private categoryService: AdminService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
   ) {
@@ -150,11 +147,19 @@ export class CategoryManagementComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response: GeneralResponse<CategoryDto[]>) => {
           if (response.success && response.data) {
-            this.dataSource.data = response.data;
-            this.totalCategories = response.data.length;
+            const list: any[] = response.data.map(c => ({ ...c, adsCount: 0 }));
+            this.dataSource.data = list as any;
+            this.totalCategories = list.length;
             this.dataSource.paginator = this.paginator;
             this.dataSource.sort = this.sort;
-            this.buildTreeData(response.data);
+            // fetch each category ads count
+            list.forEach(c => {
+              this.categoryService.getCategoryWithAds(c.id).pipe(takeUntil(this.destroy$)).subscribe(res => {
+                if (res.success && res.data) {
+                  c.adsCount = Array.isArray(res.data.ads) ? res.data.ads.length : 0;
+                }
+              });
+            });
           }
           this.loading = false;
         },
@@ -181,40 +186,7 @@ export class CategoryManagementComponent implements OnInit, OnDestroy {
       });
   }
 
-  private buildTreeData(categories: CategoryDto[]): void {
-    const categoryMap = new Map<number, TreeNode>();
-    const rootNodes: TreeNode[] = [];
-
-    // Create tree nodes
-    categories.forEach(category => {
-      const node: TreeNode = {
-        id: category.id,
-        name: category.name,
-        description: category.description || '',
-        parentId: 0, // No parentId in CategoryDto
-        children: [],
-        isExpanded: false,
-        adsCount: 0, // This would come from API
-        isActive: true // This would come from API
-      };
-      categoryMap.set(category.id, node);
-    });
-
-    // Build tree structure
-    categoryMap.forEach(node => {
-      if (node.parentId && categoryMap.has(node.parentId)) {
-        const parent = categoryMap.get(node.parentId)!;
-        if (!parent.children) {
-          parent.children = [];
-        }
-        parent.children.push(node);
-      } else {
-        rootNodes.push(node);
-      }
-    });
-
-    this.treeDataSource = rootNodes;
-  }
+  // Tree view removed as parent is no longer used
 
   onPageChange(event: any): void {
     this.currentPage = event.pageIndex + 1;
@@ -287,8 +259,8 @@ export class CategoryManagementComponent implements OnInit, OnDestroy {
     this.categoryForm.patchValue({
       name: category.name,
       description: category.description,
-      parentId: 0, // No parentId in CategoryDto
-      isActive: true // This would come from API
+      parentId: null,
+      isActive: true
     });
   }
 
@@ -297,10 +269,9 @@ export class CategoryManagementComponent implements OnInit, OnDestroy {
       const formValue = this.categoryForm.value;
       
       if (this.isEditing && this.selectedCategory) {
-        const updateDto: UpdateCategoryDto = {
+        const updateDto = {
           name: formValue.name,
           description: formValue.description,
-          // parentId: formValue.parentId, // Remove parentId
           isActive: formValue.isActive
         };
 
@@ -323,10 +294,9 @@ export class CategoryManagementComponent implements OnInit, OnDestroy {
             }
           });
       } else {
-        const createDto: CreateCategoryDto = {
+        const createDto = {
           name: formValue.name,
           description: formValue.description,
-          // parentId: formValue.parentId, // Remove parentId
           isActive: formValue.isActive
         };
 

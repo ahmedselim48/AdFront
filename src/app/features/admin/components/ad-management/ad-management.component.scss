@@ -5,6 +5,9 @@
   min-height: 100vh;
   direction: rtl;
 
+  // Floating brand badge on the left empty area
+  // (Removed brand tile styles)
+
   // Page Header
   .page-header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -223,10 +226,11 @@
 
   // Table Container
   .table-container {
-    margin: 0 30px 30px 30px;
+    margin: 0 0 30px 0; // stretch to component borders
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     background: white;
+    overflow: hidden; // ensure table reaches edges without inner gaps
 
     .ads-table {
       width: 100%;
@@ -239,7 +243,7 @@
       }
 
       .mat-mdc-cell {
-        border-bottom: 1px solid #f0f0f0;
+        border-bottom: 1px solid transparent;
         padding: 15px 8px;
       }
 
@@ -265,6 +269,17 @@
           color: #666;
           font-size: 14px;
         }
+      }
+
+      // Row card style
+      .row-card {
+        transition: box-shadow 0.3s ease, transform 0.2s ease;
+      }
+
+      tr.mat-mdc-row:hover {
+        background: #fdfefe;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+        transform: translateY(-2px);
       }
 
       .owner-info {

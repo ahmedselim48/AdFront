@@ -83,8 +83,21 @@ export const routes: Routes = [
   // Ads & Content Routes - Available without auth for testing
   { path: 'ads', component: AdsComponent },
   { path: 'ads/list', component: AdsListComponent },
-  { path: 'ads/create', component: AdCreateComponent },
-  { path: 'ads/create', redirectTo: 'ads/create', pathMatch: 'full' }, // For backward compatibility
+  { 
+    path: 'ads/create', 
+    component: AdCreateComponent,
+    canActivate: [() => {
+      const auth = inject(AuthService);
+      const router = inject(Router);
+      const user = auth.getCurrentUser();
+      const isAdmin = user?.roles?.includes('Admin') || user?.roles?.includes('admin') || false;
+      if (isAdmin) { 
+        router.navigateByUrl('/ads/list'); 
+        return false; 
+      }
+      return true;
+    }]
+  },
   { path: 'adscreate', redirectTo: 'ads/create', pathMatch: 'full' }, // Alternative route
   
   // Legal & Policy Routes

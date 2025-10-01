@@ -21,7 +21,7 @@
 
   <!-- Statistics Cards -->
   <div class="stats-grid">
-    <mat-card class="stat-card total-ads">
+    <mat-card class="stat-card total-ads" (click)="filterByStatus('all')">
       <mat-card-content>
         <div class="stat-content">
           <div class="stat-icon">
@@ -35,7 +35,7 @@
       </mat-card-content>
     </mat-card>
 
-    <mat-card class="stat-card active-ads">
+    <mat-card class="stat-card active-ads" (click)="filterByStatus('Approved')">
       <mat-card-content>
         <div class="stat-content">
           <div class="stat-icon">
@@ -49,7 +49,7 @@
       </mat-card-content>
     </mat-card>
 
-    <mat-card class="stat-card pending-ads">
+    <mat-card class="stat-card pending-ads" (click)="filterByStatus('Pending')">
       <mat-card-content>
         <div class="stat-content">
           <div class="stat-icon">
@@ -63,7 +63,7 @@
       </mat-card-content>
     </mat-card>
 
-    <mat-card class="stat-card rejected-ads">
+    <mat-card class="stat-card rejected-ads" (click)="filterByStatus('Rejected')">
       <mat-card-content>
         <div class="stat-content">
           <div class="stat-icon">
@@ -78,73 +78,25 @@
     </mat-card>
   </div>
 
-  <!-- Search Card -->
+  <!-- Search Card (clean and minimal) -->
   <mat-card class="search-card">
     <mat-card-content>
-      <div class="search-header">
-        <h3>البحث والفلترة</h3>
-        <button mat-icon-button (click)="toggleAdvancedSearch()" [class.expanded]="showAdvancedSearch">
-          <mat-icon>expand_more</mat-icon>
+      <form [formGroup]="searchForm" (ngSubmit)="onSearch()" class="search-form" style="display:flex; gap:12px; align-items:center;">
+        <mat-form-field appearance="fill" style="flex:1;">
+          <mat-label>ابحث عن إعلان</mat-label>
+          <input matInput formControlName="searchTerm" placeholder="العنوان، الوصف...">
+          <button mat-icon-button matSuffix type="submit" aria-label="بحث" [disabled]="loading">
+            <mat-icon>search</mat-icon>
+          </button>
+        </mat-form-field>
+        <button mat-stroked-button color="primary" type="submit" [disabled]="loading">
+          <mat-icon>search</mat-icon>
+          بحث
         </button>
-      </div>
-
-      <form [formGroup]="searchForm" (ngSubmit)="onSearch()" class="search-form">
-        <div class="search-row">
-          <mat-form-field appearance="outline" class="search-field">
-            <mat-label>البحث في الإعلانات</mat-label>
-            <input matInput formControlName="searchTerm" placeholder="ابحث بالعنوان أو الوصف...">
-            <mat-icon matSuffix>search</mat-icon>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="filter-field">
-            <mat-label>الحالة</mat-label>
-            <mat-select formControlName="status">
-              <mat-option *ngFor="let option of statusOptions" [value]="option.value">
-                {{ option.label }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-
-          <div class="action-buttons">
-            <button mat-raised-button color="primary" type="submit" [disabled]="loading">
-              <mat-icon>search</mat-icon>
-              بحث
-            </button>
-            <button mat-button type="button" (click)="clearSearch()">
-              <mat-icon>clear</mat-icon>
-              مسح
-            </button>
-          </div>
-        </div>
-
-        <!-- Advanced Search -->
-        <div class="advanced-search" [class.show]="showAdvancedSearch">
-          <div class="advanced-row">
-            <mat-form-field appearance="outline" class="price-field">
-              <mat-label>السعر من</mat-label>
-              <input matInput type="number" formControlName="priceFrom" placeholder="0">
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="price-field">
-              <mat-label>السعر إلى</mat-label>
-              <input matInput type="number" formControlName="priceTo" placeholder="10000">
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="date-field">
-              <mat-label>من تاريخ</mat-label>
-              <input matInput [matDatepicker]="dateFromPicker" formControlName="dateFrom">
-              <mat-datepicker-toggle matSuffix [for]="dateFromPicker"></mat-datepicker-toggle>
-              <mat-datepicker #dateFromPicker></mat-datepicker>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="date-field">
-              <mat-label>إلى تاريخ</mat-label>
-              <input matInput [matDatepicker]="dateToPicker" formControlName="dateTo">
-              <mat-datepicker-toggle matSuffix [for]="dateToPicker"></mat-datepicker-toggle>
-              <mat-datepicker #dateToPicker></mat-datepicker>
-            </mat-form-field>
-          </div>
-        </div>
+        <button mat-button type="button" (click)="clearSearch()">
+          <mat-icon>clear</mat-icon>
+          مسح
+        </button>
       </form>
     </mat-card-content>
   </mat-card>
@@ -268,6 +220,7 @@
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
           <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
+              class="row-card"
               [class.selected-row]="selectedAds.has(row.id)"></tr>
         </mat-table>
 
@@ -392,6 +345,10 @@
             <mat-icon>close</mat-icon>
             رفض الإعلان
           </button>
+          <button mat-raised-button color="accent" (click)="setPendingAd(selectedAd.id)" *ngIf="selectedAd.status !== 'Pending'">
+            <mat-icon>schedule</mat-icon>
+            تحويل إلى انتظار
+          </button>
           <button mat-raised-button color="warn" (click)="deleteAd(selectedAd.id)">
             <mat-icon>delete</mat-icon>
             حذف الإعلان
@@ -408,13 +365,17 @@
     <mat-icon>visibility</mat-icon>
     <span>عرض التفاصيل</span>
   </button>
-  <button mat-menu-item (click)="acceptAd(selectedAdForActions!.id)" *ngIf="selectedAdForActions && selectedAdForActions.status === 'Pending'" class="menu-item accept">
+  <button mat-menu-item (click)="acceptAd(selectedAdForActions!.id)" *ngIf="selectedAdForActions && (selectedAdForActions.status === 'Pending' || selectedAdForActions.status === 'Rejected')" class="menu-item accept">
     <mat-icon>check</mat-icon>
     <span>قبول الإعلان</span>
   </button>
-  <button mat-menu-item (click)="rejectAd(selectedAdForActions!.id)" *ngIf="selectedAdForActions && selectedAdForActions.status === 'Pending'" class="menu-item reject">
+  <button mat-menu-item (click)="rejectAd(selectedAdForActions!.id)" *ngIf="selectedAdForActions && selectedAdForActions.status !== 'Rejected'" class="menu-item reject">
     <mat-icon>close</mat-icon>
     <span>رفض الإعلان</span>
+  </button>
+  <button mat-menu-item (click)="setPendingAd(selectedAdForActions!.id)" *ngIf="selectedAdForActions && selectedAdForActions.status !== 'Pending'" class="menu-item">
+    <mat-icon>schedule</mat-icon>
+    <span>تحويل إلى انتظار</span>
   </button>
   <button mat-menu-item (click)="deleteAd(selectedAdForActions!.id)" *ngIf="selectedAdForActions" class="menu-item delete">
     <mat-icon>delete</mat-icon>

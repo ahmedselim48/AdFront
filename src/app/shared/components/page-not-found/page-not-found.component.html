@@ -19,7 +19,7 @@
 
           <!-- Action Buttons -->
           <div class="action-buttons">
-            <button mat-raised-button color="primary" routerLink="/dashboard" class="home-button">
+            <button mat-raised-button color="primary" [routerLink]="isAdmin ? '/admin/dashboard' : '/dashboard'" class="home-button">
               <lucide-icon name="home" size="18" class="me-2"></lucide-icon>
               العودة للرئيسية
             </button>

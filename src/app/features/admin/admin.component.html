@@ -41,19 +41,6 @@
             <span>التقارير</span>
           </a>
         </li>
-        <li class="nav-item">
-          <a routerLink="/admin/notifications" routerLinkActive="active" class="nav-link">
-            <mat-icon>notifications</mat-icon>
-            <span>الإشعارات</span>
-            <span class="notification-badge">3</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a routerLink="/admin/settings" routerLinkActive="active" class="nav-link">
-            <mat-icon>settings</mat-icon>
-            <span>الإعدادات</span>
-          </a>
-        </li>
       </ul>
     </nav>
     
@@ -67,7 +54,7 @@
           <span class="user-role">مدير النظام</span>
         </div>
       </div>
-      <button mat-icon-button class="logout-btn" title="تسجيل الخروج">
+      <button mat-icon-button class="logout-btn" title="تسجيل الخروج" (click)="logout()">
         <mat-icon>logout</mat-icon>
       </button>
     </div>

@@ -21,7 +21,7 @@ export interface AdminReportItemDto {
 }
 
 export interface AdminReportDto {
-  period: string; // Weekly | Monthly
+  period: string; // Custom
   from: string;
   to: string;
   items: AdminReportItemDto[];
@@ -68,28 +68,14 @@ export class StatisticsService {
     return this.http.get<GeneralResponse<DashboardStatsDto>>(`${this.baseUrl}/dashboard/stats`);
   }
 
-  // Get weekly report
-  getWeeklyReport(): Observable<GeneralResponse<AdminReportDto>> {
-    return this.http.get<GeneralResponse<AdminReportDto>>(`${this.baseUrl}/reports/weekly`);
+  // Get report by date range
+  getReportByRange(fromUtc: string, toUtc: string): Observable<GeneralResponse<AdminReportDto>> {
+    return this.http.get<GeneralResponse<AdminReportDto>>(`${this.baseUrl}/reports/range`, { params: { fromUtc, toUtc } });
   }
 
-  // Get monthly report
-  getMonthlyReport(): Observable<GeneralResponse<AdminReportDto>> {
-    return this.http.get<GeneralResponse<AdminReportDto>>(`${this.baseUrl}/reports/monthly`);
-  }
-
-  // Export weekly report
-  exportWeeklyReport(format: string = 'pdf'): Observable<Blob> {
-    return this.http.get(`${this.baseUrl}/reports/weekly/export?format=${format}`, { 
-      responseType: 'blob' 
-    });
-  }
-
-  // Export monthly report
-  exportMonthlyReport(format: string = 'pdf'): Observable<Blob> {
-    return this.http.get(`${this.baseUrl}/reports/monthly/export?format=${format}`, { 
-      responseType: 'blob' 
-    });
+  // Export report by date range
+  exportReportByRange(fromUtc: string, toUtc: string, format: string = 'pdf'): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/reports/range/export?fromUtc=${encodeURIComponent(fromUtc)}&toUtc=${encodeURIComponent(toUtc)}&format=${format}`, { responseType: 'blob' });
   }
 
   // Get category analytics
