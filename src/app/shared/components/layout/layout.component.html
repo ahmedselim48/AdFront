@@ -119,7 +119,7 @@
             الملف الشخصي
           </a>
           <a mat-list-item (click)="logout()">
-            <lucide-icon name="log-out" size="18" class="me-2"></lucide-icon>
+            <lucide-icon name="sign-out" size="18" class="me-2"></lucide-icon>
             تسجيل الخروج
           </a>
         </mat-nav-list>
@@ -185,6 +185,37 @@
   </footer>
 </div>
 
+<!-- Notifications Menu -->
+<mat-menu #notificationsMenu="matMenu" class="notifications-menu">
+  <div class="notifications-header">
+    <h6>الإشعارات</h6>
+    <button mat-button (click)="markAllAsRead()" *ngIf="unreadNotifications > 0">
+      تعيين الكل كمقروء
+    </button>
+  </div>
+  <mat-divider></mat-divider>
+  <div class="notifications-list">
+    <div class="notification-item" *ngFor="let notification of recentNotifications">
+      <div class="notification-content">
+        <h6 class="notification-title">{{ notification.title }}</h6>
+        <p class="notification-message">{{ notification.message }}</p>
+        <small class="notification-time">{{ notification.createdAt | timeAgo }}</small>
+      </div>
+      <div class="notification-actions">
+        <button mat-icon-button (click)="markAsRead(notification.id)">
+          <lucide-icon name="check-circle" size="16"></lucide-icon>
+        </button>
+      </div>
+    </div>
+    <div class="no-notifications" *ngIf="recentNotifications.length === 0">
+      <p class="text-muted">لا توجد إشعارات جديدة</p>
+    </div>
+  </div>
+  <mat-divider></mat-divider>
+  <div class="notifications-footer">
+    <button mat-button routerLink="/notifications">عرض جميع الإشعارات</button>
+  </div>
+</mat-menu>
 
 <!-- User Menu -->
 <mat-menu #userMenu="matMenu" class="user-menu">
@@ -212,7 +243,7 @@
   </button>
   <mat-divider></mat-divider>
   <button mat-menu-item (click)="logout()">
-    <lucide-icon name="log-out" size="18" class="me-2"></lucide-icon>
+    <lucide-icon name="sign-out" size="18" class="me-2"></lucide-icon>
     تسجيل الخروج
   </button>
 </mat-menu>

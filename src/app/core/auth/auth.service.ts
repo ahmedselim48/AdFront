@@ -40,6 +40,7 @@ export class AuthService {
   
   get currentUser(): UserProfile | null { return this.currentUserSubject.value; }
 
+
   // ===== AUTHENTICATION METHODS =====
 
   login(req: LoginRequest): Observable<AuthResponse> {
@@ -243,6 +244,7 @@ export class AuthService {
     const accessToken = this.storage.accessToken;
     
     if (!accessToken) {
+      console.log('No access token found');
       return false;
     }
     
@@ -250,25 +252,36 @@ export class AuthService {
     try {
       const payload = JSON.parse(atob(accessToken.split('.')[1]));
       const now = Math.floor(Date.now() / 1000);
-      return payload.exp > now;
-    } catch {
+      const isValid = payload.exp > now;
+      console.log('Token validation:', { exp: payload.exp, now, isValid });
+      return isValid;
+    } catch (error) {
+      console.error('Token parsing error:', error);
       return false;
     }
   }
 
   // Initialize auth state from stored tokens
   initializeAuth(): void {
+    console.log('Initializing auth state...');
     if (this.isLoggedIn()) {
+      console.log('User is logged in, loading profile...');
       // Try to load user profile
       this.getProfile().subscribe({
         next: (profile) => {
+          console.log('Profile loaded successfully:', profile);
           this.currentUserSubject.next(profile);
         },
-        error: () => {
+        error: (error) => {
+          console.error('Failed to load profile on initialization:', error);
           // If profile loading fails, clear tokens
           this.clearLocalData();
         }
       });
+    } else {
+      console.log('User is not logged in, clearing tokens...');
+      // Clear any invalid tokens
+      this.clearLocalData();
     }
   }
 

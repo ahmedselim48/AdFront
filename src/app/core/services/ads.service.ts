@@ -1,220 +1,155 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { 
-  AdDto, 
-  CreateAdCommand, 
-  CreateAdWithFilesCommand,
-  UpdateAdManagementCommand,
-  AdSearchRequest,
-  PaginatedAdsResponse,
-  AdGenerationResponse,
-  AdAnalysisResult,
-  StartAdABTestRequest,
-  ABTestDto,
-  ABTestResult,
-  CommentDto,
-  AdminAdDto,
-  AdStatus
-} from '../../models/ads.models';
-import { GeneralResponse } from '../../models/general-response';
+import { GeneralResponse } from '../../models/common.models';
+import { AdDto, AdImageDto, AdStatus, CreateAdDto, UpdateAdDto, AdFilters } from '../../models/profile.models';
+
+// Ad-related interfaces are now imported from profile.models.ts
 
 @Injectable({
   providedIn: 'root'
 })
 export class AdsService {
-
- private base = `${environment.apiBaseUrl}/Ads`; // set environment.apiUrl
+  private readonly apiUrl = `${environment.apiUrl}/api/ads`;
 
   constructor(private http: HttpClient) {}
 
-  // Get all with pagination
-  getAll(page = 1, pageSize = 10): Observable<GeneralResponse<PaginatedAdsResponse>> {
-    const params = new HttpParams()
-      .set('page', String(page))
-      .set('pageSize', String(pageSize));
-    return this.http.get<GeneralResponse<PaginatedAdsResponse>>(this.base, { params });
-  }
-
-  getById(id: string): Observable<GeneralResponse<AdDto>> {
-    return this.http.get<GeneralResponse<AdDto>>(`${this.base}/${id}`);
-  }
-
-  getByUserId(userId: string): Observable<GeneralResponse<AdDto[]>> {
-    return this.http.get<GeneralResponse<AdDto[]>>(`${this.base}/user/${userId}`);
-  }
-
+  // Get user's ads
   getMyAds(status?: AdStatus): Observable<GeneralResponse<AdDto[]>> {
-    const params = status ? new HttpParams().set('status', status) : new HttpParams();
-    return this.http.get<GeneralResponse<AdDto[]>>(`${this.base}/my`, { params });
+    let params = new HttpParams();
+    if (status) {
+      params = params.set('status', status);
+    }
+    return this.http.get<GeneralResponse<AdDto[]>>(`${this.apiUrl}/my`, { params });
   }
 
+  // Get draft ads
   getDraftAds(): Observable<GeneralResponse<AdDto[]>> {
-    return this.http.get<GeneralResponse<AdDto[]>>(`${this.base}/drafts`);
+    return this.http.get<GeneralResponse<AdDto[]>>(`${this.apiUrl}/drafts`);
   }
 
+  // Get published ads
   getPublishedAds(): Observable<GeneralResponse<AdDto[]>> {
-    return this.http.get<GeneralResponse<AdDto[]>>(`${this.base}/published`);
+    return this.http.get<GeneralResponse<AdDto[]>>(`${this.apiUrl}/published`);
   }
 
-  getPendingAds(): Observable<GeneralResponse<AdDto[]>> {
-    return this.http.get<GeneralResponse<AdDto[]>>(`${this.base}/pending`);
-  }
-
-  getByStatus(status: AdStatus): Observable<GeneralResponse<AdDto[]>> {
-    return this.http.get<GeneralResponse<AdDto[]>>(`${this.base}/status/${status}`);
-  }
-
-  getByCategory(categoryId: number): Observable<GeneralResponse<AdDto[]>> {
-    return this.http.get<GeneralResponse<AdDto[]>>(`${this.base}/category/${categoryId}`);
-  }
-
-  searchAds(searchRequest: AdSearchRequest): Observable<GeneralResponse<AdDto[]>> {
-    const params = new HttpParams()
-      .set('query', searchRequest.query || '')
-      .set('categoryId', String(searchRequest.categoryId || ''))
-      .set('minPrice', String(searchRequest.minPrice || ''))
-      .set('maxPrice', String(searchRequest.maxPrice || ''))
-      .set('location', searchRequest.location || '')
-      .set('status', searchRequest.status || '')
-      .set('page', String(searchRequest.page || 1))
-      .set('pageSize', String(searchRequest.pageSize || 10))
-      .set('sortBy', searchRequest.sortBy || 'date')
-      .set('sortOrder', searchRequest.sortOrder || 'desc');
+  // List all ads (for home page)
+  list(page: number = 1, pageSize: number = 10, filters?: AdFilters): Observable<GeneralResponse<AdDto[]>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
     
-    return this.http.get<GeneralResponse<AdDto[]>>(`${this.base}/search`, { params });
+    if (filters) {
+      if (filters.categoryId) params = params.set('categoryId', filters.categoryId);
+      if (filters.location) params = params.set('location', filters.location);
+      if (filters.minPrice) params = params.set('minPrice', filters.minPrice.toString());
+      if (filters.maxPrice) params = params.set('maxPrice', filters.maxPrice.toString());
+      if (filters.keyword) params = params.set('keyword', filters.keyword);
+    }
+    
+    return this.http.get<GeneralResponse<AdDto[]>>(`${this.apiUrl}`, { params });
   }
 
-  // Create using JSON (urls)
-  create(dto: CreateAdCommand): Observable<GeneralResponse<AdDto>> {
-    return this.http.post<GeneralResponse<AdDto>>(this.base, dto);
+  // Get ad by ID
+  getAdById(adId: string): Observable<GeneralResponse<AdDto>> {
+    return this.http.get<GeneralResponse<AdDto>>(`${this.apiUrl}/${adId}`);
   }
 
-  // Create with files (multipart/form-data)
-  createWithFiles(form: CreateAdWithFilesCommand): Observable<GeneralResponse<AdDto>> {
-    const fd = new FormData();
-    fd.append('title', form.title);
-    fd.append('description', form.description);
-    fd.append('price', String(form.price));
-    fd.append('location', form.location);
-    fd.append('userId', form.userId);
-    if (form.categoryId) {
-      fd.append('categoryId', String(form.categoryId));
-    }
-    if (form.keywords) {
-      form.keywords.forEach(keyword => fd.append('keywords', keyword));
-    }
-    if (form.images) {
-      form.images.forEach(file => fd.append('images', file, file.name));
-    }
-    return this.http.post<GeneralResponse<AdDto>>(`${this.base}/create-with-files`, fd);
-  }
-
-  // Generate ad content with AI
-  generateAdContent(form: any): Observable<GeneralResponse<AdGenerationResponse>> {
-    const fd = new FormData();
-    fd.append('productName', form.productName);
-    fd.append('initialDescription', form.initialDescription);
-    fd.append('price', String(form.price));
-    fd.append('userId', form.userId);
-    if (form.categoryId) {
-      fd.append('categoryId', String(form.categoryId));
-    }
-    if (form.images) {
-      form.images.forEach((file: File) => fd.append('images', file, file.name));
-    }
-    return this.http.post<GeneralResponse<AdGenerationResponse>>(`${this.base}/generate`, fd);
-  }
-
-  // Create draft ad
-  createDraftAd(form: any): Observable<GeneralResponse<AdDto>> {
-    const fd = new FormData();
-    fd.append('productName', form.productName);
-    fd.append('initialDescription', form.initialDescription);
-    fd.append('price', String(form.price));
-    fd.append('userId', form.userId);
-    if (form.categoryId) {
-      fd.append('categoryId', String(form.categoryId));
-    }
-    if (form.images) {
-      form.images.forEach((file: File) => fd.append('images', file, file.name));
-    }
-    return this.http.post<GeneralResponse<AdDto>>(`${this.base}/create-draft`, fd);
-  }
-
-  // Publish ad
-  publishAd(adId: string, request: any): Observable<GeneralResponse<AdDto>> {
-    return this.http.post<GeneralResponse<AdDto>>(`${this.base}/${adId}/publish`, request);
+  // Create new ad
+  createAd(adData: CreateAdDto): Observable<GeneralResponse<AdDto>> {
+    return this.http.post<GeneralResponse<AdDto>>(`${this.apiUrl}`, adData);
   }
 
   // Update ad
-  updateAd(id: string, form: UpdateAdManagementCommand): Observable<GeneralResponse<AdDto>> {
-    const fd = new FormData();
-    fd.append('adId', id);
-    fd.append('userId', form.userId);
-    if (form.title) fd.append('title', form.title);
-    if (form.description) fd.append('description', form.description);
-    if (form.price) fd.append('price', String(form.price));
-    if (form.location) fd.append('location', form.location);
-    if (form.categoryId) fd.append('categoryId', String(form.categoryId));
-    if (form.keywords) {
-      form.keywords.forEach(keyword => fd.append('keywords', keyword));
-    }
-    if (form.newImages) {
-      form.newImages.forEach(file => fd.append('newImages', file, file.name));
-    }
-    if (form.imagesToDelete) {
-      form.imagesToDelete.forEach(url => fd.append('imagesToDelete', url));
-    }
-    return this.http.put<GeneralResponse<AdDto>>(`${this.base}/${id}`, fd);
+  updateAd(adId: string, adData: UpdateAdDto): Observable<GeneralResponse<AdDto>> {
+    return this.http.put<GeneralResponse<AdDto>>(`${this.apiUrl}/${adId}`, adData);
   }
 
-  delete(id: string): Observable<GeneralResponse<boolean>> {
-    return this.http.delete<GeneralResponse<boolean>>(`${this.base}/${id}`);
+  // Delete ad
+  deleteAd(adId: string): Observable<GeneralResponse<boolean>> {
+    return this.http.delete<GeneralResponse<boolean>>(`${this.apiUrl}/${adId}`);
   }
 
-  // Ad interactions
-  incrementView(adId: string): Observable<GeneralResponse<boolean>> {
-    return this.http.post<GeneralResponse<boolean>>(`${this.base}/${adId}/view`, {});
+  // Publish ad
+  publishAd(adId: string): Observable<GeneralResponse<AdDto>> {
+    return this.http.post<GeneralResponse<AdDto>>(`${this.apiUrl}/${adId}/publish`, {});
   }
 
-  incrementClick(adId: string): Observable<GeneralResponse<boolean>> {
-    return this.http.post<GeneralResponse<boolean>>(`${this.base}/${adId}/click`, {});
-  }
-
+  // Like ad
   likeAd(adId: string): Observable<GeneralResponse<boolean>> {
-    return this.http.post<GeneralResponse<boolean>>(`${this.base}/${adId}/like`, {});
+    return this.http.post<GeneralResponse<boolean>>(`${this.apiUrl}/${adId}/like`, {});
   }
 
+  // Unlike ad
   unlikeAd(adId: string): Observable<GeneralResponse<boolean>> {
-    return this.http.post<GeneralResponse<boolean>>(`${this.base}/${adId}/unlike`, {});
+    return this.http.post<GeneralResponse<boolean>>(`${this.apiUrl}/${adId}/unlike`, {});
   }
 
-  // Comments
-  addComment(adId: string, content: string): Observable<GeneralResponse<CommentDto>> {
-    return this.http.post<GeneralResponse<CommentDto>>(`${this.base}/${adId}/comments`, content);
+  // Increment view count
+  incrementView(adId: string): Observable<GeneralResponse<boolean>> {
+    return this.http.post<GeneralResponse<boolean>>(`${this.apiUrl}/${adId}/view`, {});
   }
 
-  getComments(adId: string): Observable<GeneralResponse<CommentDto[]>> {
-    return this.http.get<GeneralResponse<CommentDto[]>>(`${this.base}/${adId}/comments`);
+  // Get ads by user ID (public)
+  getAdsByUserId(userId: string): Observable<GeneralResponse<AdDto[]>> {
+    return this.http.get<GeneralResponse<AdDto[]>>(`${this.apiUrl}/user/${userId}`);
   }
 
-  deleteComment(commentId: string): Observable<GeneralResponse<boolean>> {
-    return this.http.delete<GeneralResponse<boolean>>(`${this.base}/comments/${commentId}`);
+  // Create ad with files
+  createWithFiles(adData: CreateAdDto & { files: File[] }): Observable<GeneralResponse<AdDto>> {
+    const formData = new FormData();
+    
+    // Add ad data
+    formData.append('title', adData.title);
+    formData.append('description', adData.description);
+    formData.append('price', adData.price.toString());
+    if (adData.categoryId) formData.append('categoryId', adData.categoryId.toString());
+    if (adData.location) formData.append('location', adData.location);
+    if (adData.contactInfo) formData.append('contactInfo', adData.contactInfo);
+    if (adData.tags) formData.append('tags', JSON.stringify(adData.tags));
+    
+    // Add files
+    adData.files.forEach((file, index) => {
+      formData.append(`images`, file);
+    });
+
+    return this.http.post<GeneralResponse<AdDto>>(`${this.apiUrl}/create-with-files`, formData);
   }
 
-  // A/B Testing
-  startABTest(request: StartAdABTestRequest): Observable<GeneralResponse<ABTestDto>> {
-    return this.http.post<GeneralResponse<ABTestDto>>(`${this.base}/ab-tests/start`, request);
+  // Analyze images (AI feature - temporarily disabled)
+  analyzeImages(adId: string): Observable<GeneralResponse<any>> {
+    return this.http.post<GeneralResponse<any>>(`${this.apiUrl}/${adId}/analyze-images`, {});
   }
 
-  getABTestResult(testId: string): Observable<GeneralResponse<ABTestResult>> {
-    return this.http.get<GeneralResponse<ABTestResult>>(`${this.base}/ab-tests/${testId}`);
-  }
+  // Get all ads (for ads-list component)
+  getAll(page: number = 1, pageSize: number = 20, filters?: AdFilters): Observable<GeneralResponse<AdDto[]>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
 
-  // AI Analysis
-  analyzeImages(adId: string): Observable<GeneralResponse<AdAnalysisResult>> {
-    return this.http.post<GeneralResponse<AdAnalysisResult>>(`${this.base}/${adId}/analyze-images`, {});
+    if (filters?.status) {
+      params = params.set('status', filters.status);
+    }
+    if (filters?.categoryId) {
+      params = params.set('categoryId', filters.categoryId);
+    }
+    if (filters?.searchTerm) {
+      params = params.set('searchTerm', filters.searchTerm);
+    }
+    if (filters?.minPrice) {
+      params = params.set('minPrice', filters.minPrice.toString());
+    }
+    if (filters?.maxPrice) {
+      params = params.set('maxPrice', filters.maxPrice.toString());
+    }
+    if (filters?.dateFrom) {
+      params = params.set('dateFrom', filters.dateFrom);
+    }
+    if (filters?.dateTo) {
+      params = params.set('dateTo', filters.dateTo);
+    }
+
+    return this.http.get<GeneralResponse<AdDto[]>>(this.apiUrl, { params });
   }
 }

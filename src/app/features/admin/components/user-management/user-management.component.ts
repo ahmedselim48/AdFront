@@ -23,6 +23,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatDividerModule } from '@angular/material/divider';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 import { AdminService, PaginatedUsersResponse, AdminUserDto, BlockUserRequestDto, GeneralResponse } from '../../../../core/services/admin.service';
+import { ImageUrlHelper } from '../../../../core/utils/image-url.helper';
 
 @Component({
   selector: 'app-user-management',
@@ -503,5 +504,9 @@ export class UserManagementComponent implements OnInit, OnDestroy {
       const userDate = new Date(user.createdAt);
       return userDate.getMonth() === currentMonth && userDate.getFullYear() === currentYear;
     }).length;
+  }
+
+  getProfileImageUrl(profileImageUrl: string | undefined): string {
+    return ImageUrlHelper.getProfileImageUrl(profileImageUrl);
   }
 }

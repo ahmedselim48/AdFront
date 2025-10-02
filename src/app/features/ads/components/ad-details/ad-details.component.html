@@ -1,308 +1,213 @@
-<div class="ad-details-container">
-  <!-- Loading State -->
-  <div *ngIf="isLoading" class="loading-container">
-    <app-loading-spinner [text]="'جاري تحميل تفاصيل الإعلان...'"></app-loading-spinner>
-  </div>
-
-  <!-- Error State -->
-  <div *ngIf="error && !isLoading" class="error-container">
-    <app-error-message [message]="error" [type]="'error'"></app-error-message>
-  </div>
-
-  <!-- Ad Details Content -->
-  <div *ngIf="ad && !isLoading" class="ad-details-content">
-    <!-- Back Button -->
-    <div class="back-section">
-      <button mat-stroked-button routerLink="/ads" class="back-button">
-        <lucide-icon name="arrow-left" size="18" class="me-2"></lucide-icon>
-        العودة للإعلانات
+<div class="ad-details-container" *ngIf="ad; else loadingTemplate">
+  <!-- Ad Header -->
+  <div class="ad-header">
+    <div class="ad-title-section">
+      <h1 class="ad-title">{{ ad.title }}</h1>
+      <div class="ad-meta">
+        <span class="ad-price">{{ formatPrice(ad.price) }}</span>
+        <span class="ad-location">{{ ad.location }}</span>
+        <span class="ad-date">{{ formatDate(ad.createdAt) }}</span>
+      </div>
+    </div>
+    <div class="ad-actions" *ngIf="isOwner">
+      <button class="btn btn-secondary" (click)="editAd()">
+        <i class="icon-edit"></i> تعديل
+      </button>
+      <button class="btn btn-danger" (click)="deleteAd()">
+        <i class="icon-trash"></i> حذف
+      </button>
+      <button class="btn btn-info" (click)="toggleAnalytics()">
+        <i class="icon-chart"></i> {{ showAnalytics ? 'إخفاء التحليلات' : 'عرض التحليلات' }}
       </button>
     </div>
+  </div>
 
-    <div class="details-grid">
-      <!-- Main Content -->
-      <div class="main-content">
-        <!-- Image Gallery -->
-        <div class="image-gallery" *ngIf="ad.images && ad.images.length > 0">
-          <div class="main-image">
-            <img [src]="ad.images[currentImageIndex]" [alt]="ad.title" class="main-image-img">
-            
-            <!-- Navigation Arrows -->
-            <button 
-              *ngIf="ad.images.length > 1"
-              mat-icon-button 
-              class="nav-arrow prev-arrow" 
-              (click)="previousImage()">
-              <lucide-icon name="chevron-left" size="24"></lucide-icon>
-            </button>
-            <button 
-              *ngIf="ad.images.length > 1"
-              mat-icon-button 
-              class="nav-arrow next-arrow" 
-              (click)="nextImage()">
-              <lucide-icon name="chevron-right" size="24"></lucide-icon>
-            </button>
-
-            <!-- Image Counter -->
-            <div *ngIf="ad.images.length > 1" class="image-counter">
-              {{ currentImageIndex + 1 }} / {{ ad.images.length }}
-            </div>
-          </div>
-
-          <!-- Thumbnail Gallery -->
-          <div *ngIf="ad.images.length > 1" class="thumbnail-gallery">
-            <div 
-              *ngFor="let image of ad.images; let i = index" 
-              class="thumbnail-item"
-              [class.active]="i === currentImageIndex"
-              (click)="onImageClick(i)">
-              <img [src]="image" [alt]="'صورة ' + (i + 1)" class="thumbnail-img">
-            </div>
-          </div>
-        </div>
-
-        <!-- Ad Info -->
-        <mat-card class="ad-info-card">
-          <mat-card-header>
-            <div class="ad-header">
-              <div class="ad-title-section">
-                <h1 class="ad-title">{{ ad.title }}</h1>
-                <div class="ad-badges">
-                  <span class="status-badge" [class]="'status-' + getStatusColor(ad.status)">
-                    {{ getStatusText(ad.status) }}
-                  </span>
-                  <span *ngIf="ad.isAIGenerated" class="ai-badge">
-                    <lucide-icon name="zap" size="12"></lucide-icon>
-                    AI
-                  </span>
-                </div>
-              </div>
-              <div class="ad-actions">
-                <button mat-icon-button [matMenuTriggerFor]="adMenu" matTooltip="المزيد">
-                  <lucide-icon name="more-vertical" size="20"></lucide-icon>
-                </button>
-              </div>
-            </div>
-          </mat-card-header>
-
-          <mat-card-content>
-            <!-- Price and Location -->
-            <div class="price-location">
-              <div class="price-section">
-                <span class="price-amount">{{ ad.price | currency:'SAR':'symbol':'1.0-0':'ar' }}</span>
-              </div>
-              <div class="location-section" *ngIf="ad.location">
-                <lucide-icon name="map-pin" size="18"></lucide-icon>
-                <span>{{ ad.location }}</span>
-              </div>
-            </div>
-
-            <!-- Description -->
-            <div class="description-section">
-              <h3>الوصف</h3>
-              <p class="ad-description">{{ ad.description }}</p>
-            </div>
-
-            <!-- Keywords -->
-            <div class="keywords-section" *ngIf="ad.keywords && ad.keywords.length > 0">
-              <h3>الكلمات المفتاحية</h3>
-              <div class="keywords-chips">
-                <mat-chip *ngFor="let keyword of ad.keywords">
-                  {{ keyword }}
-                </mat-chip>
-              </div>
-            </div>
-
-            <!-- Stats -->
-            <div class="stats-section">
-              <div class="stat-item">
-                <lucide-icon name="eye" size="18"></lucide-icon>
-                <span>{{ ad.viewsCount | number }}</span>
-                <span class="stat-label">مشاهدة</span>
-              </div>
-              <div class="stat-item">
-                <lucide-icon name="heart" size="18"></lucide-icon>
-                <span>{{ ad.likesCount | number }}</span>
-                <span class="stat-label">إعجاب</span>
-              </div>
-              <div class="stat-item">
-                <lucide-icon name="message-square" size="18"></lucide-icon>
-                <span>{{ ad.commentsCount | number }}</span>
-                <span class="stat-label">تعليق</span>
-              </div>
-            </div>
-          </mat-card-content>
-
-          <mat-card-actions class="ad-actions-section">
-            <button mat-raised-button color="primary" (click)="onLike()" class="action-button">
-              <lucide-icon name="heart" size="18" class="me-2"></lucide-icon>
-              إعجاب
-            </button>
-            <button mat-stroked-button (click)="onShare()" class="action-button">
-              <lucide-icon name="share" size="18" class="me-2"></lucide-icon>
-              مشاركة
-            </button>
-            <button mat-stroked-button (click)="onContactSeller()" class="action-button">
-              <lucide-icon name="message-square" size="18" class="me-2"></lucide-icon>
-              تواصل مع البائع
-            </button>
-          </mat-card-actions>
-        </mat-card>
-
-        <!-- Comments Section -->
-        <mat-card class="comments-card">
-          <mat-card-header>
-            <mat-card-title>التعليقات ({{ ad.commentsCount }})</mat-card-title>
-          </mat-card-header>
-          
-          <mat-card-content>
-            <!-- Add Comment -->
-            <div class="add-comment">
-              <mat-form-field appearance="outline" class="comment-input">
-                <mat-label>أضف تعليقاً</mat-label>
-                <textarea 
-                  matInput 
-                  [(ngModel)]="newComment" 
-                  placeholder="اكتب تعليقك هنا..."
-                  rows="3">
-                </textarea>
-              </mat-form-field>
-              <button 
-                mat-raised-button 
-                color="primary" 
-                (click)="onSubmitComment()"
-                [disabled]="!newComment.trim() || isSubmittingComment">
-                <mat-spinner *ngIf="isSubmittingComment" diameter="20" class="me-2"></mat-spinner>
-                <span *ngIf="!isSubmittingComment">إضافة تعليق</span>
-              </button>
-            </div>
-
-            <!-- Comments List -->
-            <div class="comments-list" *ngIf="comments.length > 0">
-              <div *ngFor="let comment of comments" class="comment-item">
-                <div class="comment-header">
-                  <div class="comment-user">
-                    <lucide-icon name="user" size="16"></lucide-icon>
-                    <span class="user-name">{{ comment.authorName }}</span>
-                  </div>
-                  <div class="comment-date">
-                    <lucide-icon name="calendar" size="14"></lucide-icon>
-                    <span>{{ formatDate(comment.createdAt) }}</span>
-                  </div>
-                </div>
-                <div class="comment-content">
-                  {{ comment.content }}
-                </div>
-                <div class="comment-actions">
-                  <button mat-icon-button (click)="onDeleteComment(comment.id)" matTooltip="حذف">
-                    <lucide-icon name="trash-2" size="16"></lucide-icon>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- No Comments -->
-            <div *ngIf="comments.length === 0 && !isLoadingComments" class="no-comments">
-              <p>لا توجد تعليقات بعد. كن أول من يعلق!</p>
-            </div>
-
-            <!-- Loading Comments -->
-            <div *ngIf="isLoadingComments" class="loading-comments">
-              <mat-spinner diameter="30"></mat-spinner>
-              <p>جاري تحميل التعليقات...</p>
-            </div>
-          </mat-card-content>
-        </mat-card>
+  <!-- Ad Images -->
+  <div class="ad-images" *ngIf="ad.images && ad.images.length > 0">
+    <div class="image-gallery">
+      <div class="main-image">
+        <img [src]="ad.images[0] || '/assets/images/placeholder-ad.svg'" [alt]="ad.title" class="primary-image">
       </div>
-
-      <!-- Sidebar -->
-      <div class="sidebar">
-        <!-- Seller Info -->
-        <mat-card class="seller-card">
-          <mat-card-header>
-            <mat-card-title>معلومات البائع</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="seller-info">
-              <div class="seller-avatar">
-                <lucide-icon name="user" size="32"></lucide-icon>
-              </div>
-              <div class="seller-details">
-                <h4>{{ ad.userName }}</h4>
-                <p>عضو منذ {{ formatDate(ad.createdAt) }}</p>
-              </div>
-            </div>
-            <div class="seller-actions">
-              <button mat-raised-button color="primary" (click)="onContactSeller()" class="contact-button">
-                <lucide-icon name="message-square" size="18" class="me-2"></lucide-icon>
-                تواصل مع البائع
-              </button>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-        <!-- Ad Meta -->
-        <mat-card class="meta-card">
-          <mat-card-header>
-            <mat-card-title>معلومات الإعلان</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="meta-item">
-              <lucide-icon name="calendar" size="16"></lucide-icon>
-              <span>تاريخ النشر: {{ formatDate(ad.createdAt) }}</span>
-            </div>
-            <div class="meta-item" *ngIf="ad.categoryName">
-              <lucide-icon name="tag" size="16"></lucide-icon>
-              <span>الفئة: {{ ad.categoryName }}</span>
-            </div>
-            <div class="meta-item">
-              <lucide-icon name="eye" size="16"></lucide-icon>
-              <span>عدد المشاهدات: {{ ad.viewsCount | number }}</span>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-        <!-- Related Ads -->
-        <mat-card class="related-card" *ngIf="relatedAds.length > 0">
-          <mat-card-header>
-            <mat-card-title>إعلانات مشابهة</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="related-ads">
-              <div *ngFor="let relatedAd of relatedAds" class="related-ad-item" routerLink="/ads/details/{{ relatedAd.id }}">
-                <div class="related-ad-image" *ngIf="relatedAd.images && relatedAd.images.length > 0">
-                  <img [src]="relatedAd.images[0]" [alt]="relatedAd.title">
-                </div>
-                <div class="related-ad-info">
-                  <h5>{{ relatedAd.title }}</h5>
-                  <p class="related-ad-price">{{ relatedAd.price | currency:'SAR':'symbol':'1.0-0':'ar' }}</p>
-                </div>
-              </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
+      <div class="thumbnail-images" *ngIf="ad.images.length > 1">
+        <img *ngFor="let image of ad.images.slice(1, 5)" 
+             [src]="image" 
+             [alt]="ad.title" 
+             class="thumbnail">
       </div>
     </div>
+  </div>
+
+  <!-- Ad Owner Info -->
+  <div class="ad-owner-info" *ngIf="ad.userName">
+    <h3>المعلن</h3>
+    <div class="owner-details">
+      <a [routerLink]="['/u', ad.userId]" class="owner-link">
+        <div class="owner-avatar">
+          <img [src]="ad.userImageUrl || '/assets/images/default-avatar.svg'" [alt]="ad.userName" class="avatar-img">
+        </div>
+        <div class="owner-info">
+          <span class="owner-name">{{ ad.userName }}</span>
+          <span class="owner-label">عرض الملف الشخصي</span>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Ad Description -->
+  <div class="ad-description">
+    <h3>الوصف</h3>
+    <p>{{ ad.description }}</p>
+  </div>
+
+  <!-- Ad Keywords -->
+  <div class="ad-keywords" *ngIf="ad.keywords && ad.keywords.length > 0">
+    <h3>الكلمات المفتاحية</h3>
+    <div class="keywords-list">
+      <span *ngFor="let keyword of ad.keywords" class="keyword-tag">{{ keyword }}</span>
+    </div>
+  </div>
+
+  <!-- Ad Stats -->
+  <div class="ad-stats">
+    <div class="stat-item">
+      <i class="icon-eye"></i>
+      <span>{{ ad.viewsCount }} مشاهدة</span>
+    </div>
+    <div class="stat-item">
+      <i class="icon-heart"></i>
+      <span>{{ ad.likesCount }} إعجاب</span>
+    </div>
+    <div class="stat-item">
+      <i class="icon-message"></i>
+      <span>{{ ad.commentsCount }} تعليق</span>
+    </div>
+  </div>
+
+  <!-- Analytics Section -->
+  <div class="analytics-section" *ngIf="showAnalytics && isOwner">
+    <h3>التحليلات</h3>
+    <div class="analytics-loading" *ngIf="performanceLoading">
+      <div class="spinner"></div>
+      <p>جاري تحميل التحليلات...</p>
+    </div>
+    <div class="analytics-content" *ngIf="!performanceLoading">
+      <div class="performance-metrics">
+        <div class="metric-card">
+          <h4>إجمالي المشاهدات</h4>
+          <span class="metric-value">{{ performance?.totalViews || ad.viewsCount || 0 }}</span>
+        </div>
+        <div class="metric-card">
+          <h4>إجمالي النقرات</h4>
+          <span class="metric-value">{{ performance?.totalClicks || ad.clicksCount || 0 }}</span>
+        </div>
+        <div class="metric-card">
+          <h4>معدل النقر</h4>
+          <span class="metric-value">{{ performance?.clickThroughRate || calculateCTR() | number:'1.2-2' }}%</span>
+        </div>
+        <div class="metric-card">
+          <h4>معدل التحويل</h4>
+          <span class="metric-value">{{ performance?.conversionRate || 0 | number:'1.2-2' }}%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comments Section -->
+  <div class="comments-section">
+    <h3>التعليقات ({{ ad.commentsCount }})</h3>
+    
+    <!-- Add Comment Form -->
+    <form [formGroup]="commentForm" (ngSubmit)="addComment()" class="comment-form">
+      <div class="form-group">
+        <textarea 
+          formControlName="content" 
+          placeholder="اكتب تعليقك هنا..."
+          class="comment-input"
+          rows="3">
+        </textarea>
+      </div>
+      <button type="submit" 
+              class="btn btn-primary" 
+              [disabled]="commentForm.invalid">
+        <i class="icon-send"></i> إرسال التعليق
+      </button>
+    </form>
+
+    <!-- Comments List -->
+    <div class="comments-loading" *ngIf="commentsLoading">
+      <div class="spinner"></div>
+      <p>جاري تحميل التعليقات...</p>
+    </div>
+    
+    <div class="comments-list" *ngIf="!commentsLoading">
+      <div *ngIf="comments.length === 0" class="no-comments">
+        <p>لا توجد تعليقات بعد</p>
+      </div>
+      
+      <div *ngFor="let comment of comments" class="comment-item">
+        <div class="comment-header">
+          <span class="comment-author">{{ comment.authorName }}</span>
+          <span class="comment-date">{{ formatDate(comment.createdAt) }}</span>
+        </div>
+        <div class="comment-content">
+          <p>{{ comment.content }}</p>
+        </div>
+        <div class="comment-actions" *ngIf="isOwner">
+          <button class="btn btn-sm btn-danger" (click)="deleteComment(comment)">
+            <i class="icon-trash"></i> حذف
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contact Information -->
+  <div class="contact-section" *ngIf="ad.contactNumber && !isOwner">
+    <h3>معلومات التواصل</h3>
+    <div class="contact-info">
+      <div class="contact-details">
+        <span class="contact-number">{{ formatPhoneNumber(ad.contactNumber) }}</span>
+        <span class="contact-method">{{ getContactMethodLabel(ad.contactMethod) }}</span>
+      </div>
+      <div class="contact-buttons">
+        <button 
+          class="btn btn-whatsapp" 
+          (click)="openWhatsApp()">
+          <i class="fab fa-whatsapp"></i>
+          واتساب
+        </button>
+        <button 
+          class="btn btn-call" 
+          (click)="makeCall()">
+          <i class="fas fa-phone"></i>
+          اتصال
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="ad-action-buttons">
+    <button class="btn btn-large" 
+            [class.btn-primary]="!isLiked" 
+            [class.btn-danger]="isLiked"
+            (click)="toggleLike()">
+      <i class="icon-heart"></i> 
+      {{ isLiked ? 'إلغاء الإعجاب' : 'إعجاب' }} ({{ ad.likesCount }})
+    </button>
+    <button class="btn btn-secondary btn-large">
+      <i class="icon-share"></i> مشاركة
+    </button>
+    <button class="btn btn-outline btn-large" (click)="contactSeller()" *ngIf="!isOwner">
+      <i class="icon-message"></i> محادثة
+    </button>
   </div>
 </div>
 
-<!-- Ad Menu -->
-<mat-menu #adMenu="matMenu">
-  <button mat-menu-item (click)="onEditAd()">
-    <lucide-icon name="edit" size="16" class="me-2"></lucide-icon>
-    تعديل الإعلان
-  </button>
-  <button mat-menu-item (click)="onShare()">
-    <lucide-icon name="share" size="16" class="me-2"></lucide-icon>
-    مشاركة
-  </button>
-  <mat-divider></mat-divider>
-  <button mat-menu-item (click)="onReport()" class="report-action">
-    <lucide-icon name="flag" size="16" class="me-2"></lucide-icon>
-    الإبلاغ عن الإعلان
-  </button>
-  <button mat-menu-item (click)="onDeleteAd()" class="delete-action">
-    <lucide-icon name="trash-2" size="16" class="me-2"></lucide-icon>
-    حذف الإعلان
-  </button>
-</mat-menu>
+<!-- Loading Template -->
+<ng-template #loadingTemplate>
+  <div class="loading-container">
+    <div class="spinner"></div>
+    <p>جاري تحميل الإعلان...</p>
+  </div>
+</ng-template>

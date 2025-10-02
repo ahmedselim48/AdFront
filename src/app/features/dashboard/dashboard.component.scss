@@ -50,3 +50,99 @@
 @media(max-width:1100px){.grid-12{grid-template-columns:1fr}.col-span-8,.col-span-4{grid-column:span 1}}
 @media(max-width:900px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:520px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+
+// New Dynamic Dashboard Styles
+.dashboard {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    color: white;
+    
+    p {
+      margin-top: 1rem;
+      font-size: 1.1rem;
+    }
+  }
+  
+  .dashboard-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1.5rem;
+  }
+  
+  // Welcome Section
+  .welcome-section {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    
+    .welcome-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      
+      .user-greeting {
+        h1 {
+          color: white;
+          font-size: 2rem;
+          font-weight: 600;
+          margin: 0 0 0.5rem 0;
+        }
+        
+        p {
+          color: rgba(255, 255, 255, 0.8);
+          font-size: 1.1rem;
+          margin: 0;
+        }
+      }
+      
+      .user-avatar {
+        .avatar-image {
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .avatar-placeholder {
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.2);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.5rem;
+          font-weight: 600;
+          color: white;
+          border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+      }
+    }
+  }
+  
+  // KPI Cards Enhancement
+  .kpi-card {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+  }
+}

@@ -1,84 +1,241 @@
-<form [formGroup]="form" (ngSubmit)="submit()" class="ad-form">
-  <h2 class="mb-4 text-center">{{ 'ads.createTitle' | t }}</h2>
-  <!-- Title -->
-  <div class="mb-3">
-    <label class="form-label">{{ 'ads.title' | t }}</label>
-    <input 
-      type="text" 
-      class="form-control" 
-      formControlName="title" 
-      [placeholder]="'ads.titlePlaceholder' | t" />
-    <div class="text-danger" *ngIf="form.get('title')?.invalid && form.get('title')?.touched">
-      {{ 'ads.titleRequired' | t }}
+<div class="ad-create-container">
+  <div class="ad-create-header">
+    <h1>إنشاء إعلان جديد</h1>
+    <p>أضف تفاصيل إعلانك وشاركه مع العالم</p>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="ad-form">
+    <div class="form-grid">
+      <!-- Basic Information -->
+      <div class="form-section">
+        <h3>المعلومات الأساسية</h3>
+        
+        <!-- Title -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>عنوان الإعلان *</mat-label>
+          <input 
+            matInput 
+            formControlName="title" 
+            placeholder="اكتب عنوان جذاب لإعلانك"
+            maxlength="200">
+          <mat-hint align="end">{{ form.get('title')?.value?.length || 0 }}/200</mat-hint>
+          <mat-error *ngIf="form.get('title')?.invalid && form.get('title')?.touched">
+            العنوان مطلوب (الحد الأقصى 200 حرف)
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Description -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>وصف الإعلان *</mat-label>
+          <textarea 
+            matInput 
+            formControlName="description" 
+            placeholder="اكتب وصفاً مفصلاً عن منتجك أو خدمتك"
+            rows="4"
+            maxlength="5000">
+          </textarea>
+          <mat-hint align="end">{{ form.get('description')?.value?.length || 0 }}/5000</mat-hint>
+          <mat-error *ngIf="form.get('description')?.invalid && form.get('description')?.touched">
+            الوصف مطلوب (الحد الأقصى 5000 حرف)
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Price and Location -->
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>السعر (ريال سعودي) *</mat-label>
+            <input 
+              matInput 
+              type="number" 
+              formControlName="price" 
+              placeholder="0.00"
+              min="0">
+            <mat-error *ngIf="form.get('price')?.invalid && form.get('price')?.touched">
+              السعر مطلوب ويجب أن يكون أكبر من أو يساوي صفر
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>الموقع *</mat-label>
+            <input 
+              matInput 
+              formControlName="location" 
+              placeholder="مثال: الرياض، جدة"
+              maxlength="200">
+            <mat-error *ngIf="form.get('location')?.invalid && form.get('location')?.touched">
+              الموقع مطلوب (الحد الأقصى 200 حرف)
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Category -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>الفئة *</mat-label>
+          <mat-select formControlName="categoryId">
+            <mat-option *ngFor="let category of categories" [value]="category.id">
+              {{ category.name }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('categoryId')?.invalid && form.get('categoryId')?.touched">
+            الفئة مطلوبة
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Contact Information -->
+      <div class="form-section">
+        <h3>معلومات التواصل</h3>
+        
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>رقم التواصل *</mat-label>
+            <input 
+              matInput 
+              formControlName="contactNumber" 
+              placeholder="مثال: 0501234567"
+              maxlength="15">
+            <mat-error *ngIf="form.get('contactNumber')?.invalid && form.get('contactNumber')?.touched">
+              رقم التواصل مطلوب (الحد الأدنى 10 أرقام)
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>طريقة التواصل *</mat-label>
+            <mat-select formControlName="contactMethod">
+              <mat-option value="Call">اتصال</mat-option>
+              <mat-option value="WhatsApp">واتساب</mat-option>
+            </mat-select>
+            <mat-error *ngIf="form.get('contactMethod')?.invalid && form.get('contactMethod')?.touched">
+              طريقة التواصل مطلوبة
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Images Section -->
+      <div class="form-section">
+        <h3>الصور</h3>
+        
+        <!-- File Upload -->
+        <div class="file-upload-area">
+          <input 
+            type="file" 
+            id="fileInput" 
+            (change)="onFileChange($event)" 
+            multiple 
+            accept="image/*"
+            class="file-input">
+          <label for="fileInput" class="file-upload-label">
+            <mat-icon>cloud_upload</mat-icon>
+            <span>اختر الصور (الحد الأقصى 12 صورة)</span>
+            <small>JPG, PNG, WEBP, GIF - الحد الأقصى 10MB لكل صورة</small>
+          </label>
+        </div>
+
+        <!-- Image Previews -->
+        <div class="image-previews" *ngIf="previewUrls.length > 0">
+          <div class="image-preview" *ngFor="let url of previewUrls; let i = index">
+            <img [src]="url" alt="Preview">
+            <button 
+              type="button" 
+              class="remove-image-btn" 
+              (click)="removeImage(i)"
+              mat-icon-button>
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Keywords Section -->
+      <div class="form-section">
+        <h3>الكلمات المفتاحية</h3>
+        
+        <div class="keywords-input">
+          <input 
+            type="text" 
+            #keywordInput
+            placeholder="أضف كلمة مفتاحية واضغط Enter"
+            (keydown.enter)="addKeyword(keywordInput.value); keywordInput.value = ''"
+            class="keyword-input">
+          <button 
+            type="button" 
+            (click)="addKeyword(keywordInput.value); keywordInput.value = ''"
+            mat-raised-button 
+            color="primary">
+            إضافة
+          </button>
+        </div>
+
+        <div class="keywords-list" *ngIf="form.get('keywords')?.value?.length > 0">
+          <mat-chip 
+            *ngFor="let keyword of form.get('keywords')?.value" 
+            [removable]="true"
+            (removed)="removeKeyword(keyword)">
+            {{ keyword }}
+            <mat-icon matChipRemove>cancel</mat-icon>
+          </mat-chip>
+        </div>
+      </div>
+
+      <!-- Publishing Options -->
+      <div class="form-section">
+        <h3>خيارات النشر</h3>
+        
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>حالة الإعلان</mat-label>
+            <mat-select formControlName="status">
+              <mat-option value="Draft">مسودة</mat-option>
+              <mat-option value="Published">منشور</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>جدولة النشر (اختياري)</mat-label>
+            <input 
+              matInput 
+              type="datetime-local" 
+              formControlName="scheduledAt">
+          </mat-form-field>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <!-- Description -->
-  <div class="mb-3">
-    <label class="form-label">{{ 'ads.description' | t }}</label>
-    <textarea 
-      class="form-control" 
-      formControlName="description" 
-      rows="4" 
-      [placeholder]="'ads.descriptionPlaceholder' | t"></textarea>
-    <div class="text-danger" *ngIf="form.get('description')?.invalid && form.get('description')?.touched">
-      {{ 'ads.descriptionRequired' | t }}
+    <!-- Error Message -->
+    <div class="error-message" *ngIf="error">
+      <mat-icon>error</mat-icon>
+      <span>{{ error }}</span>
     </div>
-  </div>
 
-  <!-- Price -->
-  <div class="mb-3">
-    <label class="form-label">{{ 'ads.price' | t }}</label>
-    <input 
-      type="number" 
-      class="form-control" 
-      formControlName="price" 
-      [placeholder]="'ads.pricePlaceholder' | t" />
-    <div class="text-danger" *ngIf="form.get('price')?.invalid && form.get('price')?.touched">
-      {{ 'ads.priceInvalid' | t }}
+    <!-- Action Buttons -->
+    <div class="form-actions">
+      <button 
+        type="button" 
+        (click)="cancel()" 
+        mat-stroked-button 
+        class="cancel-btn">
+        إلغاء
+      </button>
+      
+      <button 
+        type="button" 
+        (click)="saveAsDraft()" 
+        [disabled]="saving || form.invalid"
+        mat-raised-button 
+        color="accent">
+        <mat-spinner *ngIf="saving" diameter="20"></mat-spinner>
+        <span *ngIf="!saving">حفظ كمسودة</span>
+      </button>
+      
+      <button 
+        type="submit" 
+        [disabled]="saving || form.invalid"
+        mat-raised-button 
+        color="primary">
+        <mat-spinner *ngIf="saving" diameter="20"></mat-spinner>
+        <span *ngIf="!saving">نشر الإعلان</span>
+      </button>
     </div>
-  </div>
-
-  <!-- Location -->
-  <div class="mb-3">
-    <label class="form-label">{{ 'ads.location' | t }}</label>
-    <input 
-      type="text" 
-      class="form-control" 
-      formControlName="location" 
-      [placeholder]="'ads.locationPlaceholder' | t" />
-    <div class="text-danger" *ngIf="form.get('location')?.invalid && form.get('location')?.touched">
-      {{ 'ads.locationRequired' | t }}
-    </div>
-  </div>
-
-  <!-- File Upload -->
-  <div class="mb-3">
-    <label for="fileInput" class="form-label d-block">
-      {{ 'ads.upload' | t }}
-    </label>
-    <input id="fileInput" type="file" (change)="onFileChange($event)" multiple class="form-control">
-  </div>
-
-  <!-- Preview -->
-  <div class="preview" *ngIf="previewUrls.length > 0">
-    <div class="preview-item" *ngFor="let url of previewUrls">
-      <img [src]="url" alt="preview">
-    </div>
-  </div>
-
-<!-- Submit -->
-<button class="btn btn-gradient mt-3" type="submit" [disabled]="uploading || form.invalid">
-  {{ uploading ? ('ads.uploading' | t ) : ('ads.create' | t) }}
-</button>
-
-<!-- AI Fill Button -->
-<button class="btn btn-outline-gradient mt-3 ms-2" type="button" (click)="onAnalyze()">
-  {{ 'ads.fillWithAI' | t }}
-</button>
-
-
-
-  <!-- Error -->
-  <div class="text-danger mt-2" *ngIf="error">{{ error }}</div>
-</form>
+  </form>
+</div>

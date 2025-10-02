@@ -36,8 +36,8 @@ export class AppComponent {
   constructor(){
     // Initialize authentication state from stored tokens
     this.auth.initializeAuth();
-    this.pollUnread();
     this.loadCurrentUser();
+    this.pollUnread();
   }
   get isAdmin(): boolean {
     const roles: string[] | undefined = this.currentUser?.roles;
@@ -62,8 +62,13 @@ export class AppComponent {
     return `${baseOrigin}${path}`;
   }
   private loadCurrentUser() {
+    // Set initial user state
+    this.currentUser = this.auth.getCurrentUser();
+    
+    // Subscribe to user changes
     this.auth.currentUser$.subscribe(user => {
       this.currentUser = user;
+      console.log('Current user updated:', user);
     });
   }
 

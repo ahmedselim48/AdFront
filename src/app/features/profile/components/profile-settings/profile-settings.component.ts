@@ -1,21 +1,20 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
-import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSelectModule } from '@angular/material/select';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatDividerModule } from '@angular/material/divider';
-import { LucideAngularModule, User, Mail, Phone, MapPin, Calendar, Save } from 'lucide-angular';
+import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { LucideAngularModule, Save, Camera, User, Mail, Phone, MapPin, Calendar } from 'lucide-angular';
 import { Subject, takeUntil } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 
-import { AuthService } from '../../../../core/auth/auth.service';
-import { UserProfile, ProfileUpdateRequest, UpdateProfileRequest } from '../../../../models/auth.models';
+import { ProfileService } from '../../../../core/services/profile.service';
+import { ProfileDto, ProfileUpdateDto } from '../../../../models/profile.models';
+import { ImageUrlHelper } from '../../../../core/utils/image-url.helper';
 
 @Component({
   selector: 'app-profile-settings',
@@ -24,73 +23,34 @@ import { UserProfile, ProfileUpdateRequest, UpdateProfileRequest } from '../../.
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,
-    MatInputModule,
     MatButtonModule,
-    MatFormFieldModule,
     MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
     MatProgressSpinnerModule,
-    MatSelectModule,
-    MatCheckboxModule,
-    MatDividerModule,
+    MatSnackBarModule,
     LucideAngularModule
   ],
   templateUrl: './profile-settings.component.html',
   styleUrls: ['./profile-settings.component.scss']
 })
 export class ProfileSettingsComponent implements OnInit, OnDestroy {
-  profileForm: FormGroup;
-  currentUser: UserProfile | null = null;
+  profileForm!: FormGroup;
+  currentUser: ProfileDto | null = null;
   isLoading = false;
   isSaving = false;
-
-  // Language options
-  languages = [
-    { value: 'ar', label: 'العربية' },
-    { value: 'en', label: 'English' }
-  ];
-
-  // Timezone options
-  timezones = [
-    { value: 'Asia/Riyadh', label: 'الرياض (GMT+3)' },
-    { value: 'Asia/Dubai', label: 'دبي (GMT+4)' },
-    { value: 'Asia/Kuwait', label: 'الكويت (GMT+3)' },
-    { value: 'Asia/Qatar', label: 'قطر (GMT+3)' }
-  ];
+  selectedImage: File | null = null;
+  imagePreview: string | null = null;
 
   private destroy$ = new Subject<void>();
-
-  constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private toastr: ToastrService
-  ) {
-    this.profileForm = this.fb.group({
-      fullName: ['', [Validators.required, Validators.minLength(2)]],
-      email: ['', [Validators.required, Validators.email]],
-      phoneNumber: [''],
-      location: [''],
-      language: ['ar'],
-      timezone: ['Asia/Riyadh'],
-      bio: [''],
-      website: [''],
-      socialLinks: this.fb.group({
-        twitter: [''],
-        instagram: [''],
-        linkedin: [''],
-        facebook: ['']
-      }),
-      preferences: this.fb.group({
-        emailNotifications: [true],
-        smsNotifications: [false],
-        pushNotifications: [true],
-        marketingEmails: [false],
-        weeklyDigest: [true]
-      })
-    });
-  }
+  private profileService = inject(ProfileService);
+  private toastr = inject(ToastrService);
+  private snackBar = inject(MatSnackBar);
+  private fb = inject(FormBuilder);
 
   ngOnInit() {
-    this.loadUserProfile();
+    this.initializeForm();
+    this.loadProfile();
   }
 
   ngOnDestroy() {
@@ -98,84 +58,150 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  loadUserProfile() {
+  private initializeForm() {
+    this.profileForm = this.fb.group({
+      firstName: ['', [Validators.required, Validators.minLength(2)]],
+      lastName: ['', [Validators.required, Validators.minLength(2)]],
+      phoneNumber: [''],
+      address: ['']
+    });
+  }
+
+  loadProfile() {
     this.isLoading = true;
-
-    this.authService.currentUser$.pipe(takeUntil(this.destroy$)).subscribe(user => {
-      if (user) {
-        this.currentUser = user;
-        this.populateForm(user);
-      }
-      this.isLoading = false;
-    });
-  }
-
-  populateForm(user: UserProfile) {
-    this.profileForm.patchValue({
-      fullName: user.fullName,
-      email: user.email,
-      phoneNumber: user.phoneNumber || '',
-      location: '', // This might come from user preferences
-      language: 'ar', // Default language
-      timezone: 'Asia/Riyadh', // Default timezone
-      bio: '', // This might come from user preferences
-      website: '', // This might come from user preferences
-      socialLinks: {
-        twitter: '',
-        instagram: '',
-        linkedin: '',
-        facebook: ''
+    
+    this.profileService.getProfile().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.currentUser = response.data;
+          this.populateForm(response.data);
+        }
+        this.isLoading = false;
       },
-      preferences: {
-        emailNotifications: true,
-        smsNotifications: false,
-        pushNotifications: true,
-        marketingEmails: false,
-        weeklyDigest: true
+      error: (error) => {
+        console.error('Error loading profile:', error);
+        this.toastr.error('فشل في تحميل بيانات الملف الشخصي', 'خطأ');
+        this.isLoading = false;
       }
     });
   }
 
-  onSubmit() {
+  private populateForm(user: ProfileDto) {
+    this.profileForm.patchValue({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      phoneNumber: user.phoneNumber || '',
+      address: user.address || ''
+    });
+  }
+
+  onImageSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedImage = file;
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.imagePreview = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  onSaveProfile() {
     if (this.profileForm.valid) {
       this.isSaving = true;
-
-      const updateRequest: UpdateProfileRequest = {
-        firstName: this.profileForm.get('fullName')?.value?.split(' ')[0] || '',
-        lastName: this.profileForm.get('fullName')?.value?.split(' ')[1] || '',
-        phoneNumber: this.profileForm.get('phoneNumber')?.value
+      
+      const updateData: ProfileUpdateDto = {
+        firstName: this.profileForm.value.firstName,
+        lastName: this.profileForm.value.lastName,
+        phoneNumber: this.profileForm.value.phoneNumber || undefined,
+        address: this.profileForm.value.address || undefined
       };
 
-      this.authService.updateProfile(updateRequest).subscribe({
-        next: (profile: UserProfile) => {
+      this.profileService.updateProfile(updateData).pipe(takeUntil(this.destroy$)).subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.currentUser = response.data;
+            this.toastr.success('تم حفظ الملف الشخصي بنجاح', 'تم');
+          } else {
+            this.toastr.error('فشل في حفظ الملف الشخصي', 'خطأ');
+          }
           this.isSaving = false;
-          this.toastr.success('تم تحديث الملف الشخصي بنجاح', 'تم');
-          // The auth service will automatically update the current user
         },
-        error: (error: any) => {
-          this.isSaving = false;
-          this.toastr.error('حدث خطأ أثناء تحديث الملف الشخصي', 'خطأ');
+        error: (error) => {
           console.error('Error updating profile:', error);
+          this.toastr.error('فشل في حفظ الملف الشخصي', 'خطأ');
+          this.isSaving = false;
         }
       });
     } else {
-      this.profileForm.markAllAsTouched();
-      this.toastr.error('يرجى ملء جميع الحقول المطلوبة', 'خطأ');
+      this.toastr.warning('يرجى ملء جميع الحقول المطلوبة', 'تحذير');
     }
   }
 
-  onReset() {
-    if (this.currentUser) {
-      this.populateForm(this.currentUser);
-      this.toastr.info('تم إعادة تعيين النموذج', 'تم');
+  onUploadImage() {
+    if (this.selectedImage) {
+      this.isSaving = true;
+      
+      this.profileService.uploadProfilePhoto(this.selectedImage).pipe(takeUntil(this.destroy$)).subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.currentUser = response.data;
+            this.imagePreview = null;
+            this.selectedImage = null;
+            this.toastr.success('تم رفع الصورة بنجاح', 'تم');
+          } else {
+            this.toastr.error('فشل في رفع الصورة', 'خطأ');
+          }
+          this.isSaving = false;
+        },
+        error: (error) => {
+          console.error('Error uploading image:', error);
+          this.toastr.error('فشل في رفع الصورة', 'خطأ');
+          this.isSaving = false;
+        }
+      });
     }
   }
 
-  formatDate(date: Date): string {
+  onRemoveImage() {
+    this.imagePreview = null;
+    this.selectedImage = null;
+  }
+
+  getFieldError(fieldName: string): string {
+    const field = this.profileForm.get(fieldName);
+    if (field?.errors && field.touched) {
+      if (field.errors['required']) {
+        return 'هذا الحقل مطلوب';
+      }
+      if (field.errors['minlength']) {
+        return 'يجب أن يكون طول النص على الأقل 2 أحرف';
+      }
+    }
+    return '';
+  }
+
+  getInitials(name: string): string {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  }
+
+  formatDate(date: string): string {
     return new Date(date).toLocaleDateString('ar-SA', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     });
+  }
+
+  getProfileImageUrl(): string {
+    return ImageUrlHelper.getProfileImageUrl(this.currentUser?.profileImageUrl);
   }
 }

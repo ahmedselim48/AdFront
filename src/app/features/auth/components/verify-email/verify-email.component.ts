@@ -43,9 +43,10 @@ export class VerifyEmailComponent {
     
     this.email = email || '';
     
+    // If no token, show a message asking user to check their email
     if (!token) {
-      this.status = 'error';
-      this.message = 'الرابط غير صالح - الرمز مفقود';
+      this.status = 'idle';
+      this.message = 'يرجى التحقق من بريدك الإلكتروني والنقر على رابط التأكيد المرسل إليك';
       return;
     }
     

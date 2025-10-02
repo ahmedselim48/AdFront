@@ -5,9 +5,9 @@ export type AdStatus = 'Draft' | 'Pending' | 'Published' | 'Rejected' | 'Archive
 export interface AdDto {
   id: string;
   title: string;
-  description: string;
+  description?: string;
   price: number;
-  location: string;
+  location?: string;
   categoryId?: number;
   categoryName?: string;
   createdAt: Date;
@@ -18,9 +18,23 @@ export interface AdDto {
   status: AdStatus;
   scheduledAtUtc?: Date;
   publishedAtUtc?: Date;
-  userName: string;
-  images: string[];
-  keywords: string[];
+  userId: string;
+  userName?: string;
+  userImageUrl?: string;
+  images?: string[];
+  keywords?: string[];
+  
+  // Contact Information - Direct fields for form handling
+  contactNumber?: string;
+  contactMethod?: 'Call' | 'WhatsApp';
+  
+  // Contact Information - Structured object
+  contactInfo?: {
+    phoneNumber?: string;
+    whatsappNumber?: string;
+    email?: string;
+    preferredContactMethod?: 'phone' | 'whatsapp' | 'email' | 'chat';
+  };
   
   // AI Generated Content
   aiGeneratedTitle?: string;
@@ -53,6 +67,9 @@ export interface CreateAdWithFilesCommand {
   keywords?: string[];
   images?: File[];
   userId: string;
+  // Contact Information
+  contactNumber: string;
+  contactMethod: 'Call' | 'WhatsApp';
 }
 
 export interface GenerateAdContentCommand {
@@ -177,6 +194,36 @@ export interface AdminAdDto extends AdDto {
   adminNotes?: string;
   lastModifiedBy?: string;
   lastModifiedAt?: Date;
+}
+
+export interface AdPerformanceDto {
+  adId: string;
+  title: string;
+  status: AdStatus;
+  createdAt: Date;
+  publishedAt?: Date;
+  totalViews: number;
+  totalClicks: number;
+  totalLikes: number;
+  totalComments: number;
+  clickThroughRate: number;
+  conversionRate: number;
+  revenue: number;
+  rank: number;
+  dailyStats: AdStatsDto[];
+}
+
+export interface AdStatsDto {
+  adId: string;
+  title: string;
+  views: number;
+  clicks: number;
+  likes: number;
+  comments: number;
+  clickThroughRate: number;
+  conversionRate: number;
+  generatedAt: Date;
+  period: 'Hourly' | 'Daily' | 'Weekly' | 'Monthly' | 'Yearly';
 }
 
 // Legacy aliases for backward compatibility

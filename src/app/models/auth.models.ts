@@ -58,6 +58,81 @@ export interface GoogleLoginRequest {
   profilePicture?: string;
 }
 
+// ===== PROFILE MODELS =====
+
+export interface ProfileUpdateRequest {
+  firstName: string;
+  lastName: string;
+  phoneNumber?: string;
+  address?: string;
+  profileImageUrl?: string;
+}
+
+export interface ProfileImageUploadRequest {
+  imageFile: File;
+}
+
+export interface ProfileImageResponse {
+  profileImageUrl: string;
+  success: boolean;
+  message: string;
+}
+
+export interface ProfileStats {
+  totalAds: number;
+  activeAds: number;
+  totalViews: number;
+  totalClicks: number;
+  totalLikes: number;
+  totalMessages: number;
+  unreadMessages: number;
+}
+
+export interface AccountSettings {
+  email: string;
+  userName: string;
+  isEmailConfirmed: boolean;
+  isActive: boolean;
+  memberSince: string;
+  lastLoginAt?: string;
+}
+
+export interface SecuritySettings {
+  twoFactorEnabled: boolean;
+  loginNotifications: boolean;
+  suspiciousActivityAlerts: boolean;
+  passwordLastChanged?: string;
+}
+
+export interface NotificationSettings {
+  emailNotifications: boolean;
+  pushNotifications: boolean;
+  smsNotifications: boolean;
+  marketingEmails: boolean;
+  adUpdates: boolean;
+  chatMessages: boolean;
+  systemUpdates: boolean;
+}
+
+export interface PrivacySettings {
+  profileVisibility: 'public' | 'private' | 'friends';
+  showEmail: boolean;
+  showPhone: boolean;
+  showLocation: boolean;
+  allowDirectMessages: boolean;
+  dataSharing: boolean;
+}
+
+export interface SubscriptionSettings {
+  currentPlan: 'free' | 'pro' | 'enterprise';
+  hasActive: boolean;
+  daysRemaining?: number;
+  endDate?: string;
+  autoRenew: boolean;
+  billingCycle: 'monthly' | 'yearly';
+  nextBillingDate?: string;
+}
+
 // ===== RESPONSE MODELS =====
 
 export interface AuthResponse {
@@ -98,6 +173,7 @@ export interface EmailConfirmationResponse {
 
 export interface SubscriptionStatus {
   hasActive: boolean;
+  plan?: string;
   daysRemaining?: number;
   endDate?: string;
 }

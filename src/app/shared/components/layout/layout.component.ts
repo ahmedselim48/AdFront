@@ -6,6 +6,8 @@ import { Subject, takeUntil, filter } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
 import { NotificationsService } from '../../../core/services/notifications.service';
 import { UserProfile } from '../../../models/auth.models';
+import { GeneralResponse } from '../../../models/common.models';
+import { NotificationDto } from '../../../models/profile.models';
 import { 
   LucideAngularModule,
   Home, 
@@ -478,10 +480,12 @@ export class LayoutComponent implements OnInit, OnDestroy {
   }
 
   private loadUnreadCount() {
-    this.notificationsService.getUnreadCount().subscribe({
-      next: (response) => {
-        if (response.success && response.data !== null && response.data !== undefined) {
-          this.notificationsService.updateUnreadCount(response.data);
+    // Load notifications to get unread count
+    this.notificationsService.getNotifications(1, 50).subscribe({
+      next: (response: GeneralResponse<NotificationDto[]>) => {
+        if (response.success && response.data) {
+          const unreadCount = response.data.filter(n => !n.isRead).length;
+          this.unreadCount = unreadCount;
         }
       },
       error: () => {

@@ -1,0 +1,259 @@
+<div class="profile-notifications">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>جاري تحميل الإشعارات...</p>
+  </div>
+
+  <!-- Notifications Content -->
+  <div *ngIf="!isLoading" class="notifications-content">
+    <!-- Header Section -->
+    <div class="notifications-header">
+      <div class="header-info">
+        <h1>الإشعارات</h1>
+        <p>متابعة إشعاراتك وتخصيص إعداداتها</p>
+      </div>
+      <div class="header-actions">
+        <button mat-button (click)="onToggleSettings()">
+          <lucide-icon name="settings" size="16"></lucide-icon>
+          <span>الإعدادات</span>
+        </button>
+        <button mat-icon-button (click)="onRefresh()">
+          <lucide-icon name="refresh-cw" size="20"></lucide-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Summary -->
+    <div class="stats-summary" *ngIf="notifications.length > 0">
+      <div class="stat-item">
+        <span class="stat-value">{{ notifications.length }}</span>
+        <span class="stat-label">إجمالي الإشعارات</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">{{ getUnreadCount() }}</span>
+        <span class="stat-label">غير مقروءة</span>
+      </div>
+        <div class="stat-item">
+          <span class="stat-value">{{ getReadNotificationsCount() }}</span>
+          <span class="stat-label">مقروءة</span>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <mat-card class="filters-card">
+      <mat-card-content>
+        <form [formGroup]="filterForm" class="filters-form">
+          <div class="filters-row">
+            <mat-form-field appearance="outline" class="search-field">
+              <mat-label>البحث في الإشعارات</mat-label>
+              <input matInput 
+                     formControlName="searchTerm"
+                     placeholder="ابحث في الإشعارات...">
+              <mat-icon matPrefix>search</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="type-field">
+              <mat-label>نوع الإشعار</mat-label>
+              <mat-select formControlName="type">
+                <mat-option value="">جميع الأنواع</mat-option>
+                <mat-option value="ad_published">نشر إعلان</mat-option>
+                <mat-option value="ad_expired">انتهاء إعلان</mat-option>
+                <mat-option value="message_received">رسالة جديدة</mat-option>
+                <mat-option value="performance_alert">تنبيه أداء</mat-option>
+                <mat-option value="competition_report">تقرير منافسة</mat-option>
+                <mat-option value="security_alert">تنبيه أمان</mat-option>
+                <mat-option value="system_update">تحديث النظام</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="status-field">
+              <mat-label>الحالة</mat-label>
+              <mat-select formControlName="isRead">
+                <mat-option [value]="null">جميع الإشعارات</mat-option>
+                <mat-option [value]="false">غير مقروءة</mat-option>
+                <mat-option [value]="true">مقروءة</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <button mat-button type="button" (click)="onToggleUnreadOnly()" [class.active]="showUnreadOnly">
+              <lucide-icon name="filter" size="16"></lucide-icon>
+              <span>غير مقروءة فقط</span>
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Bulk Actions -->
+    <div class="bulk-actions" *ngIf="getPaginatedNotifications().length > 0">
+      <button mat-button (click)="onMarkAllAsRead()" [disabled]="isSaving">
+        <lucide-icon name="check-circle" size="16"></lucide-icon>
+        <span>تمييز الكل كمقروء</span>
+      </button>
+      <button mat-button (click)="onDeleteAllNotifications()" [disabled]="isSaving" class="delete-action">
+        <lucide-icon name="trash-2" size="16"></lucide-icon>
+        <span>حذف الكل</span>
+      </button>
+    </div>
+
+    <!-- Notifications List -->
+    <div class="notifications-list" *ngIf="getPaginatedNotifications().length > 0; else noNotificationsTemplate">
+      <mat-card *ngFor="let notification of getPaginatedNotifications(); trackBy: trackByNotificationId" 
+                class="notification-card"
+                [class.unread]="!notification.isRead">
+        <mat-card-content>
+          <div class="notification-content">
+            <div class="notification-icon" [class]="getNotificationColor(notification.type)">
+              <lucide-icon [name]="getNotificationIcon(notification.type)" size="20"></lucide-icon>
+            </div>
+            
+            <div class="notification-details">
+              <div class="notification-header">
+                <h3 class="notification-title">{{ notification.title }}</h3>
+                <span class="notification-time">{{ formatDate(notification.createdAt) }}</span>
+              </div>
+              
+              <p class="notification-message">{{ notification.message }}</p>
+              
+              <div class="notification-meta">
+                <mat-chip [color]="getNotificationColor(notification.type)" selected>
+                  {{ notification.type }}
+                </mat-chip>
+                <span class="notification-status" [class.unread]="!notification.isRead">
+                  {{ notification.isRead ? 'مقروء' : 'غير مقروء' }}
+                </span>
+              </div>
+            </div>
+            
+            <div class="notification-actions">
+              <button *ngIf="!notification.isRead" 
+                      mat-icon-button 
+                      (click)="onMarkAsRead(notification)"
+                      matTooltip="تمييز كمقروء">
+                <lucide-icon name="check-circle" size="16"></lucide-icon>
+              </button>
+              
+              <button mat-icon-button 
+                      (click)="onDeleteNotification(notification)"
+                      matTooltip="حذف الإشعار"
+                      class="delete-action">
+                <lucide-icon name="trash-2" size="16"></lucide-icon>
+              </button>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- No Notifications Template -->
+    <ng-template #noNotificationsTemplate>
+      <div class="no-notifications">
+        <div class="no-notifications-content">
+          <lucide-icon name="bell" size="64" class="no-notifications-icon"></lucide-icon>
+          <h3>لا توجد إشعارات</h3>
+          <p>لم تتلق أي إشعارات بعد. ستظهر إشعاراتك هنا عند توفرها.</p>
+        </div>
+      </div>
+    </ng-template>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button mat-button 
+              [disabled]="currentPage === 1" 
+              (click)="onPageChange(currentPage - 1)">
+        السابق
+      </button>
+      
+      <span class="page-info">
+        صفحة {{ currentPage }} من {{ totalPages }}
+      </span>
+      
+      <button mat-button 
+              [disabled]="currentPage === totalPages" 
+              (click)="onPageChange(currentPage + 1)">
+        التالي
+      </button>
+    </div>
+  </div>
+
+  <!-- Settings Panel -->
+  <div class="settings-panel" *ngIf="showSettings">
+    <mat-card class="settings-card">
+      <mat-card-header>
+        <mat-card-title>إعدادات الإشعارات</mat-card-title>
+        <mat-card-subtitle>تخصيص أنواع الإشعارات التي تريد تلقيها</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <form [formGroup]="settingsForm" class="settings-form">
+          <div class="settings-section">
+            <h4>طرق الإشعار</h4>
+            <div class="settings-grid">
+              <mat-slide-toggle formControlName="emailNotifications">
+                <span>البريد الإلكتروني</span>
+              </mat-slide-toggle>
+              
+              <mat-slide-toggle formControlName="pushNotifications">
+                <span>الإشعارات المنبثقة</span>
+              </mat-slide-toggle>
+              
+              <mat-slide-toggle formControlName="smsNotifications">
+                <span>رسائل SMS</span>
+              </mat-slide-toggle>
+            </div>
+          </div>
+
+          <mat-divider></mat-divider>
+
+          <div class="settings-section">
+            <h4>أنواع الإشعارات</h4>
+            <div class="settings-grid">
+              <mat-slide-toggle formControlName="adUpdates">
+                <span>تحديثات الإعلانات</span>
+              </mat-slide-toggle>
+              
+              <mat-slide-toggle formControlName="chatMessages">
+                <span>الرسائل والمحادثات</span>
+              </mat-slide-toggle>
+              
+              <mat-slide-toggle formControlName="systemUpdates">
+                <span>تحديثات النظام</span>
+              </mat-slide-toggle>
+              
+              <mat-slide-toggle formControlName="performanceAlerts">
+                <span>تنبيهات الأداء</span>
+              </mat-slide-toggle>
+              
+              <mat-slide-toggle formControlName="competitionReports">
+                <span>تقارير المنافسة</span>
+              </mat-slide-toggle>
+              
+              <mat-slide-toggle formControlName="securityAlerts">
+                <span>تنبيهات الأمان</span>
+              </mat-slide-toggle>
+              
+              <mat-slide-toggle formControlName="marketingEmails">
+                <span>رسائل التسويق</span>
+              </mat-slide-toggle>
+            </div>
+          </div>
+        </form>
+      </mat-card-content>
+      
+      <mat-card-actions class="settings-actions">
+        <button mat-button (click)="onToggleSettings()">
+          إلغاء
+        </button>
+        <button mat-raised-button 
+                color="primary" 
+                (click)="onSaveSettings()"
+                [disabled]="settingsForm.invalid || isSaving">
+          <lucide-icon name="save" size="16"></lucide-icon>
+          <span>حفظ الإعدادات</span>
+          <mat-spinner *ngIf="isSaving" diameter="20"></mat-spinner>
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>

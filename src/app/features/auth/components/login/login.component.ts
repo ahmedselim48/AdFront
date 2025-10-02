@@ -36,6 +36,7 @@ import { LoginRequest } from '../../../../models/auth.models';
       <div class="login-card">
         <mat-card class="login-mat-card">
           <mat-card-header>
+            <div class="brand-badge">HarajPlus</div>
             <div class="login-header">
               <lucide-icon name="log-in" size="32" class="login-icon"></lucide-icon>
               <h2 class="login-title">تسجيل الدخول</h2>
@@ -47,22 +48,25 @@ import { LoginRequest } from '../../../../models/auth.models';
             <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
               <!-- Email Field -->
               <mat-form-field appearance="outline" class="full-width">
-                <mat-label>البريد الإلكتروني</mat-label>
+                <mat-label>البريد الإلكتروني أو اسم المستخدم</mat-label>
                 <input
                   matInput
-                  type="email"
+                  type="text"
                   formControlName="email"
-                  placeholder="أدخل بريدك الإلكتروني"
+                  placeholder="أدخل بريدك الإلكتروني أو اسم المستخدم"
                   autocomplete="email"
                   class="form-input">
                 <mat-icon matPrefix>
                   <lucide-icon name="mail" size="20"></lucide-icon>
                 </mat-icon>
                 <mat-error *ngIf="loginForm.get('email')?.hasError('required')">
-                  البريد الإلكتروني مطلوب
+                  البريد الإلكتروني أو اسم المستخدم مطلوب
                 </mat-error>
                 <mat-error *ngIf="loginForm.get('email')?.hasError('email')">
                   يرجى إدخال بريد إلكتروني صحيح
+                </mat-error>
+                <mat-error *ngIf="loginForm.get('email')?.hasError('invalidEmailOrUsername')">
+                  يرجى إدخال بريد إلكتروني صحيح أو اسم مستخدم صحيح
                 </mat-error>
               </mat-form-field>
 
@@ -180,18 +184,32 @@ import { LoginRequest } from '../../../../models/auth.models';
       z-index: 0;
     }
 
+    .brand-badge {
+      display: inline-block;
+      align-self: center;
+      margin: 0 auto 0.75rem auto;
+      padding: 0.25rem 0.75rem;
+      font-weight: 700;
+      font-size: 0.8rem;
+      letter-spacing: 0.5px;
+      color: #fff;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: 999px;
+      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.35);
+    }
+
     .login-card {
       width: 100%;
-      max-width: 450px;
+      max-width: 400px;
       position: relative;
       z-index: 1;
     }
 
     .login-mat-card {
-      padding: 3rem;
-      border-radius: 1.5rem;
+      padding: 2rem;
+      border-radius: 1rem;
       box-shadow: 
-        0 20px 40px rgba(0, 0, 0, 0.1),
+        0 15px 30px rgba(0, 0, 0, 0.1),
         0 0 0 1px rgba(255, 255, 255, 0.1);
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(10px);
@@ -200,7 +218,7 @@ import { LoginRequest } from '../../../../models/auth.models';
 
     .login-header {
       text-align: center;
-      margin-bottom: 2.5rem;
+      margin-bottom: 1.5rem;
     }
 
     .login-icon {
@@ -210,27 +228,47 @@ import { LoginRequest } from '../../../../models/auth.models';
     }
 
     .login-title {
-      font-size: 2rem;
+      font-size: 1.5rem;
       font-weight: 700;
       background: linear-gradient(135deg, #667eea, #764ba2);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      margin: 0 0 0.5rem 0;
+      margin: 0 0 0.25rem 0;
       text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .login-subtitle {
       color: #666;
       margin: 0;
-      font-size: 1rem;
+      font-size: 0.9rem;
       font-weight: 400;
     }
 
     .login-form {
       display: flex;
       flex-direction: column;
-      gap: 1.5rem;
+      gap: 1rem;
+    }
+
+    /* Enhanced input focus/hover states */
+    :host ::ng-deep .mat-mdc-form-field-appearance-outline .mdc-notched-outline__leading,
+    :host ::ng-deep .mat-mdc-form-field-appearance-outline .mdc-notched-outline__trailing,
+    :host ::ng-deep .mat-mdc-form-field-appearance-outline .mdc-notched-outline__notch {
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    :host ::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+    :host ::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing,
+    :host ::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline__notch {
+      border-color: #667eea !important;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+    }
+
+    :host ::ng-deep .mat-mdc-form-field:hover .mdc-notched-outline__leading,
+    :host ::ng-deep .mat-mdc-form-field:hover .mdc-notched-outline__trailing,
+    :host ::ng-deep .mat-mdc-form-field:hover .mdc-notched-outline__notch {
+      border-color: rgba(102, 126, 234, 0.6);
     }
 
     .full-width {
@@ -282,19 +320,19 @@ import { LoginRequest } from '../../../../models/auth.models';
     }
 
     .login-button {
-      height: 56px;
-      font-size: 1.1rem;
+      height: 48px;
+      font-size: 1rem;
       font-weight: 600;
-      margin-top: 1rem;
+      margin-top: 0.75rem;
       background: linear-gradient(135deg, #667eea, #764ba2);
       border: none;
-      border-radius: 12px;
+      border-radius: 10px;
       box-shadow: 
-        0 4px 15px rgba(102, 126, 234, 0.4),
+        0 3px 12px rgba(102, 126, 234, 0.4),
         0 2px 4px rgba(0, 0, 0, 0.1);
       transition: all 0.3s ease;
       text-transform: none;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.3px;
     }
 
     .login-button:hover:not(:disabled) {
@@ -344,16 +382,16 @@ import { LoginRequest } from '../../../../models/auth.models';
     }
 
     .google-login-button {
-      height: 56px;
-      font-size: 1rem;
+      height: 48px;
+      font-size: 0.95rem;
       font-weight: 600;
       border: 2px solid rgba(102, 126, 234, 0.2);
       color: #3c4043;
       background: rgba(255, 255, 255, 0.8);
-      border-radius: 12px;
+      border-radius: 10px;
       transition: all 0.3s ease;
       text-transform: none;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.3px;
     }
 
     .google-login-button:hover:not(:disabled) {
@@ -369,10 +407,10 @@ import { LoginRequest } from '../../../../models/auth.models';
 
     .register-link {
       text-align: center;
-      margin-top: 2rem;
-      padding: 1.5rem;
+      margin-top: 1.5rem;
+      padding: 1rem;
       background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
-      border-radius: 12px;
+      border-radius: 8px;
       border: 1px solid rgba(102, 126, 234, 0.1);
     }
 
@@ -468,10 +506,33 @@ export class LoginComponent implements OnInit {
     private toastr: ToastrService
   ) {
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      email: ['', [Validators.required, this.emailOrUsernameValidator]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       rememberMe: [false]
     });
+  }
+
+  // Custom validator for email or username
+  emailOrUsernameValidator(control: any) {
+    if (!control.value) {
+      return null;
+    }
+    
+    const value = control.value.trim();
+    
+    // Check if it's a valid email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (emailRegex.test(value)) {
+      return null; // Valid email
+    }
+    
+    // Check if it's a valid username (2-32 chars, letters, numbers, _, ., -)
+    const usernameRegex = /^[a-zA-Z\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF0-9_.-]{2,32}$/;
+    if (usernameRegex.test(value)) {
+      return null; // Valid username
+    }
+    
+    return { invalidEmailOrUsername: true };
   }
 
   ngOnInit() {

@@ -13,7 +13,6 @@ import { VerifyEmailComponent } from './features/auth/components/verify-email/ve
 import { ResendConfirmationComponent } from './features/auth/components/resend-confirmation/resend-confirmation.component';
 import { ChangePasswordComponent } from './features/auth/components/change-password/change-password.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
-import { AdsComponent } from './features/ads/ads.component';
 import { AdsListComponent } from './features/ads-list/ads-list.component';
 import { SmartRepliesComponent } from './features/smart-replies/smart-replies.component';
 import { CompetitionComponent } from './features/competition/competition.component';
@@ -26,6 +25,7 @@ import { DirectChatListComponent } from './features/direct-chat/direct-chat-list
 import { DirectChatMessagesComponent } from './features/direct-chat/direct-chat-messages.component';
 import { ProfileComponent } from './features/profile/profile.component';
 import { ProfileManagementComponent } from './features/profile/profile-management.component';
+import { ProfileDashboardComponent } from './features/profile/components/profile-dashboard/profile-dashboard.component';
 import { AdCreateComponent } from './features/ad-create/ad-create.component';
 
 // Import Additional Components
@@ -37,13 +37,8 @@ import { PrivacyComponent } from './features/legal/privacy.component';
 import { TermsComponent } from './features/legal/terms.component';
 
 // Import Profile Components
-import { AccountSettingsComponent } from './features/profile/components/account-settings/account-settings.component';
-import { NotificationSettingsComponent } from './features/profile/components/notification-settings/notification-settings.component';
-import { PrivacySettingsComponent } from './features/profile/components/privacy-settings/privacy-settings.component';
 import { ProfileSettingsComponent } from './features/profile/components/profile-settings/profile-settings.component';
 import { ProfilePictureComponent } from './features/profile/components/profile-picture/profile-picture.component';
-import { SecuritySettingsComponent } from './features/profile/components/security-settings/security-settings.component';
-import { SubscriptionSettingsComponent } from './features/profile/components/subscription-settings/subscription-settings.component';
 
 // Import Admin Components
 import { AdminComponent } from './features/admin/admin.component';
@@ -81,23 +76,11 @@ export const routes: Routes = [
   ]},
   
   // Ads & Content Routes - Available without auth for testing
-  { path: 'ads', component: AdsComponent },
-  { path: 'ads/list', component: AdsListComponent },
-  { 
-    path: 'ads/create', 
-    component: AdCreateComponent,
-    canActivate: [() => {
-      const auth = inject(AuthService);
-      const router = inject(Router);
-      const user = auth.getCurrentUser();
-      const isAdmin = user?.roles?.includes('Admin') || user?.roles?.includes('admin') || false;
-      if (isAdmin) { 
-        router.navigateByUrl('/ads/list'); 
-        return false; 
-      }
-      return true;
-    }]
-  },
+  { path: 'ads', redirectTo: 'ads/list', pathMatch: 'full' },
+  { path: 'ads/create', component: AdCreateComponent }, // يجب أن يأتي قبل ads/:id
+  { path: 'ads/list', loadComponent: () => import('./features/ads/components/ads-list/ads-list.component').then(m => m.AdsListComponent) },
+  { path: 'ads/:id', loadComponent: () => import('./features/ads/components/ad-details/ad-details.component').then(m => m.AdDetailsComponent) },
+  { path: 'ads/:id/edit', loadComponent: () => import('./features/ads/components/ad-edit/ad-edit.component').then(m => m.AdEditComponent) },
   { path: 'adscreate', redirectTo: 'ads/create', pathMatch: 'full' }, // Alternative route
   
   // Legal & Policy Routes
@@ -110,25 +93,32 @@ export const routes: Routes = [
   
   // Dashboard & Analytics - Available without auth for testing
   { path: 'dashboard', component: DashboardComponent },
-  { path: 'smart-replies', component: SmartRepliesComponent },
+  // { path: 'smart-replies', component: SmartRepliesComponent }, // disabled
   { path: 'competition', component: CompetitionComponent },
   { path: 'reports', component: ReportsComponent },
   { path: 'notifications', component: NotificationsComponent },
   
   // Chat & Communication - Available without auth for testing
-  { path: 'chat', children: [
-    { path: '', component: ChatListComponent },
-    { path: 'templates', component: TemplatesComponent },
-    { path: ':id', component: ChatMessagesComponent }
-  ] },
+  // Legacy chat routes (disabled while focusing on direct chat)
+  // { path: 'chat', children: [
+  //   { path: '', component: ChatListComponent },
+  //   { path: 'templates', component: TemplatesComponent },
+  //   { path: ':id', component: ChatMessagesComponent }
+  // ] },
   
   { path: 'direct-chat', children: [
     { path: '', component: DirectChatListComponent },
     { path: ':id', component: DirectChatMessagesComponent }
   ] },
   
+  // Chat route for direct access
+  { path: 'chat/:id', component: DirectChatMessagesComponent },
+  
+  // Public Profile Route (separate from user's own profile area)
+  { path: 'u/:id', loadComponent: () => import('./features/profile/components/public-profile/public-profile.component').then(m => m.PublicProfileComponent) },
+  
   // Profile Management - Redirect admins to dashboard
-  { path: 'profile', canActivate: [() => {
+  { path: 'profile', component: ProfileComponent, canActivate: [() => {
     const auth = inject(AuthService);
     const router = inject(Router);
     const user = auth.getCurrentUser();
@@ -136,22 +126,20 @@ export const routes: Routes = [
     if (isAdmin) { router.navigateByUrl('/admin/dashboard'); return false; }
     return true;
   }], children: [
-    { path: '', component: ProfileComponent },
+    { path: '', redirectTo: 'profile-settings', pathMatch: 'full' },
+    { path: 'profile-settings', component: ProfileSettingsComponent },
+    { path: 'dashboard', component: ProfileDashboardComponent },
+    { path: 'ads', loadComponent: () => import('./features/profile/components/profile-ads/profile-ads.component').then(m => m.ProfileAdsComponent) },
+    { path: 'messages', loadComponent: () => import('./features/profile/components/profile-messages/profile-messages.component').then(m => m.ProfileMessagesComponent) },
+    { path: 'notifications', loadComponent: () => import('./features/profile/components/profile-notifications/profile-notifications.component').then(m => m.ProfileNotificationsComponent) },
+    { path: 'subscription', loadComponent: () => import('./features/profile/components/profile-subscription/profile-subscription.component').then(m => m.ProfileSubscriptionComponent) },
     { path: 'management', component: ProfileManagementComponent },
     { path: 'settings', redirectTo: 'profile-settings', pathMatch: 'full' },
-    { path: 'account', redirectTo: 'account-settings', pathMatch: 'full' },
-    { path: 'privacy', redirectTo: 'privacy-settings', pathMatch: 'full' },
-    { path: 'notifications', redirectTo: 'notification-settings', pathMatch: 'full' },
-    { path: 'security', redirectTo: 'security-settings', pathMatch: 'full' },
-    { path: 'subscription', redirectTo: 'subscription-settings', pathMatch: 'full' },
-    // Actual settings routes
-    { path: 'account-settings', component: AccountSettingsComponent },
-    { path: 'notification-settings', component: NotificationSettingsComponent },
-    { path: 'privacy-settings', component: PrivacySettingsComponent },
-    { path: 'profile-settings', component: ProfileSettingsComponent },
-    { path: 'profile-picture', component: ProfilePictureComponent },
-    { path: 'security-settings', component: SecuritySettingsComponent },
-    { path: 'subscription-settings', component: SubscriptionSettingsComponent }
+    { path: 'account', redirectTo: 'profile-settings', pathMatch: 'full' },
+    { path: 'privacy', redirectTo: 'profile-settings', pathMatch: 'full' },
+    { path: 'security', redirectTo: 'profile-settings', pathMatch: 'full' },
+    // Legacy routes for backward compatibility
+    { path: 'profile-picture', component: ProfilePictureComponent }
   ] },
   
   // Admin Management - Available without auth for testing

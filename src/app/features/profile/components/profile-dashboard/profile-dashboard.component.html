@@ -1,0 +1,281 @@
+<div class="profile-dashboard">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>جاري تحميل البيانات...</p>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div *ngIf="!isLoading" class="dashboard-content">
+    <!-- Welcome Section -->
+    <mat-card class="welcome-card">
+      <mat-card-content>
+        <div class="welcome-content">
+          <div class="welcome-text">
+            <h1>{{ getGreeting() }}، {{ dashboardData?.fullName || 'مستخدم' }}!</h1>
+            <p>مرحباً بك في لوحة التحكم الخاصة بك. إليك نظرة عامة على أداء إعلاناتك.</p>
+          </div>
+          <div class="welcome-actions">
+            <button mat-raised-button color="primary" (click)="onRefresh()">
+              <lucide-icon name="refresh-cw" size="16"></lucide-icon>
+              <span>تحديث البيانات</span>
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Enhanced Stats Overview -->
+    <div class="stats-overview" *ngIf="stats">
+      <div class="stats-grid">
+        <!-- Total Ads -->
+        <mat-card class="stat-card">
+          <mat-card-content>
+            <div class="stat-content">
+              <div class="stat-icon">
+                <lucide-icon name="eye" size="24"></lucide-icon>
+              </div>
+              <div class="stat-info">
+                <h3>{{ formatNumber(getTotalAdsCount()) }}</h3>
+                <p>إجمالي الإعلانات</p>
+                <span class="stat-subtitle">{{ getPublishedAdsCount() }} منشور</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Total Views -->
+        <mat-card class="stat-card">
+          <mat-card-content>
+            <div class="stat-content">
+              <div class="stat-icon views">
+                <lucide-icon name="eye" size="24"></lucide-icon>
+              </div>
+              <div class="stat-info">
+                <h3>{{ formatNumber(getTotalViews()) }}</h3>
+                <p>إجمالي المشاهدات</p>
+                <span class="stat-subtitle">{{ getAverageViewsPerAd() }} متوسط لكل إعلان</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Total Clicks -->
+        <mat-card class="stat-card">
+          <mat-card-content>
+            <div class="stat-content">
+              <div class="stat-icon clicks">
+                <lucide-icon name="target" size="24"></lucide-icon>
+              </div>
+              <div class="stat-info">
+                <h3>{{ formatNumber(getTotalClicks()) }}</h3>
+                <p>إجمالي النقرات</p>
+                <span class="stat-subtitle">{{ getClickThroughRate() }}% معدل النقر</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Total Likes -->
+        <mat-card class="stat-card">
+          <mat-card-content>
+            <div class="stat-content">
+              <div class="stat-icon likes">
+                <lucide-icon name="heart" size="24"></lucide-icon>
+              </div>
+              <div class="stat-info">
+                <h3>{{ formatNumber(getTotalLikes()) }}</h3>
+                <p>إجمالي الإعجابات</p>
+                <span class="stat-subtitle">{{ getEngagementRate() }}% معدل التفاعل</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Total Comments -->
+        <mat-card class="stat-card">
+          <mat-card-content>
+            <div class="stat-content">
+              <div class="stat-icon comments">
+                <lucide-icon name="message-circle" size="24"></lucide-icon>
+              </div>
+              <div class="stat-info">
+                <h3>{{ formatNumber(getTotalComments()) }}</h3>
+                <p>إجمالي التعليقات</p>
+                <span class="stat-subtitle">تفاعل المستخدمين</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Top Category -->
+        <mat-card class="stat-card">
+          <mat-card-content>
+            <div class="stat-content">
+              <div class="stat-icon category">
+                <lucide-icon name="trending-up" size="24"></lucide-icon>
+              </div>
+              <div class="stat-info">
+                <h3>{{ getTopCategory() }}</h3>
+                <p>الفئة الأكثر نشاطاً</p>
+                <span class="stat-subtitle">{{ getAdsByStatus('Published').length }} إعلان نشط</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- Ads Analytics Section -->
+    <div class="ads-analytics-section" *ngIf="ads.length > 0">
+      <!-- Top Performing Ads -->
+      <mat-card class="analytics-card">
+        <mat-card-header>
+          <mat-card-title>أفضل الإعلانات أداءً</mat-card-title>
+          <mat-card-subtitle>الإعلانات الأكثر تفاعلاً ومشاهدة</mat-card-subtitle>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="ads-list" *ngIf="topPerformingAds.length > 0; else noTopAds">
+            <div class="ad-item" *ngFor="let ad of topPerformingAds; trackBy: trackByAdId">
+              <div class="ad-image">
+                <img [src]="ad.images?.[0] || '/assets/images/no-image.png'" [alt]="ad.title">
+                <mat-chip [color]="getAdStatusColor(ad.status)" selected class="status-chip">
+                  {{ getAdStatusLabel(ad.status) }}
+                </mat-chip>
+              </div>
+              <div class="ad-info">
+                <h4 class="ad-title">{{ ad.title }}</h4>
+                <p class="ad-price">{{ formatPrice(ad.price) }}</p>
+                <div class="ad-stats">
+                  <span class="stat">
+                    <lucide-icon name="eye" size="14"></lucide-icon>
+                    {{ ad.viewsCount || 0 }}
+                  </span>
+                  <span class="stat">
+                    <lucide-icon name="heart" size="14"></lucide-icon>
+                    {{ ad.likesCount || 0 }}
+                  </span>
+                  <span class="stat">
+                    <lucide-icon name="message-circle" size="14"></lucide-icon>
+                    {{ ad.commentsCount || 0 }}
+                  </span>
+                </div>
+              </div>
+              <div class="ad-actions">
+                <button mat-icon-button (click)="onViewAd(ad)" matTooltip="عرض الإعلان">
+                  <lucide-icon name="eye" size="16"></lucide-icon>
+                </button>
+                <button mat-icon-button (click)="onEditAd(ad)" matTooltip="تعديل الإعلان">
+                  <lucide-icon name="edit" size="16"></lucide-icon>
+                </button>
+                <button mat-icon-button (click)="onViewAnalytics(ad)" matTooltip="عرض التحليلات">
+                  <lucide-icon name="bar-chart-3" size="16"></lucide-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+          <ng-template #noTopAds>
+            <p class="no-data">لا توجد إعلانات كافية لعرض الإحصائيات</p>
+          </ng-template>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Recent Ads -->
+      <mat-card class="analytics-card">
+        <mat-card-header>
+          <mat-card-title>الإعلانات الحديثة</mat-card-title>
+          <mat-card-subtitle>آخر الإعلانات التي تم إنشاؤها</mat-card-subtitle>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="ads-list" *ngIf="recentAds.length > 0; else noRecentAds">
+            <div class="ad-item" *ngFor="let ad of recentAds; trackBy: trackByAdId">
+              <div class="ad-image">
+                <img [src]="ad.images?.[0] || '/assets/images/no-image.png'" [alt]="ad.title">
+                <mat-chip [color]="getAdStatusColor(ad.status)" selected class="status-chip">
+                  {{ getAdStatusLabel(ad.status) }}
+                </mat-chip>
+              </div>
+              <div class="ad-info">
+                <h4 class="ad-title">{{ ad.title }}</h4>
+                <p class="ad-price">{{ formatPrice(ad.price) }}</p>
+                <div class="ad-meta">
+                  <span class="ad-category">{{ ad.categoryName }}</span>
+                  <span class="ad-date">{{ formatDate(ad.createdAt) }}</span>
+                </div>
+              </div>
+              <div class="ad-actions">
+                <button mat-icon-button (click)="onViewAd(ad)" matTooltip="عرض الإعلان">
+                  <lucide-icon name="eye" size="16"></lucide-icon>
+                </button>
+                <button mat-icon-button (click)="onEditAd(ad)" matTooltip="تعديل الإعلان">
+                  <lucide-icon name="edit" size="16"></lucide-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+          <ng-template #noRecentAds>
+            <p class="no-data">لا توجد إعلانات حديثة</p>
+          </ng-template>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Recent Activity -->
+    <mat-card class="activity-card" *ngIf="stats?.recentActivity">
+      <mat-card-header>
+        <mat-card-title>النشاط الأخير</mat-card-title>
+        <mat-card-subtitle>آخر التحديثات والأنشطة</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="activity-list">
+          <div class="activity-item" 
+               *ngFor="let activity of stats?.recentActivity; trackBy: trackByActivityId">
+            <div class="activity-icon" [class]="getActivityColor(activity.type)">
+              <lucide-icon [name]="getActivityIcon(activity.type)" size="16"></lucide-icon>
+            </div>
+            <div class="activity-content">
+              <h4 class="activity-title">{{ activity.title }}</h4>
+              <p class="activity-description">{{ activity.description }}</p>
+              <span class="activity-time">{{ formatDate(activity.timestamp) }}</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Quick Actions -->
+    <mat-card class="quick-actions-card">
+      <mat-card-header>
+        <mat-card-title>إجراءات سريعة</mat-card-title>
+        <mat-card-subtitle>الوصول السريع للميزات المهمة</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="actions-grid">
+          <button mat-raised-button color="primary" class="action-button" (click)="onCreateAd()">
+            <lucide-icon name="plus" size="20"></lucide-icon>
+            <span>إعلان جديد</span>
+          </button>
+          
+          <button mat-raised-button color="accent" class="action-button" (click)="onViewAllAds()">
+            <lucide-icon name="eye" size="20"></lucide-icon>
+            <span>إعلاناتي</span>
+          </button>
+          
+          <button mat-raised-button color="warn" class="action-button">
+            <lucide-icon name="bar-chart-3" size="20"></lucide-icon>
+            <span>التقارير</span>
+          </button>
+          
+          <button mat-raised-button class="action-button">
+            <lucide-icon name="settings" size="20"></lucide-icon>
+            <span>الإعدادات</span>
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

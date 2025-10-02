@@ -1,379 +1,241 @@
 <div class="ad-create-container">
-  <!-- Header -->
-  <div class="create-header">
-    <div class="header-content">
-      <div class="header-left">
-        <button mat-icon-button routerLink="/ads" class="back-button">
-          <lucide-icon name="arrow-left" size="24"></lucide-icon>
-        </button>
-        <div class="header-text">
-          <h1 class="page-title">إنشاء إعلان جديد</h1>
-          <p class="page-subtitle">أنشئ إعلانك بسهولة مع الذكاء الاصطناعي</p>
+  <div class="ad-create-header">
+    <h1>إنشاء إعلان جديد</h1>
+    <p>أضف تفاصيل إعلانك وشاركه مع العالم</p>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="ad-form">
+    <div class="form-grid">
+      <!-- Basic Information -->
+      <div class="form-section">
+        <h3>المعلومات الأساسية</h3>
+        
+        <!-- Title -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>عنوان الإعلان *</mat-label>
+          <input 
+            matInput 
+            formControlName="title" 
+            placeholder="اكتب عنوان جذاب لإعلانك"
+            maxlength="200">
+          <mat-hint align="end">{{ form.get('title')?.value?.length || 0 }}/200</mat-hint>
+          <mat-error *ngIf="form.get('title')?.invalid && form.get('title')?.touched">
+            العنوان مطلوب (الحد الأقصى 200 حرف)
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Description -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>وصف الإعلان *</mat-label>
+          <textarea 
+            matInput 
+            formControlName="description" 
+            placeholder="اكتب وصفاً مفصلاً عن منتجك أو خدمتك"
+            rows="4"
+            maxlength="5000">
+          </textarea>
+          <mat-hint align="end">{{ form.get('description')?.value?.length || 0 }}/5000</mat-hint>
+          <mat-error *ngIf="form.get('description')?.invalid && form.get('description')?.touched">
+            الوصف مطلوب (الحد الأقصى 5000 حرف)
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Price and Location -->
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>السعر (ريال سعودي) *</mat-label>
+            <input 
+              matInput 
+              type="number" 
+              formControlName="price" 
+              placeholder="0.00"
+              min="0">
+            <mat-error *ngIf="form.get('price')?.invalid && form.get('price')?.touched">
+              السعر مطلوب ويجب أن يكون أكبر من أو يساوي صفر
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>الموقع *</mat-label>
+            <input 
+              matInput 
+              formControlName="location" 
+              placeholder="مثال: الرياض، جدة"
+              maxlength="200">
+            <mat-error *ngIf="form.get('location')?.invalid && form.get('location')?.touched">
+              الموقع مطلوب (الحد الأقصى 200 حرف)
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Category -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>الفئة *</mat-label>
+          <mat-select formControlName="categoryId">
+            <mat-option *ngFor="let category of categories" [value]="category.id">
+              {{ category.name }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('categoryId')?.invalid && form.get('categoryId')?.touched">
+            الفئة مطلوبة
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Contact Information -->
+      <div class="form-section">
+        <h3>معلومات التواصل</h3>
+        
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>رقم التواصل *</mat-label>
+            <input 
+              matInput 
+              formControlName="contactNumber" 
+              placeholder="مثال: 0501234567"
+              maxlength="15">
+            <mat-error *ngIf="form.get('contactNumber')?.invalid && form.get('contactNumber')?.touched">
+              رقم التواصل مطلوب (الحد الأدنى 10 أرقام)
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>طريقة التواصل *</mat-label>
+            <mat-select formControlName="contactMethod">
+              <mat-option value="Call">اتصال</mat-option>
+              <mat-option value="WhatsApp">واتساب</mat-option>
+            </mat-select>
+            <mat-error *ngIf="form.get('contactMethod')?.invalid && form.get('contactMethod')?.touched">
+              طريقة التواصل مطلوبة
+            </mat-error>
+          </mat-form-field>
         </div>
       </div>
-      <div class="header-actions">
-        <button mat-stroked-button (click)="saveDraft()" [disabled]="isLoading">
-          <lucide-icon name="save" size="18" class="me-2"></lucide-icon>
-          حفظ مسودة
-        </button>
+
+      <!-- Images Section -->
+      <div class="form-section">
+        <h3>الصور</h3>
+        
+        <!-- File Upload -->
+        <div class="file-upload-area">
+          <input 
+            type="file" 
+            id="fileInput" 
+            (change)="onFileChange($event)" 
+            multiple 
+            accept="image/*"
+            class="file-input">
+          <label for="fileInput" class="file-upload-label">
+            <mat-icon>cloud_upload</mat-icon>
+            <span>اختر الصور (الحد الأقصى 12 صورة)</span>
+            <small>JPG, PNG, WEBP, GIF - الحد الأقصى 10MB لكل صورة</small>
+          </label>
+        </div>
+
+        <!-- Image Previews -->
+        <div class="image-previews" *ngIf="previewUrls.length > 0">
+          <div class="image-preview" *ngFor="let url of previewUrls; let i = index">
+            <img [src]="url" alt="Preview">
+            <button 
+              type="button" 
+              class="remove-image-btn" 
+              (click)="removeImage(i)"
+              mat-icon-button>
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Keywords Section -->
+      <div class="form-section">
+        <h3>الكلمات المفتاحية</h3>
+        
+        <div class="keywords-input">
+          <input 
+            type="text" 
+            #keywordInput
+            placeholder="أضف كلمة مفتاحية واضغط Enter"
+            (keydown.enter)="addKeyword(keywordInput.value); keywordInput.value = ''"
+            class="keyword-input">
+          <button 
+            type="button" 
+            (click)="addKeyword(keywordInput.value); keywordInput.value = ''"
+            mat-raised-button 
+            color="primary">
+            إضافة
+          </button>
+        </div>
+
+        <div class="keywords-list" *ngIf="form.get('keywords')?.value?.length > 0">
+          <mat-chip 
+            *ngFor="let keyword of form.get('keywords')?.value" 
+            [removable]="true"
+            (removed)="removeKeyword(keyword)">
+            {{ keyword }}
+            <mat-icon matChipRemove>cancel</mat-icon>
+          </mat-chip>
+        </div>
+      </div>
+
+      <!-- Publishing Options -->
+      <div class="form-section">
+        <h3>خيارات النشر</h3>
+        
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>حالة الإعلان</mat-label>
+            <mat-select formControlName="status">
+              <mat-option value="Draft">مسودة</mat-option>
+              <mat-option value="Published">منشور</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>جدولة النشر (اختياري)</mat-label>
+            <input 
+              matInput 
+              type="datetime-local" 
+              formControlName="scheduledAt">
+          </mat-form-field>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Stepper -->
-  <div class="stepper-container">
-    <mat-stepper #stepper [linear]="true" (selectionChange)="onStepChange($event)">
-      
-      <!-- Step 1: Basic Information -->
-      <mat-step [stepControl]="basicInfoForm" label="المعلومات الأساسية">
-        <ng-template matStepLabel>
-          <div class="step-label">
-            <lucide-icon name="file-text" size="18" class="me-2"></lucide-icon>
-            المعلومات الأساسية
-          </div>
-        </ng-template>
-        
-        <div class="step-content">
-          <mat-card class="step-card">
-            <mat-card-header>
-              <mat-card-title>المعلومات الأساسية</mat-card-title>
-              <mat-card-subtitle>أدخل المعلومات الأساسية للإعلان</mat-card-subtitle>
-            </mat-card-header>
-            
-            <mat-card-content>
-              <form [formGroup]="basicInfoForm" class="basic-info-form">
-                <div class="form-row">
-                  <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>عنوان الإعلان</mat-label>
-                    <input matInput formControlName="title" placeholder="أدخل عنوان الإعلان">
-                    <mat-hint>5-100 حرف</mat-hint>
-                    <mat-error *ngIf="basicInfoForm.get('title')?.hasError('required')">
-                      عنوان الإعلان مطلوب
-                    </mat-error>
-                    <mat-error *ngIf="basicInfoForm.get('title')?.hasError('minlength')">
-                      العنوان يجب أن يكون 5 أحرف على الأقل
-                    </mat-error>
-                  </mat-form-field>
-                </div>
+    <!-- Error Message -->
+    <div class="error-message" *ngIf="error">
+      <mat-icon>error</mat-icon>
+      <span>{{ error }}</span>
+    </div>
 
-                <div class="form-row">
-                  <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>وصف الإعلان</mat-label>
-                    <textarea 
-                      matInput 
-                      formControlName="description" 
-                      placeholder="أدخل وصف مفصل للإعلان"
-                      rows="4">
-                    </textarea>
-                    <mat-hint>20-1000 حرف</mat-hint>
-                    <mat-error *ngIf="basicInfoForm.get('description')?.hasError('required')">
-                      وصف الإعلان مطلوب
-                    </mat-error>
-                    <mat-error *ngIf="basicInfoForm.get('description')?.hasError('minlength')">
-                      الوصف يجب أن يكون 20 حرف على الأقل
-                    </mat-error>
-                  </mat-form-field>
-                </div>
-
-                <div class="form-row">
-                  <mat-form-field appearance="outline" class="half-width">
-                    <mat-label>السعر</mat-label>
-                    <input matInput type="number" formControlName="price" placeholder="0">
-                    <span matPrefix>ر.س&nbsp;</span>
-                    <mat-error *ngIf="basicInfoForm.get('price')?.hasError('required')">
-                      السعر مطلوب
-                    </mat-error>
-                    <mat-error *ngIf="basicInfoForm.get('price')?.hasError('min')">
-                      السعر يجب أن يكون أكبر من 0
-                    </mat-error>
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline" class="half-width">
-                    <mat-label>الموقع</mat-label>
-                    <input matInput formControlName="location" placeholder="أدخل الموقع">
-                    <mat-error *ngIf="basicInfoForm.get('location')?.hasError('required')">
-                      الموقع مطلوب
-                    </mat-error>
-                  </mat-form-field>
-                </div>
-
-                <div class="form-row">
-                  <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>الفئة</mat-label>
-                    <mat-select formControlName="categoryId">
-                      <mat-option *ngFor="let category of categories" [value]="category.id">
-                        {{ category.name }}
-                      </mat-option>
-                    </mat-select>
-                    <mat-error *ngIf="basicInfoForm.get('categoryId')?.hasError('required')">
-                      الفئة مطلوبة
-                    </mat-error>
-                  </mat-form-field>
-                </div>
-
-                <!-- Keywords -->
-                <div class="form-row">
-                  <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>الكلمات المفتاحية</mat-label>
-                    <mat-chip-grid #chipGrid formArrayName="keywords">
-                      <mat-chip-row *ngFor="let keyword of basicInfoForm.get('keywords')?.value; let i = index" (removed)="removeKeyword(i)">
-                        {{ keyword }}
-                        <button matChipRemove [attr.aria-label]="'إزالة ' + keyword">
-                          <lucide-icon name="x" size="16"></lucide-icon>
-                        </button>
-                      </mat-chip-row>
-                    </mat-chip-grid>
-                    <input 
-                      placeholder="أضف كلمة مفتاحية"
-                      [matChipInputFor]="chipGrid"
-                      [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-                      (matChipInputTokenEnd)="addKeyword($event.value)"
-                      #keywordInput>
-                  </mat-form-field>
-                </div>
-              </form>
-            </mat-card-content>
-          </mat-card>
-        </div>
-      </mat-step>
-
-      <!-- Step 2: Images -->
-      <mat-step label="الصور">
-        <ng-template matStepLabel>
-          <div class="step-label">
-            <lucide-icon name="image" size="18" class="me-2"></lucide-icon>
-            الصور
-          </div>
-        </ng-template>
-        
-        <div class="step-content">
-          <mat-card class="step-card">
-            <mat-card-header>
-              <mat-card-title>رفع الصور</mat-card-title>
-              <mat-card-subtitle>أضف صوراً عالية الجودة لإعلانك</mat-card-subtitle>
-            </mat-card-header>
-            
-            <mat-card-content>
-              <!-- Image Upload Area -->
-              <div class="image-upload-area" (click)="fileInput.click()">
-                <div class="upload-content">
-                  <lucide-icon name="upload" size="48" class="upload-icon"></lucide-icon>
-                  <h3>اسحب الصور هنا أو انقر للرفع</h3>
-                  <p>يمكنك رفع حتى 10 صور (JPG, PNG, WebP)</p>
-                  <button mat-raised-button color="primary" type="button">
-                    <lucide-icon name="image" size="18" class="me-2"></lucide-icon>
-                    اختيار الصور
-                  </button>
-                </div>
-                <input 
-                  #fileInput 
-                  type="file" 
-                  multiple 
-                  accept="image/*" 
-                  (change)="onImageSelect($event)"
-                  style="display: none;">
-              </div>
-
-              <!-- Image Previews -->
-              <div *ngIf="imagePreviews.length > 0" class="image-previews">
-                <h4>الصور المرفوعة ({{ imagePreviews.length }}/10)</h4>
-                <div class="preview-grid">
-                  <div *ngFor="let preview of imagePreviews; let i = index" class="preview-item">
-                    <img [src]="preview" [alt]="'صورة ' + (i + 1)" class="preview-image">
-                    <button mat-icon-button (click)="removeImage(i)" class="remove-button">
-                      <lucide-icon name="x" size="16"></lucide-icon>
-                    </button>
-                    <div class="preview-overlay">
-                      <span class="preview-number">{{ i + 1 }}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Upload Progress -->
-              <div *ngIf="isUploadingImages" class="upload-progress">
-                <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-                <p>جاري رفع الصور...</p>
-              </div>
-            </mat-card-content>
-          </mat-card>
-        </div>
-      </mat-step>
-
-      <!-- Step 3: AI Generation -->
-      <mat-step label="الذكاء الاصطناعي">
-        <ng-template matStepLabel>
-          <div class="step-label">
-            <lucide-icon name="zap" size="18" class="me-2"></lucide-icon>
-            الذكاء الاصطناعي
-          </div>
-        </ng-template>
-        
-        <div class="step-content">
-          <mat-card class="step-card">
-            <mat-card-header>
-              <mat-card-title>تحسين المحتوى بالذكاء الاصطناعي</mat-card-title>
-              <mat-card-subtitle>استخدم الذكاء الاصطناعي لتحسين عنوان ووصف الإعلان</mat-card-subtitle>
-            </mat-card-header>
-            
-            <mat-card-content>
-              <form [formGroup]="aiForm" class="ai-form">
-                <div class="ai-toggle">
-                  <mat-checkbox formControlName="useAI">
-                    استخدام الذكاء الاصطناعي لتحسين المحتوى
-                  </mat-checkbox>
-                </div>
-
-                <div *ngIf="aiForm.get('useAI')?.value" class="ai-content">
-                  <div class="form-row">
-                    <mat-form-field appearance="outline" class="full-width">
-                      <mat-label>اسم المنتج</mat-label>
-                      <input matInput formControlName="productName" placeholder="أدخل اسم المنتج">
-                    </mat-form-field>
-                  </div>
-
-                  <div class="form-row">
-                    <mat-form-field appearance="outline" class="full-width">
-                      <mat-label>الوصف الأولي</mat-label>
-                      <textarea 
-                        matInput 
-                        formControlName="initialDescription" 
-                        placeholder="أدخل وصف أولي للمنتج"
-                        rows="3">
-                      </textarea>
-                    </mat-form-field>
-                  </div>
-
-                  <div class="ai-actions">
-                    <button 
-                      mat-raised-button 
-                      color="primary" 
-                      (click)="generateAIContent()"
-                      [disabled]="isGeneratingAI || !aiForm.valid">
-                      <mat-spinner *ngIf="isGeneratingAI" diameter="20" class="me-2"></mat-spinner>
-                      <lucide-icon *ngIf="!isGeneratingAI" name="zap" size="18" class="me-2"></lucide-icon>
-                      {{ isGeneratingAI ? 'جاري التوليد...' : 'توليد المحتوى' }}
-                    </button>
-                  </div>
-
-                  <!-- AI Generated Content -->
-                  <div *ngIf="aiGeneratedContent" class="ai-results">
-                    <h4>المحتوى المُولد</h4>
-                    <div class="ai-result-item">
-                      <h5>العنوان المُحسن:</h5>
-                      <p>{{ aiGeneratedContent.generatedTitle }}</p>
-                    </div>
-                    <div class="ai-result-item">
-                      <h5>الوصف المُحسن:</h5>
-                      <p>{{ aiGeneratedContent.generatedDescription }}</p>
-                    </div>
-                    <div class="ai-result-item">
-                      <h5>الكلمات المفتاحية:</h5>
-                      <div class="keywords-chips">
-                        <mat-chip *ngFor="let keyword of aiGeneratedContent.generatedKeywords">
-                          {{ keyword }}
-                        </mat-chip>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </form>
-            </mat-card-content>
-          </mat-card>
-        </div>
-      </mat-step>
-
-      <!-- Step 4: Review and Publish -->
-      <mat-step label="المراجعة والنشر">
-        <ng-template matStepLabel>
-          <div class="step-label">
-            <lucide-icon name="eye" size="18" class="me-2"></lucide-icon>
-            المراجعة والنشر
-          </div>
-        </ng-template>
-        
-        <div class="step-content">
-          <mat-card class="step-card">
-            <mat-card-header>
-              <mat-card-title>مراجعة الإعلان</mat-card-title>
-              <mat-card-subtitle>راجع إعلانك قبل النشر</mat-card-subtitle>
-            </mat-card-header>
-            
-            <mat-card-content>
-              <div class="review-content">
-                <!-- Ad Preview -->
-                <div class="ad-preview">
-                  <h4>معاينة الإعلان</h4>
-                  <mat-card class="preview-card">
-                    <div class="preview-image" *ngIf="imagePreviews.length > 0">
-                      <img [src]="imagePreviews[0]" alt="معاينة الإعلان">
-                    </div>
-                    <mat-card-content>
-                      <h3>{{ basicInfoForm.get('title')?.value }}</h3>
-                      <p>{{ basicInfoForm.get('description')?.value }}</p>
-                      <div class="preview-meta">
-                        <span class="preview-price">{{ basicInfoForm.get('price')?.value | currency:'SAR':'symbol':'1.0-0':'ar' }}</span>
-                        <span class="preview-location">{{ basicInfoForm.get('location')?.value }}</span>
-                      </div>
-                    </mat-card-content>
-                  </mat-card>
-                </div>
-
-                <!-- Final Edits -->
-                <div class="final-edits">
-                  <h4>التعديلات النهائية</h4>
-                  <form [formGroup]="reviewForm" class="review-form">
-                    <mat-form-field appearance="outline" class="full-width">
-                      <mat-label>العنوان النهائي</mat-label>
-                      <input matInput formControlName="finalTitle">
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline" class="full-width">
-                      <mat-label>الوصف النهائي</mat-label>
-                      <textarea matInput formControlName="finalDescription" rows="4"></textarea>
-                    </mat-form-field>
-                  </form>
-                </div>
-
-                <!-- Publish Actions -->
-                <div class="publish-actions">
-                  <button 
-                    mat-raised-button 
-                    color="primary" 
-                    (click)="publishAd()"
-                    [disabled]="isLoading || !reviewForm.valid">
-                    <mat-spinner *ngIf="isLoading" diameter="20" class="me-2"></mat-spinner>
-                    <lucide-icon *ngIf="!isLoading" name="save" size="18" class="me-2"></lucide-icon>
-                    {{ isLoading ? 'جاري النشر...' : 'نشر الإعلان' }}
-                  </button>
-                </div>
-              </div>
-            </mat-card-content>
-          </mat-card>
-        </div>
-      </mat-step>
-    </mat-stepper>
-  </div>
-
-  <!-- Stepper Navigation -->
-  <div class="stepper-navigation">
-    <div class="nav-buttons">
+    <!-- Action Buttons -->
+    <div class="form-actions">
       <button 
+        type="button" 
+        (click)="cancel()" 
         mat-stroked-button 
-        (click)="previousStep()" 
-        [disabled]="currentStep === 0">
-        <lucide-icon name="arrow-left" size="18" class="me-2"></lucide-icon>
-        السابق
+        class="cancel-btn">
+        إلغاء
       </button>
       
       <button 
+        type="button" 
+        (click)="saveAsDraft()" 
+        [disabled]="saving || form.invalid"
         mat-raised-button 
-        color="primary" 
-        (click)="nextStep()" 
-        [disabled]="currentStep === steps.length - 1 || !canProceedToNext()">
-        التالي
-        <lucide-icon name="arrow-right" size="18" class="ms-2"></lucide-icon>
+        color="accent">
+        <mat-spinner *ngIf="saving" diameter="20"></mat-spinner>
+        <span *ngIf="!saving">حفظ كمسودة</span>
+      </button>
+      
+      <button 
+        type="submit" 
+        [disabled]="saving || form.invalid"
+        mat-raised-button 
+        color="primary">
+        <mat-spinner *ngIf="saving" diameter="20"></mat-spinner>
+        <span *ngIf="!saving">نشر الإعلان</span>
       </button>
     </div>
-  </div>
+  </form>
 </div>

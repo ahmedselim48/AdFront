@@ -11,6 +11,7 @@ import { Subscription } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
 import { SignalRService } from '../../../core/services/signalr.service';
 import { NotificationBellComponent } from '../notification-bell/notification-bell.component';
+import { NavbarChatComponent } from '../navbar-chat/navbar-chat.component';
 
 @Component({
   selector: 'app-header',
@@ -24,7 +25,8 @@ import { NotificationBellComponent } from '../notification-bell/notification-bel
     MatMenuModule,
     MatDividerModule,
     LucideAngularModule,
-    NotificationBellComponent
+    NotificationBellComponent,
+    NavbarChatComponent
   ],
   template: `
     <mat-toolbar color="primary" class="header-toolbar">
@@ -59,6 +61,8 @@ import { NotificationBellComponent } from '../notification-bell/notification-bel
         <div class="header-right">
           <!-- Notifications -->
           <app-notification-bell></app-notification-bell>
+          <!-- Chat -->
+          <app-navbar-chat></app-navbar-chat>
 
           <!-- User Menu -->
           <button 
@@ -85,7 +89,7 @@ import { NotificationBellComponent } from '../notification-bell/notification-bel
             <mat-divider></mat-divider>
             
             <button mat-menu-item (click)="logout()" class="logout-button">
-              <lucide-icon name="log-out" size="16" class="menu-icon"></lucide-icon>
+              <lucide-icon name="sign-out" size="16" class="menu-icon"></lucide-icon>
               تسجيل الخروج
             </button>
           </mat-menu>
@@ -248,10 +252,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
       })
     );
 
-    // بدء SignalR connection عند تسجيل الدخول
-    if (this.authService.isLoggedIn()) {
-      this.signalRService.startConnection();
-    }
+    // SignalR connections are initialized by the service itself
+    // when the app loads; no explicit start needed here.
   }
 
   ngOnDestroy() {
@@ -266,8 +268,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   logout() {
     this.authService.logout().subscribe({
       next: () => {
-        // إيقاف SignalR connection
-        this.signalRService.stopConnection();
+        // SignalR service manages its own lifecycle; no explicit stop needed.
         // إعادة توجيه إلى صفحة تسجيل الدخول
         window.location.href = '/auth/login';
       },

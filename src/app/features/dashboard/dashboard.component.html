@@ -1,104 +1,183 @@
 <section class="dashboard">
-  <!-- Unified header bar -->
-  <div class="dash-header card glass">
-    <div class="title">
-      <h2>لوحة التحكم</h2>
-      <small>متابعة الأداء والتنبيهات والوصول السريع.</small>
-    </div>
-    <div class="actions">
-      <a class="action" routerLink="/chat" aria-label="Messages">
-        <span class="icon">💬</span>
-        <span>{{ 'dash.messages' | t }}</span>
-        <span class="badge" *ngIf="kpi?.messages">{{ kpi.messages }}</span>
-      </a>
-      <a class="action" routerLink="/notifications" aria-label="Notifications">
-        <span class="icon">🔔</span>
-        <span>{{ 'notifications.title' | t }}</span>
-        <span class="badge warn" *ngIf="kpi?.alerts">{{ kpi.alerts }}</span>
-      </a>
-      <a class="action" routerLink="/reports">
-        <span class="icon">📈</span>
-        <span>{{ 'nav.reports' | t }}</span>
-      </a>
-      <a class="action" routerLink="/competition">
-        <span class="icon">🏆</span>
-        <span>{{ 'nav.competition' | t }}</span>
-      </a>
-    </div>
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>جاري تحميل البيانات...</p>
   </div>
 
-  <!-- Filters toolbar -->
-  <div class="filters card glass">
-    <form [formGroup]="filters" class="filters-form">
-      <input type="date" formControlName="from">
-      <input type="date" formControlName="to">
-      <select formControlName="channel">
-        <option value="all">{{ 'dash.allChannels' | t }}</option>
-        <option value="facebook">{{ 'dash.facebook' | t }}</option>
-        <option value="google">{{ 'dash.google' | t }}</option>
-      </select>
-      <button type="button" class="apply">تطبيق</button>
-    </form>
-  </div>
+  <!-- Dashboard Content -->
+  <div *ngIf="!isLoading" class="dashboard-content">
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+      <div class="welcome-content">
+        <div class="user-greeting">
+          <h1>{{ getGreeting() }}، {{ currentUser?.fullName || 'مستخدم' }}!</h1>
+          <p>مرحباً بك في لوحة التحكم الخاصة بك</p>
+        </div>
+        <div class="user-avatar">
+          <img *ngIf="currentUser?.profileImageUrl" 
+               [src]="getProfileImageUrl()" 
+               [alt]="currentUser?.fullName"
+               class="avatar-image">
+          <div *ngIf="!currentUser?.profileImageUrl" class="avatar-placeholder">
+            {{ getInitials(currentUser?.fullName || 'U') }}
+          </div>
+        </div>
+      </div>
+      <div class="subscription-info" *ngIf="subscriptionStatus">
+        <mat-chip-set>
+          <mat-chip [color]="getPlanColor(subscriptionStatus.plan)" selected>
+            {{ getPlanLabel(subscriptionStatus.plan) }}
+          </mat-chip>
+        </mat-chip-set>
+      </div>
+    </div>
 
-  <div class="kpi-grid">
-    <div class="kpi-card card glass">
-      <div class="kpi-head">
-        <span class="kpi-icon">👁️</span>
-        <h3>{{ 'dash.views' | t }}</h3>
+    <!-- Unified header bar -->
+    <div class="dash-header card glass">
+      <div class="title">
+        <h2>لوحة التحكم</h2>
+        <small>متابعة الأداء والتنبيهات والوصول السريع.</small>
       </div>
-      <div class="kpi-value">{{kpi.views | number}}</div>
-      <small class="kpi-sub">إجمالي المشاهدات</small>
-    </div>
-    <div class="kpi-card card glass">
-      <div class="kpi-head">
-        <span class="kpi-icon">💬</span>
-        <h3>{{ 'dash.messages' | t }}</h3>
+      <div class="actions">
+        <a class="action" routerLink="/chat" aria-label="Messages">
+          <lucide-icon name="message-circle" size="20"></lucide-icon>
+          <span>الرسائل</span>
+          <span class="badge" *ngIf="kpi?.messages">{{ kpi.messages }}</span>
+        </a>
+        <a class="action" routerLink="/notifications" aria-label="Notifications">
+          <lucide-icon name="bell" size="20"></lucide-icon>
+          <span>التنبيهات</span>
+          <span class="badge warn" *ngIf="kpi?.alerts">{{ kpi.alerts }}</span>
+        </a>
+        <a class="action" routerLink="/reports">
+          <lucide-icon name="bar-chart-3" size="20"></lucide-icon>
+          <span>التقارير</span>
+        </a>
+        <a class="action" routerLink="/competition">
+          <lucide-icon name="trophy" size="20"></lucide-icon>
+          <span>المنافسة</span>
+        </a>
       </div>
-      <div class="kpi-value">{{kpi.messages | number}}</div>
-      <small class="kpi-sub">الرسائل المستلمة</small>
     </div>
-    <div class="kpi-card card glass">
-      <div class="kpi-head">
-        <span class="kpi-icon">🎯</span>
-        <h3>{{ 'dash.conversions' | t }}</h3>
-      </div>
-      <div class="kpi-value">{{kpi.conversions | number}}</div>
-      <small class="kpi-sub">تحويلات</small>
-    </div>
-    <div class="kpi-card card glass">
-      <div class="kpi-head">
-        <span class="kpi-icon">📊</span>
-        <h3>{{ 'dash.ctr' | t }}</h3>
-      </div>
-      <div class="kpi-value">{{kpi.ctr | number:'1.0-2'}}%</div>
-      <small class="kpi-sub">نسبة النقر إلى الظهور</small>
-    </div>
-    <div class="kpi-card card glass">
-      <div class="kpi-head">
-        <span class="kpi-icon">🔔</span>
-        <h3>{{ 'dash.alerts' | t }}</h3>
-      </div>
-      <div class="kpi-value">{{kpi.alerts}}</div>
-      <small class="kpi-sub">تنبيهات</small>
-    </div>
-  </div>
 
-  <!-- 12-col responsive grid -->
-  <div class="grid-12">
-    <div class="panel card col-span-8">
-      <h3 class="panel-title">{{ 'dash.performance' | t }}</h3>
-      <app-line-chart [labels]="labels" [series]="[{ label: 'Performance', values: series }]"></app-line-chart>
+    <!-- Filters toolbar -->
+    <div class="filters-toolbar card">
+      <form [formGroup]="filters" class="filter-form">
+        <mat-form-field appearance="outline">
+          <mat-label>من تاريخ</mat-label>
+          <input matInput type="date" formControlName="from">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>إلى تاريخ</mat-label>
+          <input matInput type="date" formControlName="to">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>القناة</mat-label>
+          <mat-select formControlName="channel">
+            <mat-option value="all">الكل</mat-option>
+            <mat-option value="facebook">فيسبوك</mat-option>
+            <mat-option value="instagram">إنستغرام</mat-option>
+            <mat-option value="twitter">تويتر</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="onRefresh()">
+          <lucide-icon name="refresh-cw" size="16"></lucide-icon>
+          تحديث البيانات
+        </button>
+      </form>
     </div>
-    <aside class="panel card glass notifications col-span-4">
-      <h3 class="panel-title">{{ 'notifications.title' | t }}</h3>
-      <ul class="n-list">
-        <li *ngFor="let n of (notifications$ | async)">
-          <span class="dot" [class.info]="n.type==='AdPublished'" [class.warning]="n.type==='SubscriptionExpiring'" [class.error]="n.type==='SuspiciousLogin'" [class.success]="n.type==='Payment'"></span>
-          <span class="msg">{{ n.message }}</span>
-          <small>{{ n.createdAt | date:'short' }}</small>
-        </li>
-      </ul>
-    </aside>
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card card">
+        <div class="kpi-icon">
+          <lucide-icon name="eye" size="24"></lucide-icon>
+        </div>
+        <div class="kpi-content">
+          <h3>{{ kpi.views || 0 | number }}</h3>
+          <p>المشاهدات</p>
+          <span class="trend positive">+12%</span>
+        </div>
+      </div>
+      
+      <div class="kpi-card card">
+        <div class="kpi-icon">
+          <lucide-icon name="message-circle" size="24"></lucide-icon>
+        </div>
+        <div class="kpi-content">
+          <h3>{{ kpi.messages || 0 }}</h3>
+          <p>الرسائل</p>
+          <span class="trend positive">+8%</span>
+        </div>
+      </div>
+      
+      <div class="kpi-card card">
+        <div class="kpi-icon">
+          <lucide-icon name="trending-up" size="24"></lucide-icon>
+        </div>
+        <div class="kpi-content">
+          <h3>{{ kpi.conversions || 0 }}</h3>
+          <p>التحويلات</p>
+          <span class="trend positive">+15%</span>
+        </div>
+      </div>
+      
+      <div class="kpi-card card">
+        <div class="kpi-icon">
+          <lucide-icon name="target" size="24"></lucide-icon>
+        </div>
+        <div class="kpi-content">
+          <h3>{{ kpi.ctr || 0 | number:'1.1-1' }}%</h3>
+          <p>معدل النقر</p>
+          <span class="trend negative">-2%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-section">
+      <div class="chart-card card">
+        <div class="chart-header">
+          <h3>إحصائيات الأداء</h3>
+          <div class="chart-actions">
+            <button mat-icon-button>
+              <lucide-icon name="download" size="18"></lucide-icon>
+            </button>
+            <button mat-icon-button>
+              <lucide-icon name="share" size="18"></lucide-icon>
+            </button>
+          </div>
+        </div>
+        <div class="chart-content">
+          <app-line-chart 
+            [labels]="labels" 
+            [series]="series"
+            [height]="300">
+          </app-line-chart>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="activity-section">
+      <div class="activity-card card">
+        <div class="activity-header">
+          <h3>النشاط الأخير</h3>
+          <a routerLink="/activity" class="view-all">عرض الكل</a>
+        </div>
+        <div class="activity-list">
+          <div class="activity-item" *ngFor="let notification of notifications$ | async | slice:0:5">
+            <div class="activity-icon">
+              <lucide-icon [name]="getActivityIcon(notification.type)" size="16"></lucide-icon>
+            </div>
+            <div class="activity-content">
+              <p>{{ notification.message }}</p>
+              <span class="activity-time">{{ notification.createdAt | date:'short' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>

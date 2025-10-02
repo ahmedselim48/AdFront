@@ -18,7 +18,7 @@
       <div class="activity-content">
         <!-- Ad Image -->
         <div class="activity-image" *ngIf="ad.images && ad.images.length > 0">
-          <img [src]="ad.images[0]" [alt]="ad.title" class="activity-img">
+          <img [src]="ad.images[0] || '/assets/images/placeholder-ad.svg'" [alt]="ad.title" class="activity-img">
         </div>
         <div class="activity-image-placeholder" *ngIf="!ad.images || ad.images.length === 0">
           <lucide-icon name="image" size="24"></lucide-icon>

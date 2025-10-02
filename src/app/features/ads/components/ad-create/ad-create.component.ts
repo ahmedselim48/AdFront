@@ -23,7 +23,11 @@ import { ToastrService } from 'ngx-toastr';
 import { AdsService } from '../../../../core/services/ads.service';
 import { CategoriesService } from '../../../../core/services/categories.service';
 import { AuthService } from '../../../../core/auth/auth.service';
-import { AdDto, CreateAdWithFilesCommand, AdGenerationResponse } from '../../../../models/ads.models';
+import { FileService } from '../../../../core/services/file.service';
+import { ImageValidationService } from '../../../../core/services/image-validation.service';
+import { CategoryService } from '../../../../core/services/category.service';
+import { AdDto, CreateAdWithFilesCommand, CreateAdCommand, AdGenerationResponse, AdItem } from '../../../../models/ads.models';
+import { CreateAdDto } from '../../../../models/profile.models';
 import { CategoryDto } from '../../../../models/categories.models';
 // import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
 
@@ -112,7 +116,10 @@ export class AdCreateComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private adsService = inject(AdsService);
   private categoriesService = inject(CategoriesService);
+  private categoryService = inject(CategoryService);
   private authService = inject(AuthService);
+  private fileService = inject(FileService);
+  private imageValidationService = inject(ImageValidationService);
   private router = inject(Router);
   private toastr = inject(ToastrService);
 
@@ -138,12 +145,17 @@ export class AdCreateComponent implements OnInit, OnDestroy {
   private initializeForms() {
     // Basic Information Form
     this.basicInfoForm = this.fb.group({
-      title: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(100)]],
-      description: ['', [Validators.required, Validators.minLength(20), Validators.maxLength(1000)]],
-      price: ['', [Validators.required, Validators.min(1)]],
-      location: ['', [Validators.required, Validators.minLength(2)]],
+      title: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(200)]],
+      description: ['', [Validators.required, Validators.minLength(20), Validators.maxLength(5000)]],
+      price: ['', [Validators.required, Validators.min(0)]],
+      location: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
       categoryId: ['', [Validators.required]],
-      keywords: this.fb.array([])
+      keywords: this.fb.array([]),
+      status: ['Draft', Validators.required],
+      scheduledAt: [''],
+      // Contact Information
+      contactNumber: ['', [Validators.required, Validators.minLength(10)]],
+      contactMethod: ['Call', Validators.required]
     });
 
     // Images Form
@@ -168,15 +180,25 @@ export class AdCreateComponent implements OnInit, OnDestroy {
   }
 
   loadCategories() {
-    this.categoriesService.getAllCategories().subscribe({
+    // Try both services for compatibility
+    this.categoriesService.getAllCategories().pipe(takeUntil(this.destroy$)).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.categories = response.data;
         }
       },
       error: (error: unknown) => {
-        console.error('Error loading categories:', error);
-        this.toastr.error('حدث خطأ أثناء تحميل الفئات', 'خطأ');
+        console.error('Error loading categories from main service:', error);
+        // Fallback to alternative service
+        this.categoryService.getCategories().pipe(takeUntil(this.destroy$)).subscribe({
+          next: (categories: any[]) => {
+            this.categories = categories;
+          },
+          error: (fallbackError: any) => {
+            console.error('Error loading categories from fallback service:', fallbackError);
+            this.toastr.error('حدث خطأ أثناء تحميل الفئات', 'خطأ');
+          }
+        });
       }
     });
   }
@@ -213,24 +235,65 @@ export class AdCreateComponent implements OnInit, OnDestroy {
   // Image Methods
   onImageSelect(event: Event) {
     const input = event.target as HTMLInputElement;
-    if (input.files) {
-      this.isUploadingImages = true;
+    if (!input.files?.length) return;
+
+    const files = Array.from(input.files);
+    
+    // Use enhanced validation service
+    const validationResult = this.imageValidationService.validateImageFiles(files);
+    
+    // Show validation summary
+    if (validationResult.hasErrors) {
+      const summary = this.imageValidationService.getValidationSummary(validationResult);
+      this.toastr.warning(summary, 'تحذير');
       
-      Array.from(input.files).forEach(file => {
-        if (file.type.startsWith('image/')) {
-          this.uploadedImages.push(file);
-          
-          // Create preview
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            this.imagePreviews.push(e.target?.result as string);
-          };
-          reader.readAsDataURL(file);
+      // Show detailed errors for each file
+      validationResult.skippedFiles.forEach(skippedFile => {
+        console.warn(`⚠ ${skippedFile.fileName}: ${skippedFile.details}`);
+        if (skippedFile.suggestedAction) {
+          console.info(`💡 Suggestion: ${skippedFile.suggestedAction}`);
         }
       });
-      
-      this.isUploadingImages = false;
     }
+    
+    // Only proceed with valid files
+    if (validationResult.validFiles.length === 0) {
+      console.log('⚠ No valid image files selected');
+      return;
+    }
+
+    // Check total file limit (12 images max)
+    const totalFiles = this.uploadedImages.length + validationResult.validFiles.length;
+    if (totalFiles > 12) {
+      this.toastr.warning(`الحد الأقصى للصور هو 12 صورة. لديك ${this.uploadedImages.length} صور، تحاول إضافة ${validationResult.validFiles.length}`, 'تحذير');
+      return;
+    }
+
+    this.isUploadingImages = true;
+    this.uploadedImages = [...this.uploadedImages, ...validationResult.validFiles];
+    this.generateImagePreviews(validationResult.validFiles);
+    
+    // Show success message if some files were processed
+    if (validationResult.validFiles.length > 0) {
+      const message = validationResult.hasErrors 
+        ? `تم إضافة ${validationResult.validFiles.length} صور صالحة من أصل ${files.length}`
+        : `تم إضافة ${validationResult.validFiles.length} صور بنجاح`;
+      this.toastr.success(message, 'تم');
+    }
+    
+    this.isUploadingImages = false;
+  }
+
+  private generateImagePreviews(files: File[]) {
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          this.imagePreviews.push(e.target.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
   }
 
   removeImage(index: number) {
@@ -264,8 +327,14 @@ export class AdCreateComponent implements OnInit, OnDestroy {
       formData.append(`images`, image);
     });
 
+    // Note: generateAdContent method needs to be implemented in AdsService
+    // For now, we'll show a placeholder message
+    this.isGeneratingAI = false;
+    this.toastr.info('ميزة الذكاء الاصطناعي قيد التطوير', 'معلومات');
+    
+    /* 
     this.adsService.generateAdContent(formData).subscribe({
-      next: (response) => {
+      next: (response: any) => {
         this.isGeneratingAI = false;
         if (response.success && response.data) {
           this.aiGeneratedContent = response.data;
@@ -292,6 +361,7 @@ export class AdCreateComponent implements OnInit, OnDestroy {
         console.error('Error generating AI content:', error);
       }
     });
+    */
   }
 
   // Review Methods
@@ -315,41 +385,85 @@ export class AdCreateComponent implements OnInit, OnDestroy {
   }
 
   // Publish Methods
-  publishAd() {
-    if (this.reviewForm.valid) {
-      this.isLoading = true;
+  async publishAd() {
+    if (!this.reviewForm.valid) {
+      this.toastr.warning('يرجى ملء جميع الحقول المطلوبة', 'تحذير');
+      return;
+    }
 
-      const createCommand: CreateAdWithFilesCommand = {
-        title: this.reviewForm.get('finalTitle')?.value,
-        description: this.reviewForm.get('finalDescription')?.value,
+    this.isLoading = true;
+
+    try {
+      const adData: CreateAdDto = {
+        title: this.reviewForm.get('finalTitle')?.value || this.basicInfoForm.get('title')?.value,
+        description: this.reviewForm.get('finalDescription')?.value || this.basicInfoForm.get('description')?.value,
         price: this.basicInfoForm.get('price')?.value,
         location: this.basicInfoForm.get('location')?.value,
-        userId: 'current-user-id', // This should come from auth service
         categoryId: this.basicInfoForm.get('categoryId')?.value,
-        keywords: this.reviewForm.get('finalKeywords')?.value,
-        images: this.uploadedImages
+        tags: this.reviewForm.get('finalKeywords')?.value || this.basicInfoForm.get('keywords')?.value || [],
+        contactInfo: this.basicInfoForm.get('contactNumber')?.value
       };
 
-      this.adsService.createWithFiles(createCommand).subscribe({
-        next: (response) => {
-          this.isLoading = false;
-          if (response.success && response.data) {
-            this.toastr.success('تم إنشاء الإعلان بنجاح', 'تم');
-            this.router.navigate(['/ads/details', response.data.id]);
-          }
-        },
-        error: (error: unknown) => {
-          this.isLoading = false;
-          this.toastr.error('حدث خطأ أثناء إنشاء الإعلان', 'خطأ');
-          console.error('Error creating ad:', error);
-        }
-      });
+      let createdAd: any;
+      
+      if (this.uploadedImages.length > 0) {
+        // Create with files
+        const adWithFiles = { ...adData, files: this.uploadedImages };
+        const result = await this.adsService.createWithFiles(adWithFiles).toPromise();
+        if (!result || !result.success || !result.data) throw new Error('Failed to create ad with files');
+        createdAd = result.data;
+      } else {
+        // Create without files
+        const result = await this.adsService.createAd(adData).toPromise();
+        if (!result || !result.success || !result.data) throw new Error('Failed to create ad');
+        createdAd = result.data;
+      }
+      
+      this.isLoading = false;
+      this.toastr.success('تم إنشاء الإعلان بنجاح', 'تم');
+      this.router.navigate(['/ads', createdAd.id]);
+    } catch (error: any) {
+      console.error('Error creating ad:', error);
+      this.isLoading = false;
+      this.toastr.error('حدث خطأ أثناء إنشاء الإعلان', 'خطأ');
     }
   }
 
-  saveDraft() {
-    // Implement save as draft functionality
-    this.toastr.info('تم حفظ المسودة', 'تم');
+  async saveDraft() {
+    this.basicInfoForm.patchValue({ status: 'Draft' });
+    
+    try {
+      const adData: CreateAdDto = {
+        title: this.basicInfoForm.get('title')?.value,
+        description: this.basicInfoForm.get('description')?.value,
+        price: this.basicInfoForm.get('price')?.value,
+        location: this.basicInfoForm.get('location')?.value,
+        categoryId: this.basicInfoForm.get('categoryId')?.value,
+        tags: this.basicInfoForm.get('keywords')?.value || [],
+        contactInfo: this.basicInfoForm.get('contactNumber')?.value
+      };
+
+      let createdAd: any;
+      
+      if (this.uploadedImages.length > 0) {
+        // Create with files
+        const adWithFiles = { ...adData, files: this.uploadedImages };
+        const result = await this.adsService.createWithFiles(adWithFiles).toPromise();
+        if (!result || !result.success || !result.data) throw new Error('Failed to create ad with files');
+        createdAd = result.data;
+      } else {
+        // Create without files
+        const result = await this.adsService.createAd(adData).toPromise();
+        if (!result || !result.success || !result.data) throw new Error('Failed to create ad');
+        createdAd = result.data;
+      }
+      
+      this.toastr.success('تم حفظ المسودة بنجاح', 'تم');
+      this.router.navigate(['/ads', createdAd.id]);
+    } catch (error: any) {
+      console.error('Error saving draft:', error);
+      this.toastr.error('حدث خطأ أثناء حفظ المسودة', 'خطأ');
+    }
   }
 
   // Validation Methods
@@ -374,5 +488,87 @@ export class AdCreateComponent implements OnInit, OnDestroy {
 
   getStepIcon(stepIndex: number): string {
     return this.steps[stepIndex].icon;
+  }
+
+  // Additional utility methods from the other component
+  cancel() {
+    this.router.navigate(['/ads']);
+  }
+
+  formatPrice(price: number): string {
+    return new Intl.NumberFormat('ar-SA', {
+      style: 'currency',
+      currency: 'SAR'
+    }).format(price);
+  }
+
+  getCategoryName(categoryId: number): string {
+    const category = this.categories.find(c => c.id === categoryId);
+    return category ? category.name : 'غير محدد';
+  }
+
+  // Enhanced keyword management
+  addKeywordFromInput(keyword: string) {
+    if (!keyword.trim()) return;
+    
+    const keywordsArray = this.basicInfoForm.get('keywords') as FormArray;
+    const currentKeywords = keywordsArray.value || [];
+    
+    if (!currentKeywords.includes(keyword.trim())) {
+      keywordsArray.push(this.fb.control(keyword.trim()));
+      this.toastr.success(`تمت إضافة الكلمة المفتاحية: ${keyword.trim()}`, 'تم');
+    } else {
+      this.toastr.warning('هذه الكلمة المفتاحية موجودة بالفعل', 'تحذير');
+    }
+  }
+
+  // File validation helper
+  private isValidImageFile(file: File): boolean {
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    
+    if (!validTypes.includes(file.type)) {
+      this.toastr.warning(`نوع الملف غير مدعوم: ${file.name}`, 'تحذير');
+      return false;
+    }
+    
+    if (file.size > maxSize) {
+      this.toastr.warning(`حجم الملف كبير جداً: ${file.name}`, 'تحذير');
+      return false;
+    }
+    
+    return true;
+  }
+
+  // Form validation helpers
+  isFieldInvalid(formName: string, fieldName: string): boolean {
+    const form = this.getForm(formName);
+    const field = form?.get(fieldName);
+    return !!(field && field.invalid && (field.dirty || field.touched));
+  }
+
+  getFieldError(formName: string, fieldName: string): string {
+    const form = this.getForm(formName);
+    const field = form?.get(fieldName);
+    
+    if (field?.errors) {
+      if (field.errors['required']) return 'هذا الحقل مطلوب';
+      if (field.errors['minlength']) return `الحد الأدنى ${field.errors['minlength'].requiredLength} أحرف`;
+      if (field.errors['maxlength']) return `الحد الأقصى ${field.errors['maxlength'].requiredLength} حرف`;
+      if (field.errors['min']) return `القيمة يجب أن تكون أكبر من ${field.errors['min'].min}`;
+      if (field.errors['email']) return 'البريد الإلكتروني غير صحيح';
+    }
+    
+    return '';
+  }
+
+  private getForm(formName: string): FormGroup | null {
+    switch (formName) {
+      case 'basic': return this.basicInfoForm;
+      case 'images': return this.imagesForm;
+      case 'ai': return this.aiForm;
+      case 'review': return this.reviewForm;
+      default: return null;
+    }
   }
 }

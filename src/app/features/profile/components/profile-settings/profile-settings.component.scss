@@ -1,145 +1,273 @@
 .profile-settings {
   max-width: 800px;
   margin: 0 auto;
+  padding: 0;
 }
 
+// Loading State
 .loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  justify-content: center;
   padding: 4rem 2rem;
+  color: #718096;
+  
+  p {
+    margin-top: 1rem;
+    font-size: 1rem;
+  }
 }
 
-.loading-container p {
-  color: #666;
-  margin: 0;
-}
-
+// Settings Content
 .settings-content {
   display: flex;
   flex-direction: column;
   gap: 2rem;
 }
 
-.settings-form {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
+// Cards
+mat-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  
+  mat-card-header {
+    padding-bottom: 1rem;
+    
+    mat-card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #2d3748;
+      margin: 0;
+    }
+    
+    mat-card-subtitle {
+      font-size: 0.9rem;
+      color: #718096;
+      margin: 0.25rem 0 0 0;
+    }
+  }
+  
+  mat-card-content {
+    padding-top: 0;
+  }
 }
 
-.settings-card {
-  border-radius: 1rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+// Profile Image Card
+.profile-image-card {
+  .image-upload-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  
+  .current-image {
+    position: relative;
+    
+    .profile-image {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #667eea;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .image-placeholder {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 2rem;
+      font-weight: bold;
+      border: 3px solid #667eea;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+  }
+  
+  .image-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    
+    button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  }
 }
 
-.settings-card mat-card-header {
-  margin-bottom: 1.5rem;
+// Profile Form Card
+.profile-form-card {
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .form-field {
+    width: 100%;
+    
+    mat-icon {
+      color: #667eea;
+    }
+  }
+  
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+    
+    button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      min-width: 140px;
+      justify-content: center;
+    }
+  }
 }
 
-.settings-card mat-card-title {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #333;
+// Account Info Card
+.account-info-card {
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .info-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f7fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    
+    lucide-icon {
+      color: #667eea;
+      flex-shrink: 0;
+    }
+    
+    .info-content {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      
+      .info-label {
+        font-size: 0.8rem;
+        color: #718096;
+        font-weight: 500;
+      }
+      
+      .info-value {
+        font-size: 0.9rem;
+        color: #2d3748;
+        font-weight: 600;
+        
+        &.confirmed {
+          color: #38a169;
+        }
+      }
+    }
+  }
 }
 
-.settings-card mat-card-subtitle {
-  color: #666;
-  font-size: 0.9rem;
+// Form Validation
+mat-form-field {
+  .mat-mdc-form-field-error {
+    font-size: 0.75rem;
+  }
 }
 
-.form-section {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.form-row {
-  display: flex;
-  gap: 1rem;
-}
-
-.full-width {
-  width: 100%;
-}
-
-.half-width {
-  flex: 1;
-}
-
-.preferences-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-}
-
-.preference-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-radius: 0.5rem;
-  border: 1px solid #e9ecef;
-}
-
-.preference-item mat-checkbox {
+// Button Styles
+button[mat-raised-button] {
+  border-radius: 8px;
   font-weight: 500;
-  color: #333;
+  text-transform: none;
+  
+  &[color="primary"] {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+  }
+  
+  &[color="accent"] {
+    background: #38a169;
+    color: white;
+    
+    &:hover:not(:disabled) {
+      background: #2f855a;
+    }
+  }
+  
+  &[color="warn"] {
+    background: #e53e3e;
+    color: white;
+    
+    &:hover:not(:disabled) {
+      background: #c53030;
+    }
+  }
 }
 
-.preference-description {
-  color: #666;
-  font-size: 0.8rem;
-  margin: 0;
-  line-height: 1.4;
+button[mat-button] {
+  text-transform: none;
+  font-weight: 500;
 }
 
-.action-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  padding: 2rem 0;
-  border-top: 1px solid #e9ecef;
-}
-
-.me-2 {
+// Loading States
+mat-spinner {
   margin-left: 0.5rem;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
+// Responsive Design
+@media (max-width: 480px) {
   .profile-settings {
     padding: 0 1rem;
   }
-
-  .form-row {
+  
+  .settings-content {
+    gap: 1.5rem;
+  }
+  
+  .image-actions {
     flex-direction: column;
-  }
-
-  .half-width {
     width: 100%;
+    
+    button {
+      width: 100%;
+    }
   }
-
-  .preferences-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .action-buttons {
-    flex-direction: column;
-  }
-
-  .action-buttons button {
-    width: 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  .settings-card {
-    margin: 0 -0.5rem;
-  }
-
-  .preference-item {
-    padding: 0.75rem;
+  
+  .form-actions {
+    justify-content: center;
+    
+    button {
+      width: 100%;
+    }
   }
 }

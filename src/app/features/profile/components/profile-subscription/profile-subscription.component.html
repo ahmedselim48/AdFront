@@ -1,0 +1,305 @@
+<div class="profile-subscription">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>جاري تحميل بيانات الاشتراك...</p>
+  </div>
+
+  <!-- Subscription Content -->
+  <div *ngIf="!isLoading" class="subscription-content">
+    <!-- Header Section -->
+    <div class="subscription-header">
+      <div class="header-info">
+        <h1>الاشتراك</h1>
+        <p>إدارة اشتراكك وخطة الدفع</p>
+      </div>
+      <div class="header-actions">
+        <button mat-icon-button (click)="onRefresh()">
+          <lucide-icon name="refresh-cw" size="20"></lucide-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Current Subscription Card -->
+    <mat-card class="current-subscription-card" *ngIf="subscription">
+      <mat-card-header>
+        <div class="subscription-header-content">
+          <div class="plan-info">
+            <div class="plan-icon" [class]="getPlanColor(planInfo?.plan || 'free')">
+              <lucide-icon [name]="getPlanIcon(planInfo?.plan || 'free')" size="24"></lucide-icon>
+            </div>
+            <div class="plan-details">
+              <h2>{{ getPlanLabel(planInfo?.plan || 'free') }}</h2>
+              <p>{{ planInfo?.plan === 'Free' ? 'خطة مجانية' : 'خطة مدفوعة' }}</p>
+            </div>
+          </div>
+          <div class="subscription-status">
+            <mat-chip [color]="getSubscriptionStatusColor()" selected>
+              {{ getSubscriptionStatus() }}
+            </mat-chip>
+          </div>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content>
+        <div class="subscription-details">
+          <div class="detail-row">
+            <div class="detail-item">
+              <lucide-icon name="calendar" size="16"></lucide-icon>
+              <span class="detail-label">تاريخ الانتهاء</span>
+              <span class="detail-value">{{ formatDate(subscription.endDate) }}</span>
+            </div>
+            
+            <div class="detail-item">
+              <lucide-icon name="credit-card" size="16"></lucide-icon>
+              <span class="detail-label">طريقة الدفع</span>
+              <span class="detail-value">{{ subscription.provider || 'غير محدد' }}</span>
+            </div>
+            
+            <div class="detail-item">
+              <lucide-icon name="check-circle" size="16"></lucide-icon>
+              <span class="detail-label">الأيام المتبقية</span>
+              <span class="detail-value">{{ getDaysRemaining() }} يوم</span>
+            </div>
+          </div>
+
+          <!-- Usage Statistics -->
+          <div class="usage-section" *ngIf="planInfo">
+            <h3>إحصائيات الاستخدام</h3>
+            <div class="usage-item">
+              <div class="usage-header">
+                <span class="usage-label">الإعلانات المستخدمة</span>
+                <span class="usage-value">{{ getUsagePercentage().toFixed(0) }}%</span>
+              </div>
+              <div class="usage-bar">
+                <div class="usage-progress" 
+                     [style.width.%]="getUsagePercentage()"
+                     [class]="getUsageColor(getUsagePercentage())">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions class="subscription-actions">
+        <button mat-raised-button 
+                color="primary" 
+                (click)="onUpgradeSubscription()"
+                [disabled]="isProcessing">
+          <lucide-icon name="star" size="16"></lucide-icon>
+          <span>ترقية الاشتراك</span>
+          <mat-spinner *ngIf="isProcessing" diameter="20"></mat-spinner>
+        </button>
+        
+        <button mat-button 
+                (click)="onRenewSubscription()"
+                [disabled]="isProcessing">
+          <lucide-icon name="refresh-cw" size="16"></lucide-icon>
+          <span>تجديد الاشتراك</span>
+        </button>
+        
+        <button mat-button 
+                color="warn" 
+                (click)="onCancelSubscription()"
+                [disabled]="isProcessing">
+          <lucide-icon name="x" size="16"></lucide-icon>
+          <span>إلغاء الاشتراك</span>
+        </button>
+        
+        <!-- Development Only: Test Subscription Button -->
+        <button mat-button 
+                color="accent" 
+                (click)="onCreateTestSubscription()"
+                [disabled]="isProcessing"
+                style="margin-top: 8px; font-size: 12px;">
+          <lucide-icon name="zap" size="14"></lucide-icon>
+          <span>إنشاء اشتراك تجريبي (تطوير)</span>
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <!-- Plan Features -->
+    <div class="plan-features" *ngIf="planInfo">
+      <h2>مميزات الخطة</h2>
+      <div class="features-grid">
+        <div class="feature-item" 
+             *ngFor="let feature of planInfo.features; let i = index"
+             [class.available]="true">
+          <div class="feature-icon">
+            <lucide-icon name="check" size="16"></lucide-icon>
+          </div>
+          <span class="feature-text">{{ feature }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Available Plans -->
+    <div class="available-plans">
+      <h2>الخطط المتاحة</h2>
+      <div class="plans-grid">
+        <!-- Free Plan -->
+        <mat-card class="plan-card">
+          <mat-card-header>
+            <div class="plan-header">
+              <div class="plan-icon free">
+                <lucide-icon name="zap" size="24"></lucide-icon>
+              </div>
+              <div class="plan-title">
+                <h3>مجاني</h3>
+                <p>خطة أساسية</p>
+              </div>
+            </div>
+            <div class="plan-price">
+              <span class="price">0 ر.س</span>
+              <span class="period">شهرياً</span>
+            </div>
+          </mat-card-header>
+          
+          <mat-card-content>
+            <div class="plan-features-list">
+              <div class="feature-item">
+                <lucide-icon name="check-circle" size="14"></lucide-icon>
+                <span>إعلانات محدودة (5 شهرياً)</span>
+              </div>
+              <div class="feature-item">
+                <lucide-icon name="check-circle" size="14"></lucide-icon>
+                <span>مشاهدة أساسية</span>
+              </div>
+              <div class="feature-item">
+                <lucide-icon name="check-circle" size="14"></lucide-icon>
+                <span>دعم المجتمع</span>
+              </div>
+            </div>
+          </mat-card-content>
+          
+          <mat-card-actions>
+            <button mat-button disabled>
+              الخطة الحالية
+            </button>
+          </mat-card-actions>
+        </mat-card>
+
+        <!-- Pro Plan -->
+        <mat-card class="plan-card featured">
+          <div class="featured-badge">الأكثر شعبية</div>
+          <mat-card-header>
+            <div class="plan-header">
+              <div class="plan-icon pro">
+                <lucide-icon name="star" size="24"></lucide-icon>
+              </div>
+              <div class="plan-title">
+                <h3>احترافي</h3>
+                <p>خطة متقدمة</p>
+              </div>
+            </div>
+            <div class="plan-price">
+              <span class="price">99 ر.س</span>
+              <span class="period">شهرياً</span>
+            </div>
+          </mat-card-header>
+          
+          <mat-card-content>
+            <div class="plan-features-list">
+              <div class="feature-item">
+                <lucide-icon name="check-circle" size="14"></lucide-icon>
+                <span>إعلانات غير محدودة</span>
+              </div>
+              <div class="feature-item">
+                <lucide-icon name="check-circle" size="14"></lucide-icon>
+                <span>تحليل المنافسة</span>
+              </div>
+              <div class="feature-item">
+                <lucide-icon name="check-circle" size="14"></lucide-icon>
+                <span>تقارير مفصلة</span>
+              </div>
+              <div class="feature-item">
+                <lucide-icon name="check-circle" size="14"></lucide-icon>
+                <span>دعم أولوية</span>
+              </div>
+            </div>
+          </mat-card-content>
+          
+          <mat-card-actions>
+            <button mat-raised-button color="primary" (click)="onUpgradeSubscription()">
+              <lucide-icon name="external-link" size="16"></lucide-icon>
+              <span>ترقية الآن</span>
+            </button>
+          </mat-card-actions>
+        </mat-card>
+
+        <!-- Premium Plan -->
+        <mat-card class="plan-card">
+          <mat-card-header>
+            <div class="plan-header">
+              <div class="plan-icon premium">
+                <lucide-icon name="star" size="24"></lucide-icon>
+              </div>
+              <div class="plan-title">
+                <h3>بريميوم</h3>
+                <p>خطة متقدمة</p>
+              </div>
+            </div>
+            <div class="plan-price">
+              <span class="price">199 ر.س</span>
+              <span class="period">شهرياً</span>
+            </div>
+          </mat-card-header>
+          
+          <mat-card-content>
+            <div class="plan-features-list">
+              <div class="feature-item">
+                <lucide-icon name="check-circle" size="14"></lucide-icon>
+                <span>جميع مميزات Pro</span>
+              </div>
+              <div class="feature-item">
+                <lucide-icon name="check-circle" size="14"></lucide-icon>
+                <span>إشعارات متقدمة</span>
+              </div>
+              <div class="feature-item">
+                <lucide-icon name="check-circle" size="14"></lucide-icon>
+                <span>دعم مخصص</span>
+              </div>
+              <div class="feature-item">
+                <lucide-icon name="check-circle" size="14"></lucide-icon>
+                <span>ميزات حصرية</span>
+              </div>
+            </div>
+          </mat-card-content>
+          
+          <mat-card-actions>
+            <button mat-raised-button color="accent" (click)="onUpgradeSubscription()">
+              <lucide-icon name="external-link" size="16"></lucide-icon>
+              <span>ترقية الآن</span>
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- Payment History -->
+    <mat-card class="payment-history-card">
+      <mat-card-header>
+        <mat-card-title>سجل المدفوعات</mat-card-title>
+        <mat-card-subtitle>تاريخ معاملاتك المالية</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="payment-history">
+          <div class="payment-item" *ngFor="let payment of getPaymentHistory()">
+            <div class="payment-info">
+              <div class="payment-details">
+                <h4>{{ payment.description }}</h4>
+                <p>{{ formatDate(payment.date) }}</p>
+              </div>
+              <div class="payment-amount">
+                <span class="amount">{{ formatPrice(payment.amount) }}</span>
+                <span class="status" [class]="payment.status">{{ payment.statusText }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

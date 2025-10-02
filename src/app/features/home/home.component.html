@@ -25,89 +25,242 @@
     </div>
   </div>
 </section>
+
+<!-- Search Bar -->
+<section class="search-section">
+  <div class="container">
+    <div class="search-container">
+      <div class="search-box">
+        <lucide-icon name="search" size="20" class="search-icon"></lucide-icon>
+        <input 
+          type="text" 
+          placeholder="ابحث عن إعلانات..." 
+          [(ngModel)]="searchQuery"
+          (keyup.enter)="onSearch()"
+          class="search-input"
+        >
+        <button class="search-btn" (click)="onSearch()">
+          <lucide-icon name="search" size="16"></lucide-icon>
+          بحث
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
 <!-- Featured Content Section -->
 <section class="home-wrap container">
   <div class="section-header">
-    <h2>أحدث الإعلانات</h2>
-    <a routerLink="/ads" class="view-all-link">
-      عرض الكل
-      <lucide-icon name="arrow-left" size="16"></lucide-icon>
-    </a>
+    <h2>جميع الإعلانات</h2>
+    <div class="header-actions">
+      <span class="ads-count">{{ totalAds }} إعلان</span>
+      <a routerLink="/ads" class="view-all-link">
+        عرض الكل
+        <lucide-icon name="arrow-left" size="16"></lucide-icon>
+      </a>
+    </div>
   </div>
   
-  <!-- Filters Section -->
-  <div class="filters-container">
-    <div class="filters-row">
-      <button class="filter-toggle" (click)="showFilters = !showFilters">
+  <!-- Advanced Filters Section -->
+  <div class="filters-container" [formGroup]="filterForm">
+    <div class="filters-header">
+      <button class="filter-toggle" (click)="toggleAdvancedFilters()">
         <lucide-icon name="filter" size="18"></lucide-icon>
-        فلتر
+        فلاتر متقدمة
+        <lucide-icon [name]="showAdvancedFilters ? 'chevron-up' : 'chevron-down'" size="16"></lucide-icon>
       </button>
       
       <div class="sort-box">
-        <select [(ngModel)]="sortBy" class="sort-select">
-          <option *ngFor="let opt of sortOptions" [value]="opt.value">{{ opt.label }}</option>
-        </select>
+        <mat-form-field appearance="outline" class="sort-field">
+          <mat-label>ترتيب حسب</mat-label>
+          <mat-select formControlName="sortBy">
+            <mat-option *ngFor="let opt of sortOptions" [value]="opt.value">
+              {{ opt.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
       </div>
     </div>
     
-    <div class="filters-section" *ngIf="showFilters">
-      <div class="filter-row">
+    <div class="advanced-filters" *ngIf="showAdvancedFilters">
+      <div class="filters-grid">
+        <!-- Search Term -->
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>البحث</mat-label>
+          <input matInput formControlName="searchTerm" placeholder="ابحث في العنوان أو الوصف">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
         <!-- Category Filter -->
-        <select class="filter-select" [(ngModel)]="selectedCategory">
-          <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
-        </select>
-        
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>الفئة</mat-label>
+          <mat-select formControlName="categoryId">
+            <mat-option *ngFor="let cat of categories" [value]="cat.value">
+              {{ cat.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
         <!-- Location Filter -->
-        <select class="filter-select" [(ngModel)]="selectedLocation">
-          <option *ngFor="let loc of locations" [value]="loc">{{ loc }}</option>
-        </select>
-        
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>المنطقة</mat-label>
+          <mat-select formControlName="location">
+            <mat-option *ngFor="let loc of locations" [value]="loc.value">
+              {{ loc.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Status Filter -->
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>الحالة</mat-label>
+          <mat-select formControlName="status">
+            <mat-option *ngFor="let status of statusOptions" [value]="status.value">
+              {{ status.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
         <!-- Price Range -->
-        <div class="price-filter">
-          <span>السعر:</span>
-          <input type="number" class="price-input" [(ngModel)]="priceRange.min" placeholder="من">
-          <input type="number" class="price-input" [(ngModel)]="priceRange.max" placeholder="إلى">
+        <div class="price-range">
+          <mat-form-field appearance="outline" class="price-field">
+            <mat-label>السعر من</mat-label>
+            <input matInput type="number" formControlName="minPrice" placeholder="0">
+            <span matSuffix>ريال</span>
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline" class="price-field">
+            <mat-label>السعر إلى</mat-label>
+            <input matInput type="number" formControlName="maxPrice" placeholder="1000000">
+            <span matSuffix>ريال</span>
+          </mat-form-field>
         </div>
-        
-        <!-- Apply Filters -->
-        <button class="apply-filter" (click)="applyFilters()">
-          تطبيق الفلتر
+
+        <!-- Date Range -->
+        <div class="date-range">
+          <mat-form-field appearance="outline" class="date-field">
+            <mat-label>من تاريخ</mat-label>
+            <input matInput [matDatepicker]="fromPicker" formControlName="dateFrom">
+            <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+            <mat-datepicker #fromPicker></mat-datepicker>
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline" class="date-field">
+            <mat-label>إلى تاريخ</mat-label>
+            <input matInput [matDatepicker]="toPicker" formControlName="dateTo">
+            <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+            <mat-datepicker #toPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="filter-actions">
+        <button mat-raised-button color="primary" (click)="applyFilters()">
+          <lucide-icon name="search" size="16"></lucide-icon>
+          تطبيق الفلاتر
+        </button>
+        <button mat-stroked-button (click)="clearFilters()">
+          <lucide-icon name="x" size="16"></lucide-icon>
+          مسح الفلاتر
         </button>
       </div>
     </div>
   </div>
   
   <div class="ads-grid" *ngIf="!loading; else loadingTpl">
-    <article class="ad-card" *ngFor="let ad of ads">
-      <header class="ad-head">
-        <h3>{{ad.title}}</h3>
-        <span class="status" [attr.data-status]="ad.status">{{getStatusText(ad.status)}}</span>
-      </header>
-      <div class="ad-body">
-        <p class="desc">{{ad.description}}</p>
-        <div class="ad-meta">
-          <div class="price">{{ad.price | currency:'SAR':'symbol':'1.0-0':'ar-SA'}}</div>
-          <div class="location">
-            <lucide-icon name="map-pin" size="14"></lucide-icon>
-            {{ad.location}}
-          </div>
+    <mat-card class="ad-card" *ngFor="let ad of ads" [routerLink]="['/ads', ad.id]">
+      <div class="ad-image" *ngIf="ad.images && ad.images.length > 0">
+        <img [src]="ad.images[0] || '/assets/images/placeholder-ad.svg'" [alt]="ad.title" loading="lazy">
+        <div class="ad-badge" [class]="'status-' + ad.status">
+          {{ getStatusText(ad.status) }}
         </div>
-        <div class="ad-stats">
-          <span class="stat">
-            <lucide-icon name="eye" size="14"></lucide-icon>
-            {{ad.viewsCount || 0}}
-          </span>
-          <span class="stat">
-            <lucide-icon name="heart" size="14"></lucide-icon>
-            {{ad.likesCount || 0}}
-          </span>
-          <span class="stat">
-            <lucide-icon name="upload" size="14"></lucide-icon>
-            {{ad.clicksCount || 0}}
-          </span>
+        <div class="ad-overlay">
+          <button mat-icon-button class="like-btn" (click)="$event.stopPropagation()">
+            <lucide-icon name="heart" size="20"></lucide-icon>
+          </button>
         </div>
       </div>
-    </article>
+      
+      <mat-card-content class="ad-content">
+        <div class="ad-header">
+          <h3 class="ad-title">{{ ad.title }}</h3>
+          <div class="ad-price">{{ ad.price | currency:'SAR':'symbol':'1.0-0':'ar-SA' }}</div>
+        </div>
+        
+        <p class="ad-description">{{ (ad.description || '') | slice:0:100 }}{{ (ad.description?.length || 0) > 100 ? '...' : '' }}</p>
+        
+        <div class="ad-meta">
+          <div class="ad-location">
+            <lucide-icon name="map-pin" size="14"></lucide-icon>
+            {{ ad.location }}
+          </div>
+          <div class="ad-user" (click)="$event.stopPropagation(); onUserClick(ad.userId)" style="cursor: pointer;">
+            <lucide-icon name="user" size="14"></lucide-icon>
+            {{ ad.userName }}
+          </div>
+          <div class="ad-date">
+            <lucide-icon name="calendar" size="14"></lucide-icon>
+            {{ ad.createdAt | date:'short':'ar-SA' }}
+          </div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="ad-contact" *ngIf="ad.contactInfo">
+          <div class="contact-methods">
+            <button mat-icon-button 
+                    *ngIf="ad.contactInfo.phoneNumber" 
+                    (click)="onCallPhone(ad.contactInfo.phoneNumber)"
+                    matTooltip="اتصال">
+              <lucide-icon name="phone" size="16"></lucide-icon>
+            </button>
+            
+            <button mat-icon-button 
+                    *ngIf="ad.contactInfo.whatsappNumber" 
+                    (click)="onOpenWhatsApp(ad.contactInfo.whatsappNumber, ad.title)"
+                    matTooltip="واتساب">
+              <lucide-icon name="message-circle" size="16"></lucide-icon>
+            </button>
+            
+            <button mat-icon-button 
+                    *ngIf="ad.contactInfo.email" 
+                    (click)="onSendEmail(ad.contactInfo.email, ad.title)"
+                    matTooltip="إيميل">
+              <lucide-icon name="mail" size="16"></lucide-icon>
+            </button>
+            
+            <button mat-icon-button 
+                    (click)="onContactUser(ad)"
+                    matTooltip="محادثة مباشرة">
+              <lucide-icon name="message-square" size="16"></lucide-icon>
+            </button>
+          </div>
+        </div>
+        
+        <div class="ad-stats">
+          <div class="stat-item">
+            <lucide-icon name="eye" size="14"></lucide-icon>
+            <span>{{ ad.viewsCount || 0 }}</span>
+          </div>
+          <div class="stat-item">
+            <lucide-icon name="heart" size="14"></lucide-icon>
+            <span>{{ ad.likesCount || 0 }}</span>
+          </div>
+          <div class="stat-item">
+            <lucide-icon name="message-circle" size="14"></lucide-icon>
+            <span>{{ ad.commentsCount || 0 }}</span>
+          </div>
+          <div class="stat-item" *ngIf="ad.isAIGenerated">
+            <lucide-icon name="sparkles" size="14"></lucide-icon>
+            <span>ذكي</span>
+          </div>
+        </div>
+        
+        <div class="ad-keywords" *ngIf="ad.keywords && ad.keywords.length > 0">
+          <mat-chip-listbox>
+            <mat-chip *ngFor="let keyword of ad.keywords.slice(0, 3)">{{ keyword }}</mat-chip>
+          </mat-chip-listbox>
+        </div>
+      </mat-card-content>
+    </mat-card>
   </div>
   
   <!-- Load More Button -->

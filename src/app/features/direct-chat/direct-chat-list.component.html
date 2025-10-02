@@ -1,12 +1,22 @@
 <section class="container">
   <h2>{{ 'chat.directChat' | t }}</h2>
+  
   <div *ngIf="loading" class="skeleton" style="height:60px;border-radius:12px"></div>
+
   <ul class="list">
     <li *ngFor="let c of conversations" class="card item">
-      <a [routerLink]="['/direct-chat', c.id]">
-        <div class="name">{{ c.user2Name }}</div>
-        <small>{{ c.createdAt | date:'short' }}</small>
-        <span *ngIf="c.unreadCount > 0" class="badge">{{ c.unreadCount }}</span>
+      <a [routerLink]="['/chat', c.id]" class="thread">
+        <img *ngIf="c.otherImageUrl" [src]="c.otherImageUrl" alt="avatar" class="avatar" />
+        <div class="meta">
+          <div class="top">
+            <span class="name">{{ c.otherName }}</span>
+            <small class="time">{{ c.lastAt | date:'short' }}</small>
+          </div>
+          <div class="bottom">
+            <span class="last">{{ c.lastMessage || ('chat.noMessages' | t) }}</span>
+            <span *ngIf="c.unreadCount > 0" class="badge">{{ c.unreadCount }}</span>
+          </div>
+        </div>
       </a>
     </li>
   </ul>

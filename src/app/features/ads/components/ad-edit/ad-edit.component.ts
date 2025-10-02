@@ -1,119 +1,44 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatStepperModule } from '@angular/material/stepper';
-import { MatSelectModule } from '@angular/material/select';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
-import { LucideAngularModule, Upload, Image, Zap, Eye, Save, ArrowLeft, ArrowRight, X, Plus, Trash2 } from 'lucide-angular';
+import { ActivatedRoute, Router } from '@angular/router';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
-import { ToastrService } from 'ngx-toastr';
-
-import { AdsService } from '../../../../core/services/ads.service';
-import { CategoriesService } from '../../../../core/services/categories.service';
-import { AdDto, UpdateAdManagementCommand } from '../../../../models/ads.models';
-import { CategoryDto } from '../../../../models/categories.models';
-import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
-import { ErrorMessageComponent } from '../../../../shared/components/error-message/error-message.component';
+// import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { AdsService } from '../../ads.service';
+import { AdItem } from '../../../../models/ads.models';
+import { CategoryService } from '../../../../core/services/category.service';
+import { FileService } from '../../../../core/services/file.service';
+import { ImageValidationService } from '../../../../core/services/image-validation.service';
 
 @Component({
   selector: 'app-ad-edit',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    RouterModule,
-    MatCardModule,
-    MatInputModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    MatStepperModule,
-    MatSelectModule,
-    MatCheckboxModule,
-    MatChipsModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatTooltipModule,
-    MatProgressBarModule,
-    MatDialogModule,
-    LucideAngularModule,
-    LoadingSpinnerComponent,
-    ErrorMessageComponent
-  ],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './ad-edit.component.html',
   styleUrls: ['./ad-edit.component.scss']
 })
 export class AdEditComponent implements OnInit, OnDestroy {
-  // Ad data
-  ad: AdDto | null = null;
-  adId: string = '';
+  ad: AdItem | null = null;
+  form!: FormGroup;
+  loading = false;
+  saving = false;
+  categories: any[] = [];
+  selectedFiles: File[] = [];
+  previewUrls: string[] = [];
   
-  // Stepper
-  currentStep = 0;
-  steps = [
-    { label: 'المعلومات الأساسية', icon: 'file-text' },
-    { label: 'الصور', icon: 'image' },
-    { label: 'المراجعة والحفظ', icon: 'eye' }
-  ];
-
-  // Forms
-  basicInfoForm!: FormGroup;
-  imagesForm!: FormGroup;
-  reviewForm!: FormGroup;
-
-  // Data
-  categories: CategoryDto[] = [];
-  existingImages: string[] = [];
-  newImages: File[] = [];
-  imagePreviews: string[] = [];
-  imagesToDelete: string[] = [];
-  
-  // Loading states
-  isLoading = false;
-  isLoadingAd = false;
-  isUploadingImages = false;
-  error = '';
-
-  // Chip input separator keys
-  separatorKeysCodes: number[] = [13, 188]; // Enter and comma
-
   private destroy$ = new Subject<void>();
-
-  // Inject services using inject() function
-  private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private adsService = inject(AdsService);
-  private categoriesService = inject(CategoriesService);
-  private toastr = inject(ToastrService);
-  private dialog = inject(MatDialog);
-
-  constructor() {
-    this.initializeForms();
-  }
+  private categoryService = inject(CategoryService);
+  private fileService = inject(FileService);
+  private imageValidationService = inject(ImageValidationService);
+  private fb = inject(FormBuilder);
 
   ngOnInit() {
-    this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
-      this.adId = params['id'];
-      if (this.adId) {
-        this.loadAdDetails();
-        this.loadCategories();
-      }
-    });
+    this.initializeForm();
+    this.loadCategories();
+    this.loadAd();
   }
 
   ngOnDestroy() {
@@ -121,257 +46,191 @@ export class AdEditComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private initializeForms() {
-    // Basic Information Form
-    this.basicInfoForm = this.fb.group({
-      title: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(100)]],
-      description: ['', [Validators.required, Validators.minLength(20), Validators.maxLength(1000)]],
-      price: ['', [Validators.required, Validators.min(1)]],
-      location: ['', [Validators.required, Validators.minLength(2)]],
-      categoryId: ['', [Validators.required]],
-      keywords: this.fb.array([])
-    });
-
-    // Images Form
-    this.imagesForm = this.fb.group({
-      images: this.fb.array([])
-    });
-
-    // Review Form
-    this.reviewForm = this.fb.group({
-      finalTitle: [''],
-      finalDescription: [''],
-      finalKeywords: this.fb.array([])
+  private initializeForm() {
+    this.form = this.fb.group({
+      title: ['', [Validators.required, Validators.maxLength(200)]],
+      description: ['', [Validators.required, Validators.maxLength(5000)]],
+      price: [null, [Validators.required, Validators.min(0)]],
+      location: ['', [Validators.required, Validators.maxLength(200)]],
+      categoryId: [null],
+      keywords: [[]],
+      status: ['Draft', Validators.required],
+      scheduledAt: [''],
+      // Contact Information
+      contactNumber: ['', [Validators.required, Validators.minLength(10)]],
+      contactMethod: ['Call', Validators.required]
     });
   }
 
-  loadAdDetails() {
-    this.isLoadingAd = true;
-    this.error = '';
+  loadAd() {
+    const adId = this.route.snapshot.paramMap.get('id');
+    if (!adId) return;
 
-    this.adsService.getById(this.adId).subscribe({
-      next: (response) => {
-        this.isLoadingAd = false;
-        if (response.success && response.data) {
-          this.ad = response.data;
-          this.populateForms();
-        }
+    this.loading = true;
+    this.adsService.getById(adId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (ad) => {
+        this.ad = ad;
+        this.populateForm(ad);
+        this.loading = false;
       },
-      error: (error: unknown) => {
-        this.isLoadingAd = false;
-        this.error = 'حدث خطأ أثناء تحميل تفاصيل الإعلان';
-        this.toastr.error('حدث خطأ أثناء تحميل الإعلان', 'خطأ');
-        console.error('Error loading ad details:', error);
+      error: (error) => {
+        console.error('Error loading ad:', error);
+        this.loading = false;
       }
     });
   }
 
   loadCategories() {
-    this.categoriesService.getAllCategories().subscribe({
-      next: (response) => {
-        if (response.success && response.data) {
-          this.categories = response.data;
-        }
+    this.categoryService.getCategories().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (categories: any[]) => {
+        this.categories = categories;
       },
-      error: (error: unknown) => {
+      error: (error: any) => {
         console.error('Error loading categories:', error);
       }
     });
   }
 
-  populateForms() {
-    if (!this.ad) return;
+  private populateForm(ad: AdItem) {
+    // Convert status to string
+    let statusString = 'Draft';
+    
+    // Handle both string and number status values
+    if (typeof ad.status === 'number') {
+      statusString = ad.status === 2 ? 'Published' : 'Draft';
+    } else if (typeof ad.status === 'string') {
+      statusString = ad.status === 'Published' ? 'Published' : 'Draft';
+    }
 
-    // Populate basic info form
-    this.basicInfoForm.patchValue({
-      title: this.ad.title,
-      description: this.ad.description,
-      price: this.ad.price,
-      location: this.ad.location,
-      categoryId: this.ad.categoryId
+    this.form.patchValue({
+      title: ad.title,
+      description: ad.description,
+      price: ad.price,
+      location: ad.location,
+      categoryId: ad.categoryId,
+      keywords: ad.keywords || [],
+      status: statusString,
+      scheduledAt: ad.scheduledAtUtc ? new Date(ad.scheduledAtUtc).toISOString().slice(0, 16) : '',
+      // Contact Information
+      contactNumber: ad.contactNumber || ad.contactInfo?.phoneNumber || ad.contactInfo?.whatsappNumber || '',
+      contactMethod: ad.contactMethod || (ad.contactInfo?.phoneNumber ? 'Call' : 'WhatsApp')
     });
-
-    // Populate keywords
-    const keywordsArray = this.basicInfoForm.get('keywords') as FormArray;
-    keywordsArray.clear();
-    if (this.ad.keywords) {
-      this.ad.keywords.forEach(keyword => {
-        keywordsArray.push(this.fb.control(keyword));
-      });
-    }
-
-    // Set existing images
-    this.existingImages = [...(this.ad.images || [])];
-    this.imagePreviews = [...this.existingImages];
-
-    // Populate review form
-    this.reviewForm.patchValue({
-      finalTitle: this.ad.title,
-      finalDescription: this.ad.description
-    });
-
-    const reviewKeywordsArray = this.reviewForm.get('finalKeywords') as FormArray;
-    reviewKeywordsArray.clear();
-    if (this.ad.keywords) {
-      this.ad.keywords.forEach(keyword => {
-        reviewKeywordsArray.push(this.fb.control(keyword));
-      });
-    }
+    
+    this.previewUrls = [...(ad.images || [])];
   }
 
-  onStepChange(event: any) {
-    this.currentStep = event.selectedIndex;
-  }
-
-  nextStep() {
-    if (this.currentStep < this.steps.length - 1) {
-      this.currentStep++;
-    }
-  }
-
-  previousStep() {
-    if (this.currentStep > 0) {
-      this.currentStep--;
-    }
-  }
-
-  // Basic Info Methods
-  addKeyword(keyword: string) {
-    if (keyword.trim()) {
-      const keywordsArray = this.basicInfoForm.get('keywords') as FormArray;
-      keywordsArray.push(this.fb.control(keyword.trim()));
-    }
-  }
-
-  removeKeyword(index: number) {
-    const keywordsArray = this.basicInfoForm.get('keywords') as FormArray;
-    keywordsArray.removeAt(index);
-  }
-
-  // Image Methods
-  onImageSelect(event: Event) {
+  onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
-    if (input.files) {
-      this.isUploadingImages = true;
-      
-      Array.from(input.files).forEach(file => {
-        if (file.type.startsWith('image/')) {
-          this.newImages.push(file);
-          
-          // Create preview
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            this.imagePreviews.push(e.target?.result as string);
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-      
-      this.isUploadingImages = false;
+    if (!input.files?.length) return;
+
+    const files = Array.from(input.files);
+    const validationResult = this.imageValidationService.validateImageFiles(files);
+    
+    if (validationResult.validFiles.length === 0) {
+      console.log('⚠ No valid image files selected');
+      return;
     }
+    
+    this.selectedFiles = [...this.selectedFiles, ...validationResult.validFiles];
+    
+    // Generate preview URLs for valid files only
+    validationResult.validFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          this.previewUrls.push(e.target.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
   }
 
   removeImage(index: number) {
-    if (index < this.existingImages.length) {
-      // Remove existing image
-      const imageToDelete = this.existingImages[index];
-      this.imagesToDelete.push(imageToDelete);
-      this.existingImages.splice(index, 1);
-    } else {
-      // Remove new image
-      const newImageIndex = index - this.existingImages.length;
-      this.newImages.splice(newImageIndex, 1);
-    }
-    this.imagePreviews.splice(index, 1);
-  }
-
-  // Review Methods
-  prepareReviewData() {
-    this.reviewForm.patchValue({
-      finalTitle: this.basicInfoForm.get('title')?.value,
-      finalDescription: this.basicInfoForm.get('description')?.value
-    });
-
-    // Update keywords in review form
-    const keywordsArray = this.basicInfoForm.get('keywords') as FormArray;
-    const reviewKeywordsArray = this.reviewForm.get('finalKeywords') as FormArray;
-    reviewKeywordsArray.clear();
-    keywordsArray.controls.forEach(control => {
-      reviewKeywordsArray.push(this.fb.control(control.value));
-    });
-  }
-
-  // Save Methods
-  saveChanges() {
-    if (this.basicInfoForm.valid) {
-      this.isLoading = true;
-
-      const updateCommand: UpdateAdManagementCommand = {
-        adId: this.adId,
-        userId: 'current-user-id', // This should come from auth service
-        title: this.reviewForm.get('finalTitle')?.value,
-        description: this.reviewForm.get('finalDescription')?.value,
-        price: this.basicInfoForm.get('price')?.value,
-        location: this.basicInfoForm.get('location')?.value,
-        categoryId: this.basicInfoForm.get('categoryId')?.value,
-        keywords: this.reviewForm.get('finalKeywords')?.value,
-        newImages: this.newImages,
-        imagesToDelete: this.imagesToDelete
-      };
-
-      this.adsService.updateAd(this.adId, updateCommand).subscribe({
-        next: (response) => {
-          this.isLoading = false;
-          if (response.success && response.data) {
-            this.toastr.success('تم تحديث الإعلان بنجاح', 'تم');
-            this.router.navigate(['/ads/details', this.adId]);
-          }
-        },
-        error: (error: unknown) => {
-          this.isLoading = false;
-          this.toastr.error('حدث خطأ أثناء تحديث الإعلان', 'خطأ');
-          console.error('Error updating ad:', error);
-        }
-      });
+    this.previewUrls.splice(index, 1);
+    if (index < this.selectedFiles.length) {
+      this.selectedFiles.splice(index, 1);
     }
   }
 
-  saveDraft() {
-    // Implement save as draft functionality
-    this.toastr.info('تم حفظ المسودة', 'تم');
-  }
+  async save() {
+    if (this.form.invalid || this.saving || !this.ad) return;
 
-  // Validation Methods
-  isStepValid(stepIndex: number): boolean {
-    switch (stepIndex) {
-      case 0:
-        return this.basicInfoForm.valid;
-      case 1:
-        return this.imagePreviews.length > 0;
-      case 2:
-        return this.reviewForm.valid;
-      default:
-        return false;
+    this.saving = true;
+    const formValue = this.form.value;
+    
+    const updateData: Partial<AdItem> = {
+      title: formValue.title,
+      description: formValue.description,
+      price: formValue.price,
+      location: formValue.location,
+      categoryId: formValue.categoryId,
+      keywords: formValue.keywords || [],
+      status: formValue.status,
+      // Contact Information
+      contactNumber: formValue.contactNumber,
+      contactMethod: formValue.contactMethod
+    };
+
+    try {
+      let updatedAd: AdItem;
+      
+      if (this.selectedFiles.length > 0) {
+        // Update with new files
+        const result = await this.adsService.updateWithFiles(this.ad.id, updateData, this.selectedFiles).toPromise();
+        if (!result) throw new Error('Failed to update ad with files');
+        updatedAd = result;
+      } else {
+        // Update without files
+        const result = await this.adsService.update(this.ad.id, updateData).toPromise();
+        if (!result) throw new Error('Failed to update ad');
+        updatedAd = result;
+      }
+      
+      this.saving = false;
+      this.router.navigate(['/ads', updatedAd.id]);
+    } catch (error) {
+      console.error('Error updating ad:', error);
+      this.saving = false;
     }
   }
 
-  canProceedToNext(): boolean {
-    return this.isStepValid(this.currentStep);
+  async saveAsDraft() {
+    this.form.patchValue({ status: 'Draft' });
+    await this.save();
   }
 
-  getStepIcon(stepIndex: number): string {
-    return this.steps[stepIndex].icon;
+  async publish() {
+    this.form.patchValue({ status: 'Published' });
+    await this.save();
   }
 
-  // Utility Methods
-  isExistingImage(index: number): boolean {
-    return index < this.existingImages.length;
+  cancel() {
+    this.router.navigate(['/ads', this.ad?.id]);
   }
 
-  getImageSource(index: number): string {
-    if (this.isExistingImage(index)) {
-      return this.existingImages[index];
+  addKeyword(keyword: string) {
+    if (!keyword.trim()) return;
+    
+    const keywords = this.form.get('keywords')?.value || [];
+    if (!keywords.includes(keyword.trim())) {
+      keywords.push(keyword.trim());
+      this.form.patchValue({ keywords });
     }
-    return this.imagePreviews[index];
+  }
+
+  removeKeyword(keyword: string) {
+    const keywords = this.form.get('keywords')?.value || [];
+    const index = keywords.indexOf(keyword);
+    if (index > -1) {
+      keywords.splice(index, 1);
+      this.form.patchValue({ keywords });
+    }
+  }
+
+  formatPrice(price: number): string {
+    return new Intl.NumberFormat('ar-SA', {
+      style: 'currency',
+      currency: 'SAR'
+    }).format(price);
   }
 }

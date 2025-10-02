@@ -27,7 +27,16 @@
             class="verifying-icon">
           </lucide-icon>
           
+          <!-- Idle State -->
+          <lucide-icon 
+            *ngIf="status === 'idle'" 
+            name="mail" 
+            size="48" 
+            class="idle-icon">
+          </lucide-icon>
+          
           <h2 class="verify-email-title">
+            <span *ngIf="status === 'idle'">تأكيد البريد الإلكتروني</span>
             <span *ngIf="status === 'verifying'">جاري التحقق...</span>
             <span *ngIf="status === 'success'">تم التحقق بنجاح</span>
             <span *ngIf="status === 'error'">فشل في التحقق</span>
@@ -40,6 +49,21 @@
       </mat-card-header>
 
       <mat-card-content>
+        <!-- Idle State -->
+        <div *ngIf="status === 'idle'" class="idle-state">
+          <h3 class="idle-title">تحقق من بريدك الإلكتروني</h3>
+          <p class="idle-message">{{ message }}</p>
+          <div class="idle-actions">
+            <button mat-raised-button color="primary" (click)="resendConfirmation()" class="resend-button">
+              إعادة إرسال رابط التأكيد
+            </button>
+            <button mat-stroked-button (click)="goToLogin()" class="back-button">
+              <lucide-icon name="arrow-left" size="16" class="me-2"></lucide-icon>
+              العودة لتسجيل الدخول
+            </button>
+          </div>
+        </div>
+
         <!-- Verifying State -->
         <div *ngIf="status === 'verifying'" class="verifying-state">
           <mat-spinner diameter="40" class="verifying-spinner"></mat-spinner>

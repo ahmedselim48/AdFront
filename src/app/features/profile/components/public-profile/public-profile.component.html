@@ -1,0 +1,187 @@
+<div class="public-profile">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>جاري تحميل الملف الشخصي...</p>
+  </div>
+
+  <!-- Profile Content -->
+  <div *ngIf="!isLoading && profile" class="profile-content">
+    <!-- Profile Header -->
+    <mat-card class="profile-header">
+      <div class="header-content">
+        <div class="profile-image">
+          <img [src]="getProfileImageUrl(profile.profileImageUrl)" 
+               [alt]="profile.userName" 
+               class="avatar">
+          <div class="verification-badge" *ngIf="profile.isVerified">
+            <lucide-icon name="check-circle" size="20"></lucide-icon>
+          </div>
+        </div>
+        
+        <div class="profile-info">
+          <h1 class="profile-name">{{ profile.firstName }} {{ profile.lastName }}</h1>
+          <p class="profile-username">{{ '@' + profile.userName }}</p>
+          
+          <div class="profile-stats">
+            <div class="stat-item">
+              <span class="stat-value">{{ profile.totalAds }}</span>
+              <span class="stat-label">إعلان</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">{{ profile.totalViews }}</span>
+              <span class="stat-label">مشاهدة</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">{{ profile.rating | number:'1.1-1' }}</span>
+              <span class="stat-label">تقييم</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="profile-actions" *ngIf="!isOwnProfile">
+          <button mat-raised-button 
+                  color="primary" 
+                  (click)="onContactUser()"
+                  [disabled]="isContacting">
+            <lucide-icon name="message-circle" size="16"></lucide-icon>
+            <span>تواصل</span>
+          </button>
+        </div>
+        
+        <!-- Own Profile Actions -->
+        <div class="profile-actions" *ngIf="isOwnProfile">
+          <button mat-raised-button 
+                  color="accent" 
+                  (click)="onEditProfile()">
+            <lucide-icon name="edit" size="16"></lucide-icon>
+            <span>تعديل الملف الشخصي</span>
+          </button>
+        </div>
+      </div>
+    </mat-card>
+
+    <!-- Profile Details -->
+    <div class="profile-details">
+      <!-- Bio Section -->
+      <mat-card class="bio-card" *ngIf="profile.bio">
+        <mat-card-content>
+          <h3>نبذة شخصية</h3>
+          <p>{{ profile.bio }}</p>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Contact Information -->
+      <mat-card class="contact-card">
+        <mat-card-content>
+          <h3>معلومات التواصل</h3>
+          <div class="contact-info">
+            <div class="contact-item" *ngIf="profile.phoneNumber">
+              <lucide-icon name="phone" size="16"></lucide-icon>
+              <span>{{ profile.phoneNumber }}</span>
+              <button mat-icon-button 
+                      *ngIf="!isOwnProfile"
+                      (click)="onCallPhone(profile.phoneNumber!)"
+                      matTooltip="اتصال">
+                <lucide-icon name="phone" size="16"></lucide-icon>
+              </button>
+            </div>
+            
+            <div class="contact-item" *ngIf="profile.whatsappNumber">
+              <lucide-icon name="message-circle" size="16"></lucide-icon>
+              <span>{{ profile.whatsappNumber }}</span>
+              <button mat-icon-button 
+                      *ngIf="!isOwnProfile"
+                      (click)="onOpenWhatsApp(profile.whatsappNumber!)"
+                      matTooltip="واتساب">
+                <lucide-icon name="message-circle" size="16"></lucide-icon>
+              </button>
+            </div>
+            
+            <div class="contact-item" *ngIf="profile.email">
+              <lucide-icon name="mail" size="16"></lucide-icon>
+              <span>{{ profile.email }}</span>
+              <button mat-icon-button 
+                      *ngIf="!isOwnProfile"
+                      (click)="onSendEmail(profile.email!)"
+                      matTooltip="إرسال إيميل">
+                <lucide-icon name="mail" size="16"></lucide-icon>
+              </button>
+            </div>
+            
+            <div class="contact-item" *ngIf="profile.location">
+              <lucide-icon name="map-pin" size="16"></lucide-icon>
+              <span>{{ profile.location }}</span>
+            </div>
+            
+            <div class="contact-item">
+              <lucide-icon name="calendar" size="16"></lucide-icon>
+              <span>عضو منذ {{ formatDate(profile.joinDate) }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- User Ads -->
+      <mat-card class="ads-card">
+        <mat-card-content>
+          <div class="ads-header">
+            <h3>إعلانات {{ profile.firstName }}</h3>
+            <span class="ads-count">{{ userAds.length }} إعلان</span>
+          </div>
+          
+          <div class="ads-grid" *ngIf="userAds.length > 0; else noAdsTemplate">
+            <div class="ad-item" *ngFor="let ad of userAds" (click)="onViewAd(ad)" style="cursor: pointer;">
+              <div class="ad-image">
+                <img [src]="getAdImage(ad)" [alt]="ad.title" class="ad-thumbnail">
+                <div class="ad-status">
+                  <mat-chip [color]="ad.status === 'Published' ? 'primary' : 'accent'" selected>
+                    {{ ad.status === 'Published' ? 'منشور' : ad.status }}
+                  </mat-chip>
+                </div>
+              </div>
+              
+              <div class="ad-content">
+                <h4 class="ad-title">{{ ad.title }}</h4>
+                <p class="ad-description">{{ ad.description | slice:0:80 }}{{ ad.description.length > 80 ? '...' : '' }}</p>
+                
+                <div class="ad-meta">
+                  <span class="ad-price">{{ formatPrice(ad.price) }}</span>
+                  <span class="ad-location" *ngIf="ad.location">{{ ad.location }}</span>
+                </div>
+                
+                <div class="ad-stats">
+                  <span class="stat">
+                    <lucide-icon name="eye" size="12"></lucide-icon>
+                    {{ ad.views || 0 }}
+                  </span>
+                  <span class="stat">
+                    <lucide-icon name="heart" size="12"></lucide-icon>
+                    {{ ad.likes || 0 }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <ng-template #noAdsTemplate>
+            <div class="no-ads">
+              <lucide-icon name="eye" size="48" class="no-ads-icon"></lucide-icon>
+              <p>لا توجد إعلانات منشورة</p>
+            </div>
+          </ng-template>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="!isLoading && !profile" class="error-state">
+    <lucide-icon name="user" size="64" class="error-icon"></lucide-icon>
+    <h3>المستخدم غير موجود</h3>
+    <p>المستخدم الذي تبحث عنه غير موجود أو تم حذفه</p>
+    <button mat-raised-button color="primary" (click)="onGoHome()">
+      العودة للرئيسية
+    </button>
+  </div>
+</div>

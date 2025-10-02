@@ -4,7 +4,7 @@
     <div class="brand-section">
       <a routerLink="/home" class="brand-link">
         <div class="brand-icon">
-          <lucide-icon name="shopping-bag" size="24"></lucide-icon>
+          <lucide-icon name="home" size="24"></lucide-icon>
         </div>
         <span class="brand-text">حراج بلس</span>
       </a>
@@ -27,7 +27,7 @@
         الرئيسية
       </a>
       <a class="nav-link" routerLink="/ads" routerLinkActive="active">
-        <lucide-icon name="megaphone" size="18"></lucide-icon>
+        <lucide-icon name="trending-up" size="18"></lucide-icon>
         الإعلانات
       </a>
       <a class="nav-link" [routerLink]="isAdmin ? '/admin/dashboard' : '/dashboard'" routerLinkActive="active" *ngIf="storage?.accessToken">
@@ -111,7 +111,7 @@
         الرئيسية
       </a>
       <a class="mobile-nav-link" routerLink="/ads" (click)="closeMenu()">
-        <lucide-icon name="megaphone" size="18"></lucide-icon>
+        <lucide-icon name="trending-up" size="18"></lucide-icon>
         الإعلانات
       </a>
       <a class="mobile-nav-link" [routerLink]="isAdmin ? '/admin/dashboard' : '/dashboard'" (click)="closeMenu()" *ngIf="storage?.accessToken">

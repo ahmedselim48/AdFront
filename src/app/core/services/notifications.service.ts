@@ -1,105 +1,156 @@
-import { Injectable, inject } from '@angular/core';
-import { ApiClientService } from './api-client.service';
-import { MockApiService } from './mock-api.service';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Injectable, OnDestroy } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, BehaviorSubject, Subject, takeUntil } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { 
-  NotificationDto, 
-  NotificationRequest, 
-  MarkAsReadRequest, 
-  NotificationStats,
-  NotificationType
-} from '../../models/notifications.models';
-import { GeneralResponse } from '../../models/general-response';
+import { GeneralResponse } from '../../models/common.models';
+import { NotificationDto, NotificationSettingsDto, NotificationFilters } from '../../models/profile.models';
+import { SignalRService } from './signalr.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class NotificationsService {
-  private api = inject(ApiClientService);
-  private mockApi = inject(MockApiService);
-  private baseUrl = environment.apiBaseUrl;
+export class NotificationsService implements OnDestroy {
+  private readonly apiUrl = `${environment.apiUrl}/api/notifications`;
+  private destroy$ = new Subject<void>();
   
+  // Observable for real-time notifications
+  private notificationsSubject = new BehaviorSubject<NotificationDto[]>([]);
+  public notifications$ = this.notificationsSubject.asObservable();
+
+  // Observable for unread count
   private unreadCountSubject = new BehaviorSubject<number>(0);
   public unreadCount$ = this.unreadCountSubject.asObservable();
 
-  getNotifications(request: NotificationRequest = {}): Observable<GeneralResponse<NotificationDto[]>> {
-    if (environment.production) {
-      const params = new URLSearchParams();
-      if (request.page) params.set('page', String(request.page));
-      if (request.pageSize) params.set('pageSize', String(request.pageSize));
-      if (request.type) params.set('type', request.type);
-      if (request.isRead !== undefined) params.set('isRead', String(request.isRead));
-
-      return this.api.get$<GeneralResponse<NotificationDto[]>>(`${this.baseUrl}/notifications?${params.toString()}`);
-    } else {
-      // Mock data for development
-      return this.mockApi.getNotifications();
-    }
+  constructor(
+    private http: HttpClient,
+    private signalRService: SignalRService
+  ) {
+    this.loadNotifications();
+    this.setupSignalRListeners();
   }
 
-  markAsRead(notificationId: string): Observable<GeneralResponse<boolean>> {
-    return this.api.put$<GeneralResponse<boolean>>(`${this.baseUrl}/notifications/${notificationId}/read`, {});
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  markAllAsRead(): Observable<GeneralResponse<boolean>> {
-    return this.api.put$<GeneralResponse<boolean>>(`${this.baseUrl}/notifications/mark-all-read`, {});
-  }
+  private setupSignalRListeners() {
+    // Listen for new notifications from SignalR
+    this.signalRService.newNotification$.pipe(takeUntil(this.destroy$)).subscribe(notification => {
+      if (notification) {
+        this.addNotification(notification);
+      }
+    });
 
-  getUnreadCount(): Observable<GeneralResponse<number>> {
-    return this.api.get$<GeneralResponse<number>>(`${this.baseUrl}/notifications/unread-count`);
-  }
-
-  // Update unread count locally
-  updateUnreadCount(count: number): void {
-    this.unreadCountSubject.next(count);
-  }
-
-  // Test notification endpoints (for development)
-  testAdPublished(adId: string, adTitle = 'Sample Ad'): Observable<GeneralResponse<boolean>> {
-    return this.api.post$<GeneralResponse<boolean>>(`${this.baseUrl}/notifications/test/ad/published`, adId, { adTitle });
-  }
-
-  testAdExpired(adId: string, adTitle = 'Sample Ad'): Observable<GeneralResponse<boolean>> {
-    return this.api.post$<GeneralResponse<boolean>>(`${this.baseUrl}/notifications/test/ad/expired`, adId, { adTitle });
-  }
-
-  testABTesting(adId: string, variant = 'B'): Observable<GeneralResponse<boolean>> {
-    return this.api.post$<GeneralResponse<boolean>>(`${this.baseUrl}/notifications/test/ab-testing`, adId, { variant });
-  }
-
-  testNewMessage(conversationId: string, fromUserId: string, preview: string): Observable<GeneralResponse<boolean>> {
-    return this.api.post$<GeneralResponse<boolean>>(`${this.baseUrl}/notifications/test/chat/new-message`, preview, { 
-      conversationId, 
-      fromUserId 
+    // Listen for notification updates from SignalR
+    this.signalRService.notificationUpdated$.pipe(takeUntil(this.destroy$)).subscribe(notification => {
+      if (notification) {
+        this.updateNotification(notification);
+      }
     });
   }
 
-  testContact(adId: string, channel = 'WhatsApp', contact = '+9665xxxxxxx'): Observable<GeneralResponse<boolean>> {
-    return this.api.post$<GeneralResponse<boolean>>(`${this.baseUrl}/notifications/test/contact`, adId, { channel, contact });
+  // Get notifications with pagination
+  getNotifications(page: number = 1, pageSize: number = 20, filters?: NotificationFilters): Observable<GeneralResponse<NotificationDto[]>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
+
+    if (filters?.type) {
+      params = params.set('type', filters.type);
+    }
+    if (filters?.isRead !== undefined) {
+      params = params.set('isRead', filters.isRead.toString());
+    }
+    if (filters?.dateFrom) {
+      params = params.set('dateFrom', filters.dateFrom);
+    }
+    if (filters?.dateTo) {
+      params = params.set('dateTo', filters.dateTo);
+    }
+
+    return this.http.get<GeneralResponse<NotificationDto[]>>(this.apiUrl, { params });
   }
 
-  testCheaperCompetitor(adId: string, price = 1000, link = ''): Observable<GeneralResponse<boolean>> {
-    return this.api.post$<GeneralResponse<boolean>>(`${this.baseUrl}/notifications/test/competition/cheaper`, adId, { price, link });
+  // Load notifications and update observables
+  private loadNotifications(): void {
+    this.getNotifications(1, 50).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.notificationsSubject.next(response.data);
+          this.updateUnreadCount(response.data);
+        }
+      },
+      error: (error) => {
+        console.error('Error loading notifications:', error);
+      }
+    });
   }
 
-  testCompetitionReport(adId: string, period = 'weekly'): Observable<GeneralResponse<boolean>> {
-    return this.api.post$<GeneralResponse<boolean>>(`${this.baseUrl}/notifications/test/competition/report`, adId, { period });
+  // Update unread count
+  private updateUnreadCount(notifications: NotificationDto[]): void {
+    const unreadCount = notifications.filter(n => !n.isRead).length;
+    this.unreadCountSubject.next(unreadCount);
   }
 
-  testSuspiciousLogin(location = 'Unknown', ip = '1.2.3.4'): Observable<GeneralResponse<boolean>> {
-    return this.api.post$<GeneralResponse<boolean>>(`${this.baseUrl}/notifications/test/security/suspicious-login`, {}, { location, ip });
+  // Mark notification as read
+  markAsRead(notificationId: string): Observable<GeneralResponse<boolean>> {
+    return this.http.put<GeneralResponse<boolean>>(`${this.apiUrl}/${notificationId}/read`, {});
   }
 
-  testPayment(status = 'Success', reference = 'TEST123', amount = 100): Observable<GeneralResponse<boolean>> {
-    return this.api.post$<GeneralResponse<boolean>>(`${this.baseUrl}/notifications/test/payment`, {}, { status, reference, amount });
+  // Mark all notifications as read
+  markAllAsRead(): Observable<GeneralResponse<boolean>> {
+    return this.http.put<GeneralResponse<boolean>>(`${this.apiUrl}/read-all`, {});
   }
 
-  testSubscriptionExpiring(plan = 'Pro', days = 3): Observable<GeneralResponse<boolean>> {
-    return this.api.post$<GeneralResponse<boolean>>(`${this.baseUrl}/notifications/test/subscription/expiring`, {}, { plan, days });
+  // Delete notification
+  deleteNotification(notificationId: string): Observable<GeneralResponse<boolean>> {
+    return this.http.delete<GeneralResponse<boolean>>(`${this.apiUrl}/${notificationId}`);
   }
 
-  testWeeklySummary(): Observable<GeneralResponse<boolean>> {
-    return this.api.post$<GeneralResponse<boolean>>(`${this.baseUrl}/notifications/test/weekly/summary`, {});
+  // Delete all notifications
+  deleteAllNotifications(): Observable<GeneralResponse<boolean>> {
+    return this.http.delete<GeneralResponse<boolean>>(`${this.apiUrl}/all`);
+  }
+
+  // Get notification settings
+  getNotificationSettings(): Observable<GeneralResponse<NotificationSettingsDto>> {
+    return this.http.get<GeneralResponse<NotificationSettingsDto>>(`${this.apiUrl}/settings`);
+  }
+
+  // Update notification settings
+  updateNotificationSettings(settings: NotificationSettingsDto): Observable<GeneralResponse<boolean>> {
+    return this.http.put<GeneralResponse<boolean>>(`${this.apiUrl}/settings`, settings);
+  }
+
+  // Refresh notifications
+  refreshNotifications(): void {
+    this.loadNotifications();
+  }
+
+  // Add notification to local list (for real-time updates)
+  addNotification(notification: NotificationDto): void {
+    const currentNotifications = this.notificationsSubject.value;
+    this.notificationsSubject.next([notification, ...currentNotifications]);
+    this.updateUnreadCount([notification, ...currentNotifications]);
+  }
+
+  // Update notification in local list
+  updateNotification(notification: NotificationDto): void {
+    const currentNotifications = this.notificationsSubject.value;
+    const index = currentNotifications.findIndex(n => n.id === notification.id);
+    if (index !== -1) {
+      currentNotifications[index] = notification;
+      this.notificationsSubject.next([...currentNotifications]);
+      this.updateUnreadCount(currentNotifications);
+    }
+  }
+
+  // Remove notification from local list
+  removeNotification(notificationId: string): void {
+    const currentNotifications = this.notificationsSubject.value;
+    const filteredNotifications = currentNotifications.filter(n => n.id !== notificationId);
+    this.notificationsSubject.next(filteredNotifications);
+    this.updateUnreadCount(filteredNotifications);
   }
 }

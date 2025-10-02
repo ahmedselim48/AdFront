@@ -1,0 +1,208 @@
+<div class="profile-messages">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>جاري تحميل المحادثات...</p>
+  </div>
+
+  <!-- Messages Content -->
+  <div *ngIf="!isLoading" class="messages-content">
+    <!-- Header -->
+    <div class="messages-header">
+      <div class="header-info">
+        <h1>الرسائل</h1>
+        <p>متابعة محادثاتك والرسائل</p>
+      </div>
+      <div class="header-actions">
+        <button mat-icon-button (click)="onRefresh()" matTooltip="تحديث المحادثات">
+          <lucide-icon name="refresh-cw" size="20"></lucide-icon>
+        </button>
+        <button mat-icon-button matTooltip="إعدادات الرسائل">
+          <lucide-icon name="settings" size="20"></lucide-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Messages Layout -->
+    <div class="messages-layout">
+      <!-- Conversations Sidebar -->
+      <div class="conversations-sidebar">
+        <!-- Search and Filters -->
+        <div class="conversations-header">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>البحث في المحادثات</mat-label>
+            <input matInput 
+                   [(ngModel)]="searchTerm"
+                   (ngModelChange)="onSearchChange($event)"
+                   placeholder="ابحث في المحادثات...">
+            <mat-icon matPrefix>search</mat-icon>
+          </mat-form-field>
+          
+          <div class="filter-actions">
+            <button mat-button 
+                    [class.active]="showUnreadOnly"
+                    (click)="onToggleUnreadOnly()"
+                    matTooltip="عرض الرسائل غير المقروءة فقط">
+              <lucide-icon name="filter" size="16"></lucide-icon>
+              <span>غير مقروءة فقط</span>
+            </button>
+            <button mat-button 
+                    (click)="markAllAsRead()"
+                    matTooltip="تعليم الكل كمقروء"
+                    *ngIf="getUnreadCount() > 0">
+              <lucide-icon name="check-double" size="16"></lucide-icon>
+              <span>تعليم الكل كمقروء</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Conversations List -->
+        <div class="conversations-list">
+          <div *ngIf="getFilteredConversations().length === 0" class="no-conversations">
+            <lucide-icon name="message-circle" size="48" class="no-conversations-icon"></lucide-icon>
+            <p>لا توجد محادثات</p>
+          </div>
+
+          <div *ngFor="let conversation of getFilteredConversations(); trackBy: trackByConversationId"
+               class="conversation-item"
+               [class.active]="selectedConversation?.id === conversation.id"
+               (click)="selectConversation(conversation)">
+            <div class="conversation-avatar">
+              <div class="avatar-placeholder">
+                {{ getOtherUserInitials(conversation) }}
+              </div>
+              <div *ngIf="conversation.unreadMessageCount > 0" 
+                   class="unread-badge">
+                {{ conversation.unreadMessageCount }}
+              </div>
+            </div>
+
+            <div class="conversation-content">
+              <div class="conversation-header">
+                <h3 class="conversation-name">{{ getOtherUserName(conversation) }}</h3>
+                <span class="conversation-time">{{ formatConversationTime(conversation.lastMessageAt || conversation.createdAt) }}</span>
+              </div>
+              
+              <div class="conversation-preview">
+                <p class="last-message" *ngIf="conversation.lastMessage">
+                  {{ conversation.lastMessage.content | slice:0:50 }}{{ conversation.lastMessage.content.length > 50 ? '...' : '' }}
+                </p>
+                <p class="no-messages" *ngIf="!conversation.lastMessage">
+                  لا توجد رسائل بعد
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Messages Area -->
+      <div class="messages-area">
+        <!-- No Conversation Selected -->
+        <div *ngIf="!selectedConversation" class="no-conversation-selected">
+          <lucide-icon name="message-circle" size="64" class="no-conversation-icon"></lucide-icon>
+          <h3>اختر محادثة</h3>
+          <p>اختر محادثة من القائمة لعرض الرسائل</p>
+        </div>
+
+        <!-- Selected Conversation -->
+        <div *ngIf="selectedConversation" class="selected-conversation">
+          <!-- Conversation Header -->
+          <div class="conversation-header">
+            <div class="conversation-info">
+              <div class="conversation-avatar">
+                <div class="avatar-placeholder">
+                  {{ getOtherUserInitials(selectedConversation) }}
+                </div>
+                <div class="online-indicator" *ngIf="isUserOnline(selectedConversation)"></div>
+              </div>
+              <div class="conversation-details">
+                <h3>{{ getOtherUserName(selectedConversation) }}</h3>
+                <p [class.online]="isUserOnline(selectedConversation)">
+                  {{ isUserOnline(selectedConversation) ? 'متصل الآن' : 'آخر ظهور: ' + formatConversationTime(selectedConversation.lastMessageAt || selectedConversation.createdAt) }}
+                </p>
+              </div>
+            </div>
+            <div class="conversation-actions">
+              <button mat-icon-button matTooltip="مكالمة صوتية">
+                <lucide-icon name="phone" size="20"></lucide-icon>
+              </button>
+              <button mat-icon-button matTooltip="مكالمة فيديو">
+                <lucide-icon name="video" size="20"></lucide-icon>
+              </button>
+              <button mat-icon-button matTooltip="معلومات المحادثة">
+                <lucide-icon name="info" size="20"></lucide-icon>
+              </button>
+              <button mat-icon-button matTooltip="المزيد">
+                <lucide-icon name="more-vertical" size="20"></lucide-icon>
+              </button>
+            </div>
+          </div>
+
+          <!-- Messages List -->
+          <div class="messages-list" #scrollContainer>
+            <div *ngIf="messages.length === 0" class="no-messages">
+              <lucide-icon name="message-circle" size="48" class="no-messages-icon"></lucide-icon>
+              <p>لا توجد رسائل في هذه المحادثة</p>
+            </div>
+
+            <button class="load-older" (click)="loadOlder()" *ngIf="!isLoading && !loadingOlder">تحميل أقدم</button>
+
+            <div class="day-group" *ngFor="let g of dayGroups">
+              <div class="day-separator">{{ g.label }}</div>
+              <div class="msg-row"
+                   *ngFor="let m of g.messages; trackBy: trackByMessageId"
+                   [class.mine]="m.senderId === currentUserId"
+                   [class.first]="m.isFirstInBlock"
+                   [class.last]="m.isLastInBlock">
+                <img class="avatar" *ngIf="m.showAvatar" [src]="'/assets/default-avatar.png'" alt="" />
+                <div class="bubble">
+                  <div class="sender" *ngIf="m.showName">{{ m.senderName }}</div>
+                  <div class="content">{{ m.content }}</div>
+                  <div class="meta">
+                    <span class="time">{{ formatMessageTime(m.sentAt) }}</span>
+                    <span class="ticks" [class.read]="m.status === 'Read'">
+                      {{ m.status === 'Read' ? '✓✓' : (m.status === 'Delivered' ? '✓' : '⌛') }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Typing Indicator -->
+            <div class="typing" *ngIf="isTyping">
+              <div class="typing-content">
+                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                <span class="typing-text">{{ getOtherUserName(selectedConversation) }} يكتب الآن...</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Message Input -->
+          <div class="message-input">
+          <form [formGroup]="messageForm" (keydown)="onComposerKeydown($event)" (ngSubmit)="sendMessage()" class="message-form">
+            <mat-form-field appearance="outline" class="message-field">
+              <mat-label>اكتب رسالتك...</mat-label>
+              <textarea matInput 
+                        formControlName="content"
+                        placeholder="اكتب رسالتك هنا..."
+                        rows="1"
+                        maxlength="2000">
+              </textarea>
+              <mat-hint align="end">{{ messageForm.get('content')?.value?.length || 0 }}/2000</mat-hint>
+            </mat-form-field>
+            
+            <button mat-fab 
+                    color="primary" 
+                    type="submit"
+                    [disabled]="messageForm.invalid || isSending"
+                    class="send-button">
+              <lucide-icon name="send" size="20"></lucide-icon>
+              <mat-spinner *ngIf="isSending" diameter="20"></mat-spinner>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -2,7 +2,19 @@ import { Injectable } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
 export class FileService {
+  private readonly supportedFormats = ['jpeg', 'jpg', 'png', 'gif', 'webp'];
+
+  private isSupportedFormat(file: File): boolean {
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    return fileExtension ? this.supportedFormats.includes(fileExtension) : false;
+  }
+
   async compressImage(file: File, quality = 0.8, maxWidth = 1600): Promise<Blob> {
+    if (!this.isSupportedFormat(file)) {
+      console.log(`⏭ Skipped unsupported format: ${file.name}`);
+      throw new Error(`Unsupported image format: ${file.name}`);
+    }
+    
     const img = await this.loadImage(file);
     const scale = Math.min(1, maxWidth / img.width);
     const canvas = document.createElement('canvas');
@@ -15,6 +27,11 @@ export class FileService {
   }
 
   async cropImage(file: File, x: number, y: number, width: number, height: number): Promise<Blob> {
+    if (!this.isSupportedFormat(file)) {
+      console.log(`⏭ Skipped unsupported format: ${file.name}`);
+      throw new Error(`Unsupported image format: ${file.name}`);
+    }
+    
     const img = await this.loadImage(file);
     const canvas = document.createElement('canvas');
     canvas.width = width;

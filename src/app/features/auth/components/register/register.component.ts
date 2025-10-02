@@ -38,6 +38,7 @@ import { RegisterRequest } from '../../../../models/auth.models';
       <div class="register-card">
         <mat-card class="register-mat-card">
           <mat-card-header>
+            <div class="brand-badge">HarajPlus</div>
             <div class="register-header">
               <lucide-icon name="user" size="32" class="register-icon"></lucide-icon>
               <h2 class="register-title">إنشاء حساب جديد</h2>
@@ -100,7 +101,7 @@ import { RegisterRequest } from '../../../../models/auth.models';
                       matInput
                       type="text"
                       formControlName="userName"
-                      placeholder="أدخل اسم المستخدم"
+                      placeholder="مثال: أحمد123 أو ahmed_123 أو محمد.علي"
                       autocomplete="username"
                       class="form-input">
                     <mat-icon matPrefix>
@@ -110,7 +111,13 @@ import { RegisterRequest } from '../../../../models/auth.models';
                       اسم المستخدم مطلوب
                     </mat-error>
                     <mat-error *ngIf="registerForm.get('userName')?.hasError('minlength')">
-                      اسم المستخدم يجب أن يكون 3 أحرف على الأقل
+                      اسم المستخدم يجب أن يكون حرفين على الأقل
+                    </mat-error>
+                    <mat-error *ngIf="registerForm.get('userName')?.hasError('maxlength')">
+                      اسم المستخدم يجب أن يكون 32 حرف على الأكثر
+                    </mat-error>
+                    <mat-error *ngIf="registerForm.get('userName')?.hasError('invalidUsername')">
+                      اسم المستخدم يجب أن يحتوي على أحرف عربية أو إنجليزية وأرقام و _ و . و - فقط
                     </mat-error>
                   </mat-form-field>
 
@@ -284,18 +291,32 @@ import { RegisterRequest } from '../../../../models/auth.models';
       z-index: 0;
     }
 
+    .brand-badge {
+      display: inline-block;
+      align-self: center;
+      margin: 0 auto 0.5rem auto;
+      padding: 0.25rem 0.75rem;
+      font-weight: 700;
+      font-size: 0.8rem;
+      letter-spacing: 0.5px;
+      color: #fff;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: 999px;
+      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.35);
+    }
+
     .register-card {
       width: 100%;
-      max-width: 500px;
+      max-width: 450px;
       position: relative;
       z-index: 1;
     }
 
     .register-mat-card {
-      padding: 2rem;
-      border-radius: 1rem;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
       box-shadow: 
-        0 15px 30px rgba(0, 0, 0, 0.1),
+        0 12px 24px rgba(0, 0, 0, 0.1),
         0 0 0 1px rgba(255, 255, 255, 0.1);
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(10px);
@@ -304,7 +325,7 @@ import { RegisterRequest } from '../../../../models/auth.models';
 
     .register-header {
       text-align: center;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
     }
 
     .register-icon {
@@ -314,33 +335,33 @@ import { RegisterRequest } from '../../../../models/auth.models';
     }
 
     .register-title {
-      font-size: 1.75rem;
+      font-size: 1.4rem;
       font-weight: 700;
       background: linear-gradient(135deg, #667eea, #764ba2);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      margin: 0 0 0.5rem 0;
+      margin: 0 0 0.25rem 0;
       text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .register-subtitle {
       color: #666;
       margin: 0;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 400;
     }
 
     .register-form {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 0.75rem;
     }
 
     .form-section {
       border: 1px solid rgba(102, 126, 234, 0.15);
-      border-radius: 0.75rem;
-      padding: 1.25rem;
+      border-radius: 0.5rem;
+      padding: 1rem;
       background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(248, 250, 252, 0.9));
       backdrop-filter: blur(5px);
       box-shadow: 
@@ -356,15 +377,35 @@ import { RegisterRequest } from '../../../../models/auth.models';
         inset 0 1px 0 rgba(255, 255, 255, 0.9);
     }
 
+    /* Enhanced input focus/hover states */
+    :host ::ng-deep .mat-mdc-form-field-appearance-outline .mdc-notched-outline__leading,
+    :host ::ng-deep .mat-mdc-form-field-appearance-outline .mdc-notched-outline__trailing,
+    :host ::ng-deep .mat-mdc-form-field-appearance-outline .mdc-notched-outline__notch {
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    :host ::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+    :host ::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing,
+    :host ::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline__notch {
+      border-color: #667eea !important;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12);
+    }
+
+    :host ::ng-deep .mat-mdc-form-field:hover .mdc-notched-outline__leading,
+    :host ::ng-deep .mat-mdc-form-field:hover .mdc-notched-outline__trailing,
+    :host ::ng-deep .mat-mdc-form-field:hover .mdc-notched-outline__notch {
+      border-color: rgba(102, 126, 234, 0.6);
+    }
+
     .section-title {
-      font-size: 1rem;
+      font-size: 0.9rem;
       font-weight: 600;
       background: linear-gradient(135deg, #667eea, #764ba2);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      margin: 0 0 1rem 0;
-      padding-bottom: 0.5rem;
+      margin: 0 0 0.75rem 0;
+      padding-bottom: 0.25rem;
       border-bottom: 2px solid transparent;
       border-image: linear-gradient(135deg, #667eea, #764ba2) 1;
       position: relative;
@@ -383,7 +424,7 @@ import { RegisterRequest } from '../../../../models/auth.models';
 
     .form-row {
       display: flex;
-      gap: 0.75rem;
+      gap: 0.5rem;
     }
 
     .full-width {
@@ -436,19 +477,19 @@ import { RegisterRequest } from '../../../../models/auth.models';
     }
 
     .register-button {
-      height: 48px;
-      font-size: 1rem;
+      height: 44px;
+      font-size: 0.95rem;
       font-weight: 600;
-      margin-top: 1rem;
+      margin-top: 0.75rem;
       background: linear-gradient(135deg, #667eea, #764ba2);
       border: none;
-      border-radius: 10px;
+      border-radius: 8px;
       box-shadow: 
         0 3px 10px rgba(102, 126, 234, 0.3),
         0 1px 3px rgba(0, 0, 0, 0.1);
       transition: all 0.3s ease;
       text-transform: none;
-      letter-spacing: 0.3px;
+      letter-spacing: 0.2px;
     }
 
     .register-button:hover:not(:disabled) {
@@ -476,10 +517,10 @@ import { RegisterRequest } from '../../../../models/auth.models';
 
     .login-link {
       text-align: center;
-      margin-top: 1.25rem;
-      padding: 1rem;
+      margin-top: 1rem;
+      padding: 0.75rem;
       background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
-      border-radius: 8px;
+      border-radius: 6px;
       border: 1px solid rgba(102, 126, 234, 0.1);
     }
 
@@ -528,7 +569,7 @@ import { RegisterRequest } from '../../../../models/auth.models';
       }
 
       .register-mat-card {
-        padding: 1.5rem;
+        padding: 1.25rem;
       }
 
       .form-row {
@@ -541,7 +582,7 @@ import { RegisterRequest } from '../../../../models/auth.models';
       }
 
       .form-section {
-        padding: 1rem;
+        padding: 0.75rem;
       }
     }
 
@@ -551,22 +592,22 @@ import { RegisterRequest } from '../../../../models/auth.models';
       }
 
       .register-mat-card {
-        padding: 1.25rem;
-        border-radius: 0.75rem;
-      }
-
-      .register-title {
-        font-size: 1.5rem;
-      }
-
-      .form-section {
-        padding: 0.75rem;
+        padding: 1rem;
         border-radius: 0.5rem;
       }
 
+      .register-title {
+        font-size: 1.25rem;
+      }
+
+      .form-section {
+        padding: 0.5rem;
+        border-radius: 0.375rem;
+      }
+
       .register-button {
-        height: 44px;
-        font-size: 0.95rem;
+        height: 40px;
+        font-size: 0.9rem;
       }
     }
   `]
@@ -587,7 +628,7 @@ export class RegisterComponent implements OnInit {
     this.registerForm = this.fb.group({
       firstName: ['', [Validators.required, Validators.minLength(2)]],
       lastName: ['', [Validators.required, Validators.minLength(2)]],
-      userName: ['', [Validators.required, Validators.minLength(3)]],
+      userName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(32), this.usernameValidator]],
       email: ['', [Validators.required, Validators.email]],
       phoneNumber: [''],
       password: ['', [Validators.required, Validators.minLength(6)]],
@@ -610,6 +651,22 @@ export class RegisterComponent implements OnInit {
     if (password && confirmPassword && password.value !== confirmPassword.value) {
       confirmPassword.setErrors({ mismatch: true });
       return { mismatch: true };
+    }
+    
+    return null;
+  }
+
+  usernameValidator(control: any) {
+    if (!control.value) {
+      return null;
+    }
+    
+    const username = control.value;
+    // Username must be 2-32 chars and can include letters (including Arabic), digits, underscore, dot, and hyphen
+    const usernameRegex = /^[a-zA-Z\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF0-9_.-]{2,32}$/;
+    
+    if (!usernameRegex.test(username)) {
+      return { invalidUsername: true };
     }
     
     return null;
@@ -651,6 +708,10 @@ export class RegisterComponent implements OnInit {
             this.errorMessage = error.error.message;
           } else if (error.status === 400) {
             this.errorMessage = 'البيانات المدخلة غير صحيحة. يرجى التحقق من جميع الحقول';
+          } else if (error.status === 409) {
+            this.errorMessage = 'اسم المستخدم أو البريد الإلكتروني مستخدم بالفعل';
+          } else if (error.status === 0) {
+            this.errorMessage = 'لا يمكن الاتصال بالخادم. يرجى المحاولة لاحقاً';
           } else {
             this.errorMessage = 'حدث خطأ أثناء إنشاء الحساب';
           }

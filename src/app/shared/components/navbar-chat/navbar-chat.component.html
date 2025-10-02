@@ -1,0 +1,32 @@
+<button class="chat-button" (click)="goToMessagesPage()" aria-label="Chat">
+  <span class="icon">💬</span>
+  <span class="badge" *ngIf="unreadTotal > 0">{{ unreadTotal }}</span>
+  <span class="label">الدردشة</span>
+  </button>
+
+<div class="chat-menu">
+  <div class="header">
+    <span>أحدث المحادثات</span>
+    <button class="view-all" (click)="goToMessagesPage()">عرض الكل</button>
+  </div>
+
+  <div class="list" *ngIf="!loading; else loadingTpl">
+    <div class="item" *ngFor="let c of conversations" (click)="openConversation(c)">
+      <img [src]="c.otherImageUrl || '/assets/default-avatar.png'" alt="avatar" />
+      <div class="meta">
+        <div class="row">
+          <span class="name">{{ c.otherName }}</span>
+          <span class="time">{{ c.lastAt | date:'short' }}</span>
+        </div>
+        <div class="preview">{{ c.lastMessage }}</div>
+      </div>
+      <span class="unread" *ngIf="c.unreadCount > 0">{{ c.unreadCount }}</span>
+    </div>
+  </div>
+
+  <ng-template #loadingTpl>
+    <div class="loading">جار التحميل…</div>
+  </ng-template>
+</div>
+
+

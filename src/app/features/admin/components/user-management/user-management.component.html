@@ -257,7 +257,7 @@
       <div class="modal-body" *ngIf="selectedUser">
         <div class="user-profile">
           <div class="user-avatar-large">
-            <img *ngIf="selectedUser.profileImageUrl" [src]="selectedUser.profileImageUrl" [alt]="selectedUser.fullName">
+            <img *ngIf="selectedUser.profileImageUrl" [src]="getProfileImageUrl(selectedUser.profileImageUrl)" [alt]="selectedUser.fullName">
             <mat-icon *ngIf="!selectedUser.profileImageUrl">person</mat-icon>
           </div>
           <div class="user-basic-info">

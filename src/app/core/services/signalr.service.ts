@@ -1,193 +1,309 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AuthService } from '../auth/auth.service';
-import { NotificationDto, NotificationType } from '../../models/notifications.models';
-
-export interface SignalRNotification {
-  id: string;
-  title: string;
-  message: string;
-  type: string;
-  isRead: boolean;
-  createdAt: string;
-  data?: any;
-}
+import { NotificationDto } from '../../models/profile.models';
+import { DirectMessageDto } from '../../models/profile.models';
+import { TokenStorageService } from '../auth/token-storage.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class SignalRService {
-  private hubConnection!: HubConnection;
-  private notificationsSubject = new BehaviorSubject<SignalRNotification[]>([]);
-  public notifications$ = this.notificationsSubject.asObservable();
+export class SignalRService implements OnDestroy {
+  private chatConnection?: HubConnection;
+  private notificationConnection?: HubConnection;
   
-  private authService = inject(AuthService);
+  // Chat observables
+  private newMessageSubject = new BehaviorSubject<DirectMessageDto | null>(null);
+  public newMessage$ = this.newMessageSubject.asObservable();
+  
+  private conversationUpdatedSubject = new BehaviorSubject<any>(null);
+  public conversationUpdated$ = this.conversationUpdatedSubject.asObservable();
+  private directTypingSubject = new BehaviorSubject<{ conversationId: string; userId: string; isTyping: boolean } | null>(null);
+  public directTyping$ = this.directTypingSubject.asObservable();
+  
+  // Notification observables
+  private newNotificationSubject = new BehaviorSubject<NotificationDto | null>(null);
+  public newNotification$ = this.newNotificationSubject.asObservable();
+  
+  private notificationUpdatedSubject = new BehaviorSubject<NotificationDto | null>(null);
+  public notificationUpdated$ = this.notificationUpdatedSubject.asObservable();
 
-  constructor() {
-    this.initializeConnection();
+  constructor(private tokenStorage: TokenStorageService) {
+    this.initializeConnections();
   }
 
-  private initializeConnection() {
-    this.hubConnection = new HubConnectionBuilder()
-      .withUrl(`${environment.apiBaseUrl}/notificationHub`, {
+  ngOnDestroy() {
+    this.stopConnections();
+  }
+
+  private initializeConnections() {
+    this.startChatConnection();
+    this.startNotificationConnection();
+  }
+
+  // Public wrappers used by header and other components
+  public startConnection(): void {
+    // If already connected, ignore; otherwise start/reconnect both
+    if (this.chatConnection?.state !== HubConnectionState.Connected) {
+      this.startChatConnection();
+    }
+    if (this.notificationConnection?.state !== HubConnectionState.Connected) {
+      this.startNotificationConnection();
+    }
+  }
+
+  public stopConnection(): void {
+    this.stopConnections();
+  }
+
+  // Chat Connection
+  private startChatConnection() {
+    this.chatConnection = new HubConnectionBuilder()
+      .withUrl(`${environment.apiUrl}/chatHub`, {
         accessTokenFactory: () => {
-          // إرجاع JWT token من AuthService
-          return this.authService.accessToken || '';
-        }
+          const token = this.tokenStorage.accessToken;
+          console.log('Using token for SignalR:', token ? 'Token present' : 'No token');
+          return token || '';
+        },
+        skipNegotiation: false, // Allow negotiation
+        transport: 1 // WebSockets only
       })
       .withAutomaticReconnect([0, 2000, 10000, 30000])
       .build();
 
-    this.setupEventHandlers();
-  }
-
-  private setupEventHandlers() {
-    // استقبال الإشعارات الجديدة
-    this.hubConnection.on('ReceiveNotification', (notification: SignalRNotification) => {
-      console.log('Received notification:', notification);
-      this.addNotification(notification);
-      this.showBrowserNotification(notification);
-    });
-
-    // استقبال تحديثات الإشعارات
-    this.hubConnection.on('NotificationUpdated', (notification: SignalRNotification) => {
-      this.updateNotification(notification);
-    });
-
-    // استقبال حذف الإشعارات
-    this.hubConnection.on('NotificationDeleted', (notificationId: string) => {
-      this.removeNotification(notificationId);
-    });
-
-    // معالجة أخطاء الاتصال
-    this.hubConnection.onclose((error) => {
-      if (error) {
-        console.error('SignalR connection closed with error:', error);
-      } else {
-        console.log('SignalR connection closed');
-      }
-    });
-  }
-
-  public async startConnection(): Promise<void> {
-    if (this.hubConnection.state === HubConnectionState.Disconnected) {
-      try {
-        await this.hubConnection.start();
-        console.log('SignalR connection started');
-        
-        // الانضمام لمجموعة المستخدم
-        const userId = this.getCurrentUserId();
-        if (userId) {
-          await this.hubConnection.invoke('JoinUserGroup', userId);
-          console.log('Joined user group:', userId);
-        }
-      } catch (error) {
-        console.error('Error starting SignalR connection:', error);
-      }
-    }
-  }
-
-  public async stopConnection(): Promise<void> {
-    if (this.hubConnection.state === HubConnectionState.Connected) {
-      try {
-        const userId = this.getCurrentUserId();
-        if (userId) {
-          await this.hubConnection.invoke('LeaveUserGroup', userId);
-        }
-        await this.hubConnection.stop();
-        console.log('SignalR connection stopped');
-      } catch (error) {
-        console.error('Error stopping SignalR connection:', error);
-      }
-    }
-  }
-
-  private addNotification(notification: SignalRNotification) {
-    const currentNotifications = this.notificationsSubject.value;
-    this.notificationsSubject.next([notification, ...currentNotifications]);
-  }
-
-  private updateNotification(notification: SignalRNotification) {
-    const currentNotifications = this.notificationsSubject.value;
-    const updatedNotifications = currentNotifications.map(n => 
-      n.id === notification.id ? notification : n
-    );
-    this.notificationsSubject.next(updatedNotifications);
-  }
-
-  private removeNotification(notificationId: string) {
-    const currentNotifications = this.notificationsSubject.value;
-    const filteredNotifications = currentNotifications.filter(n => n.id !== notificationId);
-    this.notificationsSubject.next(filteredNotifications);
-  }
-
-  private showBrowserNotification(notification: SignalRNotification) {
-    if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification(notification.title, {
-        body: notification.message,
-        icon: '/assets/icons/notification-icon.png',
-        badge: '/assets/icons/badge-icon.png',
-        tag: notification.id,
-        requireInteraction: notification.type === 'CompetitionAnalysis' || notification.type === 'Security'
+    this.chatConnection.start()
+      .then(() => {
+        console.log('Chat connection started');
+        this.setupChatListeners();
+      })
+      .catch(error => {
+        console.error('Error starting chat connection:', error);
+        // Try with Server-Sent Events as fallback
+        this.tryFallbackConnection();
       });
+  }
+
+  private tryFallbackConnection() {
+    console.log('Trying fallback connection with Server-Sent Events...');
+    this.chatConnection = new HubConnectionBuilder()
+      .withUrl(`${environment.apiUrl}/chatHub`, {
+        accessTokenFactory: () => {
+          const token = this.tokenStorage.accessToken;
+          console.log('Using token for fallback SignalR:', token ? 'Token present' : 'No token');
+          return token || '';
+        },
+        skipNegotiation: false, // Allow negotiation
+        transport: 2 // Server-Sent Events
+      })
+      .withAutomaticReconnect([0, 2000, 10000, 30000])
+      .build();
+
+    this.chatConnection.start()
+      .then(() => {
+        console.log('Chat connection started with SSE fallback');
+        this.setupChatListeners();
+      })
+      .catch(error => {
+        console.error('Error starting fallback chat connection:', error);
+      });
+  }
+
+  private setupChatListeners() {
+    if (!this.chatConnection) return;
+
+    // Listen for new messages
+    this.chatConnection.on('ReceiveMessage', (message: DirectMessageDto) => {
+      this.newMessageSubject.next(message);
+    });
+
+    // Listen for conversation updates
+    this.chatConnection.on('ConversationUpdated', (conversation: any) => {
+      this.conversationUpdatedSubject.next(conversation);
+    });
+
+    // Listen for message status updates
+    this.chatConnection.on('MessageStatusUpdated', (messageId: string, status: string) => {
+      // Handle message status update
+      console.log(`Message ${messageId} status updated to ${status}`);
+    });
+
+    // ===== Direct Chat specific events =====
+    this.chatConnection.on('ReceiveDirectMessage', (message: DirectMessageDto) => {
+      this.newMessageSubject.next(message);
+    });
+    this.chatConnection.on('DirectConversationRead', (payload: any) => {
+      // surface as conversation update so UI can zero unread and set ticks
+      this.conversationUpdatedSubject.next(payload);
+    });
+    this.chatConnection.on('DirectMessageRead', (_messageId: string) => {
+      // optionally handle read receipts
+    });
+    this.chatConnection.on('DirectTyping', (payload: { DirectConversationId: string; UserId: string; IsTyping: boolean; At: string; }) => {
+      this.directTypingSubject.next({
+        conversationId: payload.DirectConversationId,
+        userId: payload.UserId,
+        isTyping: payload.IsTyping
+      });
+    });
+  }
+
+  // Notification Connection
+  private startNotificationConnection() {
+    this.notificationConnection = new HubConnectionBuilder()
+      .withUrl(`${environment.apiUrl}/notificationHub`, {
+        accessTokenFactory: () => {
+          const token = this.tokenStorage.accessToken;
+          console.log('Using token for notification SignalR:', token ? 'Token present' : 'No token');
+          return token || '';
+        },
+        skipNegotiation: false
+      })
+      .withAutomaticReconnect()
+      .build();
+
+    this.notificationConnection.start()
+      .then(() => {
+        console.log('Notification connection started');
+        this.setupNotificationListeners();
+      })
+      .catch(error => {
+        console.error('Error starting notification connection:', error);
+      });
+  }
+
+  private setupNotificationListeners() {
+    if (!this.notificationConnection) return;
+
+    // Listen for new notifications
+    this.notificationConnection.on('ReceiveNotification', (notification: NotificationDto) => {
+      this.newNotificationSubject.next(notification);
+    });
+
+    // Listen for notification updates
+    this.notificationConnection.on('NotificationUpdated', (notification: NotificationDto) => {
+      this.notificationUpdatedSubject.next(notification);
+    });
+  }
+
+  // Chat Methods
+  async joinConversation(conversationId: string): Promise<void> {
+    if (this.chatConnection?.state === HubConnectionState.Connected) {
+      await this.chatConnection.invoke('JoinConversation', conversationId);
     }
   }
 
-  private getCurrentUserId(): string | null {
-    // استخراج User ID من AuthService
-    const user = this.authService.currentUser;
-    return user?.id || null;
-  }
-
-  // طلب إذن الإشعارات من المتصفح
-  public async requestNotificationPermission(): Promise<boolean> {
-    if ('Notification' in window) {
-      const permission = await Notification.requestPermission();
-      return permission === 'granted';
+  async leaveConversation(conversationId: string): Promise<void> {
+    if (this.chatConnection?.state === HubConnectionState.Connected) {
+      await this.chatConnection.invoke('LeaveConversation', conversationId);
     }
-    return false;
   }
 
-  // إرسال إشعار مخصص (اختياري)
-  public async sendCustomNotification(userId: string, title: string, message: string): Promise<void> {
-    if (this.hubConnection.state === HubConnectionState.Connected) {
+  async sendMessage(conversationId: string, content: string): Promise<void> {
+    if (this.chatConnection?.state === HubConnectionState.Connected) {
+      await this.chatConnection.invoke('SendMessage', conversationId, content);
+    }
+  }
+
+  async markMessageAsRead(messageId: string): Promise<void> {
+    if (this.chatConnection?.state === HubConnectionState.Connected) {
+      await this.chatConnection.invoke('MarkMessageAsRead', messageId);
+    }
+  }
+
+  // ===== Direct Chat Methods =====
+  async joinDirectConversation(directConversationId: string): Promise<void> {
+    if (this.chatConnection?.state === HubConnectionState.Connected) {
+      await this.chatConnection.invoke('JoinDirectConversation', directConversationId);
+    }
+  }
+
+  async leaveDirectConversation(directConversationId: string): Promise<void> {
+    if (this.chatConnection?.state === HubConnectionState.Connected) {
+      await this.chatConnection.invoke('LeaveDirectConversation', directConversationId);
+    }
+  }
+
+  async sendDirectMessage(directConversationId: string, content: string): Promise<void> {
+    if (this.chatConnection?.state === HubConnectionState.Connected) {
+      await this.chatConnection.invoke('SendDirectMessage', directConversationId, content);
+    }
+  }
+
+  async markDirectMessageAsRead(messageId: string): Promise<void> {
+    if (this.chatConnection?.state === HubConnectionState.Connected) {
+      await this.chatConnection.invoke('MarkDirectMessageAsRead', messageId);
+    }
+  }
+
+  async sendDirectTyping(directConversationId: string, isTyping: boolean): Promise<void> {
+    if (this.chatConnection?.state === HubConnectionState.Connected) {
       try {
-        await this.hubConnection.invoke('SendNotification', userId, title, message);
+        await this.chatConnection.invoke('DirectTyping', directConversationId, isTyping);
       } catch (error) {
-        console.error('Error sending custom notification:', error);
+        console.warn('Failed to send typing status:', error);
+        // Don't throw error to prevent UI issues
       }
+    } else {
+      console.warn('Chat connection not available for typing status');
     }
   }
 
-  // الحصول على حالة الاتصال
-  public getConnectionState(): HubConnectionState {
-    return this.hubConnection.state;
-  }
-
-  // إعادة الاتصال يدوياً
-  public async reconnect(): Promise<void> {
-    if (this.hubConnection.state === HubConnectionState.Disconnected) {
-      await this.startConnection();
+  async markDirectConversationAsRead(directConversationId: string): Promise<void> {
+    if (this.chatConnection?.state === HubConnectionState.Connected) {
+      await this.chatConnection.invoke('MarkDirectConversationAsRead', directConversationId);
     }
   }
 
-  // تحويل SignalRNotification إلى NotificationDto
-  public convertToNotificationDto(signalRNotification: SignalRNotification): NotificationDto {
-    return {
-      id: signalRNotification.id,
-      title: signalRNotification.title,
-      message: signalRNotification.message,
-      type: signalRNotification.type as NotificationType,
-      isRead: signalRNotification.isRead,
-      createdAt: new Date(signalRNotification.createdAt),
-      data: signalRNotification.data
-    };
+  // Notification Methods
+  async joinUserGroup(userId: string): Promise<void> {
+    if (this.notificationConnection?.state === HubConnectionState.Connected) {
+      await this.notificationConnection.invoke('JoinUserGroup', userId);
+    }
   }
 
-  // تحويل مصفوفة SignalRNotification إلى NotificationDto
-  public convertToNotificationDtoArray(signalRNotifications: SignalRNotification[]): NotificationDto[] {
-    return signalRNotifications.map(notification => this.convertToNotificationDto(notification));
+  async leaveUserGroup(userId: string): Promise<void> {
+    if (this.notificationConnection?.state === HubConnectionState.Connected) {
+      await this.notificationConnection.invoke('LeaveUserGroup', userId);
+    }
+  }
+
+  // Connection Management
+  async reconnectChat(): Promise<void> {
+    if (this.chatConnection?.state === HubConnectionState.Disconnected) {
+      await this.chatConnection.start();
+    }
+  }
+
+  async reconnectNotifications(): Promise<void> {
+    if (this.notificationConnection?.state === HubConnectionState.Disconnected) {
+      await this.notificationConnection.start();
+    }
+  }
+
+  private stopConnections() {
+    if (this.chatConnection) {
+      this.chatConnection.stop();
+    }
+    if (this.notificationConnection) {
+      this.notificationConnection.stop();
+    }
+  }
+
+  // Connection Status
+  get isChatConnected(): boolean {
+    return this.chatConnection?.state === HubConnectionState.Connected;
+  }
+
+  get isNotificationConnected(): boolean {
+    return this.notificationConnection?.state === HubConnectionState.Connected;
+  }
+
+  get chatConnectionState(): HubConnectionState | undefined {
+    return this.chatConnection?.state;
+  }
+
+  get notificationConnectionState(): HubConnectionState | undefined {
+    return this.notificationConnection?.state;
   }
 }

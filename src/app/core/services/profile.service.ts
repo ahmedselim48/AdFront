@@ -1,81 +1,60 @@
-import { Injectable, inject } from '@angular/core';
-import { ApiClientService } from './api-client.service';
-import { Observable, BehaviorSubject } from 'rxjs';
-import { tap } from 'rxjs/operators';
-import { UserProfile, UpdateProfileRequest, SubscriptionStatus } from '../../models/auth.models';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { GeneralResponse } from '../../models/common.models';
+import { ProfileDto, ProfileUpdateDto, UserDashboardDto, SubscriptionStatusDto } from '../../models/profile.models';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class ProfileService {
-  private api = inject(ApiClientService);
-  
-  private currentProfileSubject = new BehaviorSubject<UserProfile | null>(null);
-  currentProfile$ = this.currentProfileSubject.asObservable();
+  private readonly apiUrl = `${environment.apiUrl}/api/account`;
 
-  // ===== PROFILE MANAGEMENT =====
+  constructor(private http: HttpClient) {}
 
-  /**
-   * Get current user profile
-   */
-  getProfile(): Observable<UserProfile> {
-    return this.api.get$<UserProfile>('/Account/profile').pipe(
-      tap(profile => this.currentProfileSubject.next(profile))
-    );
+  // Get user profile
+  getProfile(): Observable<GeneralResponse<ProfileDto>> {
+    return this.http.get<GeneralResponse<ProfileDto>>(`${this.apiUrl}/profile`);
   }
 
-  /**
-   * Update user profile
-   */
-  updateProfile(request: UpdateProfileRequest): Observable<UserProfile> {
-    return this.api.put$<UserProfile>('/Account/profile', request).pipe(
-      tap(profile => this.currentProfileSubject.next(profile))
-    );
+  // Update user profile
+  updateProfile(profileUpdate: ProfileUpdateDto): Observable<GeneralResponse<ProfileDto>> {
+    return this.http.put<GeneralResponse<ProfileDto>>(`${this.apiUrl}/profile`, profileUpdate);
   }
 
-  /**
-   * Get user subscription status
-   */
-  getSubscriptionStatus(): Observable<SubscriptionStatus> {
-    return this.api.get$<SubscriptionStatus>('/Account/subscription-status');
+  // Get user dashboard data
+  getDashboard(): Observable<GeneralResponse<UserDashboardDto>> {
+    return this.http.get<GeneralResponse<UserDashboardDto>>(`${this.apiUrl}/dashboard`);
   }
 
-  /**
-   * Upload profile image
-   */
-  uploadProfileImage(file: File): Observable<{ profileImageUrl: string }> {
+  // Get subscription status
+  getSubscriptionStatus(): Observable<{ success: boolean; data: SubscriptionStatusDto }> {
+    return this.http.get<{ success: boolean; data: SubscriptionStatusDto }>(`${this.apiUrl}/subscription-status`);
+  }
+
+  // Upload profile photo
+  uploadProfilePhoto(imageFile: File): Observable<GeneralResponse<ProfileDto>> {
     const formData = new FormData();
-    formData.append('file', file);
-    
-    return this.api.post$<{ profileImageUrl: string }>('/Account/upload-profile-image', formData);
+    formData.append('imageFile', imageFile);
+    return this.http.post<GeneralResponse<ProfileDto>>(`${this.apiUrl}/profile/upload-photo`, formData);
   }
 
-  /**
-   * Delete profile image
-   */
-  deleteProfileImage(): Observable<boolean> {
-    return this.api.delete$<boolean>('/Account/profile-image');
+  // Change password
+  changePassword(currentPassword: string, newPassword: string): Observable<GeneralResponse<boolean>> {
+    return this.http.post<GeneralResponse<boolean>>(`${this.apiUrl}/change-password`, {
+      currentPassword,
+      newPassword
+    });
   }
 
-  // ===== UTILITY METHODS =====
-
-  /**
-   * Get current profile from memory
-   */
-  getCurrentProfile(): UserProfile | null {
-    return this.currentProfileSubject.value;
+  // Upload profile image (alias for uploadProfilePhoto)
+  uploadProfileImage(imageFile: File): Observable<GeneralResponse<ProfileDto>> {
+    return this.uploadProfilePhoto(imageFile);
   }
 
-  /**
-   * Clear profile data
-   */
-  clearProfile(): void {
-    this.currentProfileSubject.next(null);
-  }
-
-  /**
-   * Refresh profile data
-   */
-  refreshProfile(): Observable<UserProfile> {
-    return this.getProfile();
+  // Delete profile image
+  deleteProfileImage(): Observable<GeneralResponse<boolean>> {
+    return this.http.delete<GeneralResponse<boolean>>(`${this.apiUrl}/profile/photo`);
   }
 }
-

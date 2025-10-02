@@ -1,215 +1,181 @@
 <div class="profile-settings">
   <!-- Loading State -->
   <div *ngIf="isLoading" class="loading-container">
-    <mat-spinner></mat-spinner>
-    <p>جاري تحميل الإعدادات...</p>
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>جاري تحميل البيانات...</p>
   </div>
 
-  <!-- Settings Form -->
+  <!-- Profile Settings Content -->
   <div *ngIf="!isLoading" class="settings-content">
-    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="settings-form">
+    <!-- Profile Image Section -->
+    <mat-card class="profile-image-card">
+      <mat-card-header>
+        <mat-card-title>صورة الملف الشخصي</mat-card-title>
+        <mat-card-subtitle>قم برفع صورة شخصية واضحة</mat-card-subtitle>
+      </mat-card-header>
       
-      <!-- Basic Information -->
-      <mat-card class="settings-card">
-        <mat-card-header>
-          <mat-card-title>المعلومات الأساسية</mat-card-title>
-          <mat-card-subtitle>قم بتحديث معلوماتك الشخصية</mat-card-subtitle>
-        </mat-card-header>
-        
-        <mat-card-content>
-          <div class="form-section">
-            <div class="form-row">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>الاسم الكامل</mat-label>
-                <input matInput formControlName="fullName" placeholder="أدخل اسمك الكامل">
-                <mat-icon matPrefix>
-                  <lucide-icon name="user" size="20"></lucide-icon>
-                </mat-icon>
-                <mat-error *ngIf="profileForm.get('fullName')?.hasError('required')">
-                  الاسم الكامل مطلوب
-                </mat-error>
-                <mat-error *ngIf="profileForm.get('fullName')?.hasError('minlength')">
-                  الاسم يجب أن يكون حرفين على الأقل
-                </mat-error>
-              </mat-form-field>
-            </div>
-
-            <div class="form-row">
-              <mat-form-field appearance="outline" class="half-width">
-                <mat-label>البريد الإلكتروني</mat-label>
-                <input matInput formControlName="email" placeholder="أدخل بريدك الإلكتروني" readonly>
-                <mat-icon matPrefix>
-                  <lucide-icon name="mail" size="20"></lucide-icon>
-                </mat-icon>
-                <mat-hint>لا يمكن تغيير البريد الإلكتروني</mat-hint>
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" class="half-width">
-                <mat-label>رقم الهاتف</mat-label>
-                <input matInput formControlName="phoneNumber" placeholder="أدخل رقم هاتفك">
-                <mat-icon matPrefix>
-                  <lucide-icon name="phone" size="20"></lucide-icon>
-                </mat-icon>
-              </mat-form-field>
-            </div>
-
-            <div class="form-row">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>الموقع</mat-label>
-                <input matInput formControlName="location" placeholder="أدخل موقعك">
-                <mat-icon matPrefix>
-                  <lucide-icon name="map-pin" size="20"></lucide-icon>
-                </mat-icon>
-              </mat-form-field>
-            </div>
-
-            <div class="form-row">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>نبذة شخصية</mat-label>
-                <textarea 
-                  matInput 
-                  formControlName="bio" 
-                  placeholder="اكتب نبذة شخصية عنك"
-                  rows="3">
-                </textarea>
-              </mat-form-field>
+      <mat-card-content>
+        <div class="image-upload-section">
+          <div class="current-image">
+            <img *ngIf="currentUser?.profileImageUrl && !imagePreview" 
+                 [src]="getProfileImageUrl()" 
+                 [alt]="currentUser?.fullName"
+                 class="profile-image">
+            <img *ngIf="imagePreview" 
+                 [src]="imagePreview" 
+                 alt="Preview"
+                 class="profile-image">
+            <div *ngIf="!currentUser?.profileImageUrl && !imagePreview" 
+                 class="image-placeholder">
+              {{ getInitials(currentUser?.fullName || 'U') }}
             </div>
           </div>
-        </mat-card-content>
-      </mat-card>
+          
+          <div class="image-actions">
+            <input #fileInput 
+                   type="file" 
+                   accept="image/*" 
+                   (change)="onImageSelected($event)"
+                   style="display: none;">
+            <button mat-raised-button 
+                    color="primary" 
+                    (click)="fileInput.click()"
+                    [disabled]="isSaving">
+              <lucide-icon name="camera" size="16"></lucide-icon>
+              <span>اختر صورة</span>
+            </button>
+            
+            <button *ngIf="imagePreview" 
+                    mat-raised-button 
+                    color="accent" 
+                    (click)="onUploadImage()"
+                    [disabled]="isSaving">
+              <lucide-icon name="save" size="16"></lucide-icon>
+              <span>رفع الصورة</span>
+            </button>
+            
+            <button *ngIf="imagePreview" 
+                    mat-button 
+                    color="warn" 
+                    (click)="onRemoveImage()"
+                    [disabled]="isSaving">
+              <lucide-icon name="trash-2" size="16"></lucide-icon>
+              <span>إلغاء</span>
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
 
-      <!-- Language & Region -->
-      <mat-card class="settings-card">
-        <mat-card-header>
-          <mat-card-title>اللغة والمنطقة</mat-card-title>
-          <mat-card-subtitle>اختر لغتك المفضلة والمنطقة الزمنية</mat-card-subtitle>
-        </mat-card-header>
-        
-        <mat-card-content>
-          <div class="form-section">
-            <div class="form-row">
-              <mat-form-field appearance="outline" class="half-width">
-                <mat-label>اللغة</mat-label>
-                <mat-select formControlName="language">
-                  <mat-option *ngFor="let lang of languages" [value]="lang.value">
-                    {{ lang.label }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
+    <!-- Profile Information Form -->
+    <mat-card class="profile-form-card">
+      <mat-card-header>
+        <mat-card-title>المعلومات الشخصية</mat-card-title>
+        <mat-card-subtitle>قم بتحديث معلوماتك الشخصية</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <form [formGroup]="profileForm" (ngSubmit)="onSaveProfile()">
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>الاسم الأول</mat-label>
+              <input matInput 
+                     formControlName="firstName"
+                     placeholder="أدخل اسمك الأول">
+              <mat-icon matPrefix>person</mat-icon>
+              <mat-error *ngIf="getFieldError('firstName')">
+                {{ getFieldError('firstName') }}
+              </mat-error>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>الاسم الأخير</mat-label>
+              <input matInput 
+                     formControlName="lastName"
+                     placeholder="أدخل اسمك الأخير">
+              <mat-icon matPrefix>person</mat-icon>
+              <mat-error *ngIf="getFieldError('lastName')">
+                {{ getFieldError('lastName') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
 
-              <mat-form-field appearance="outline" class="half-width">
-                <mat-label>المنطقة الزمنية</mat-label>
-                <mat-select formControlName="timezone">
-                  <mat-option *ngFor="let tz of timezones" [value]="tz.value">
-                    {{ tz.label }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>رقم الهاتف</mat-label>
+              <input matInput 
+                     formControlName="phoneNumber"
+                     placeholder="أدخل رقم هاتفك">
+              <mat-icon matPrefix>phone</mat-icon>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>العنوان</mat-label>
+              <input matInput 
+                     formControlName="address"
+                     placeholder="أدخل عنوانك">
+              <mat-icon matPrefix>location_on</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <div class="form-actions">
+            <button mat-raised-button 
+                    color="primary" 
+                    type="submit"
+                    [disabled]="profileForm.invalid || isSaving">
+              <lucide-icon name="save" size="16"></lucide-icon>
+              <span>حفظ التغييرات</span>
+              <mat-spinner *ngIf="isSaving" diameter="20"></mat-spinner>
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Account Information -->
+    <mat-card class="account-info-card" *ngIf="currentUser">
+      <mat-card-header>
+        <mat-card-title>معلومات الحساب</mat-card-title>
+        <mat-card-subtitle>معلومات إضافية عن حسابك</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="info-grid">
+          <div class="info-item">
+            <lucide-icon name="mail" size="20"></lucide-icon>
+            <div class="info-content">
+              <span class="info-label">البريد الإلكتروني</span>
+              <span class="info-value">{{ currentUser.email }}</span>
             </div>
           </div>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- Social Links -->
-      <mat-card class="settings-card">
-        <mat-card-header>
-          <mat-card-title>الروابط الاجتماعية</mat-card-title>
-          <mat-card-subtitle>أضف روابط حساباتك الاجتماعية</mat-card-subtitle>
-        </mat-card-header>
-        
-        <mat-card-content>
-          <div class="form-section" formGroupName="socialLinks">
-            <div class="form-row">
-              <mat-form-field appearance="outline" class="half-width">
-                <mat-label>تويتر</mat-label>
-                <input matInput formControlName="twitter" placeholder="https://twitter.com/username">
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" class="half-width">
-                <mat-label>إنستغرام</mat-label>
-                <input matInput formControlName="instagram" placeholder="https://instagram.com/username">
-              </mat-form-field>
-            </div>
-
-            <div class="form-row">
-              <mat-form-field appearance="outline" class="half-width">
-                <mat-label>لينكد إن</mat-label>
-                <input matInput formControlName="linkedin" placeholder="https://linkedin.com/in/username">
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" class="half-width">
-                <mat-label>فيسبوك</mat-label>
-                <input matInput formControlName="facebook" placeholder="https://facebook.com/username">
-              </mat-form-field>
+          
+          <div class="info-item">
+            <lucide-icon name="user" size="20"></lucide-icon>
+            <div class="info-content">
+              <span class="info-label">اسم المستخدم</span>
+              <span class="info-value">{{ currentUser.userName }}</span>
             </div>
           </div>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- Notification Preferences -->
-      <mat-card class="settings-card">
-        <mat-card-header>
-          <mat-card-title>تفضيلات الإشعارات</mat-card-title>
-          <mat-card-subtitle>اختر كيف تريد تلقي الإشعارات</mat-card-subtitle>
-        </mat-card-header>
-        
-        <mat-card-content>
-          <div class="form-section" formGroupName="preferences">
-            <div class="preferences-grid">
-              <div class="preference-item">
-                <mat-checkbox formControlName="emailNotifications">
-                  الإشعارات عبر البريد الإلكتروني
-                </mat-checkbox>
-                <p class="preference-description">تلقي إشعارات مهمة عبر البريد الإلكتروني</p>
-              </div>
-
-              <div class="preference-item">
-                <mat-checkbox formControlName="smsNotifications">
-                  الإشعارات عبر الرسائل النصية
-                </mat-checkbox>
-                <p class="preference-description">تلقي إشعارات عاجلة عبر الرسائل النصية</p>
-              </div>
-
-              <div class="preference-item">
-                <mat-checkbox formControlName="pushNotifications">
-                  الإشعارات المنبثقة
-                </mat-checkbox>
-                <p class="preference-description">تلقي إشعارات في المتصفح</p>
-              </div>
-
-              <div class="preference-item">
-                <mat-checkbox formControlName="marketingEmails">
-                  رسائل التسويق
-                </mat-checkbox>
-                <p class="preference-description">تلقي عروض ورسائل تسويقية</p>
-              </div>
-
-              <div class="preference-item">
-                <mat-checkbox formControlName="weeklyDigest">
-                  التلخيص الأسبوعي
-                </mat-checkbox>
-                <p class="preference-description">تلقي ملخص أسبوعي لأنشطتك</p>
-              </div>
+          
+          <div class="info-item">
+            <lucide-icon name="calendar" size="20"></lucide-icon>
+            <div class="info-content">
+              <span class="info-label">تاريخ الانضمام</span>
+              <span class="info-value">{{ formatDate(currentUser.createdAt) }}</span>
             </div>
           </div>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- Action Buttons -->
-      <div class="action-buttons">
-        <button mat-stroked-button type="button" (click)="onReset()" [disabled]="isSaving">
-          إعادة تعيين
-        </button>
-        <button 
-          mat-raised-button 
-          color="primary" 
-          type="submit" 
-          [disabled]="profileForm.invalid || isSaving">
-          <mat-spinner *ngIf="isSaving" diameter="20" class="me-2"></mat-spinner>
-          <lucide-icon *ngIf="!isSaving" name="save" size="18" class="me-2"></lucide-icon>
-          {{ isSaving ? 'جاري الحفظ...' : 'حفظ التغييرات' }}
-        </button>
-      </div>
-    </form>
+          
+          <div class="info-item">
+            <lucide-icon name="shield" size="20"></lucide-icon>
+            <div class="info-content">
+              <span class="info-label">حالة البريد الإلكتروني</span>
+              <span class="info-value" [class.confirmed]="currentUser.isEmailConfirmed">
+                {{ currentUser.isEmailConfirmed ? 'مؤكد' : 'غير مؤكد' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
   </div>
 </div>

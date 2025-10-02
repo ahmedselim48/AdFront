@@ -1,16 +1,33 @@
 <section class="container">
   <h2>{{ 'chat.directChat' | t }}</h2>
-  <div class="msgs card" *ngIf="!loading; else loadTpl">
-    <div class="msg" *ngFor="let m of messages">
-      <div class="bubble">{{ m.content }}</div>
+  <div class="msgs card" *ngIf="!loading; else loadTpl" #scrollContainer>
+    <div class="msg" *ngFor="let m of messages" [class.me]="m.senderId === meId" [class.them]="m.senderId !== meId">
+      <div class="bubble">
+        <span *ngIf="getMessageContent(m) && getMessageContent(m) !== 'رسالة فارغة'; else emptyMessage">
+          {{ getMessageContent(m) }}
+        </span>
+        <ng-template #emptyMessage>
+          <em class="empty-message">رسالة فارغة</em>
+        </ng-template>
+      </div>
       <small class="time">{{ m.createdAt | date:'short' }}</small>
     </div>
+    <div class="typing" *ngIf="isTyping"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
   </div>
   <ng-template #loadTpl>
     <div class="skeleton" style="height:160px;border-radius:12px"></div>
   </ng-template>
-  <form [formGroup]="form" (ngSubmit)="send()" class="row mt-3">
-    <input [placeholder]="('chat.typeMessage' | t)" formControlName="content">
-    <button class="button" type="submit" [disabled]="form.invalid">{{ 'chat.send' | t }}</button>
+  <form [formGroup]="form" (keydown)="onKeydown($event)" (ngSubmit)="send()" class="row mt-3">
+    <input [placeholder]="('chat.typeMessage' | t)" 
+           formControlName="content"
+           class="message-input"
+           autocomplete="off">
+    <button class="button send-button" 
+            type="submit" 
+            [disabled]="form.invalid || form.get('content')?.value?.trim() === ''"
+            matTooltip="إرسال الرسالة">
+      <lucide-icon name="send" size="16"></lucide-icon>
+      <span>{{ 'chat.send' | t }}</span>
+    </button>
   </form>
 </section>

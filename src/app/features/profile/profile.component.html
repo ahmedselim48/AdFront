@@ -1,350 +1,57 @@
-<section class="profile-wrap container">
-  <!-- Profile Header -->
-  <div class="profile-header">
-    <div class="profile-card card glass">
-      <div class="profile-info">
-        <div class="avatar-container">
-        <div class="avatar" aria-hidden="true">
-          <img *ngIf="imagePreview" 
-               [src]="imagePreview" 
-               [alt]="form.value.firstName" 
-               class="profile-avatar-img"
-               (error)="onImageError($event)">
-          <span *ngIf="!imagePreview">{{ (form.value.firstName || 'U').slice(0,1) }}</span>
+<div class="profile-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>جاري تحميل البيانات...</p>
+  </div>
+
+  <!-- Profile Content -->
+  <div *ngIf="!isLoading" class="profile-content">
+    <!-- Left Sidebar Navigation -->
+    <div class="sidebar">
+      <!-- Navigation Menu -->
+      <nav class="sidebar-nav">
+        <ul class="nav-list">
+          <li class="nav-item" 
+              *ngFor="let item of menuItems; let i = index"
+              [class.active]="activeTab === i"
+              (click)="onTabChange(i)">
+            <a class="nav-link" [routerLink]="item.route" [title]="item.label">
+              <lucide-icon [name]="item.icon" size="20" class="nav-icon"></lucide-icon>
+              <span class="nav-badge" *ngIf="item.badge">{{ item.badge }}</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+      <!-- Content Header -->
+      <div class="content-header">
+        <div class="header-info">
+          <h1 class="page-title">{{ getCurrentPageTitle() }}</h1>
+          <p class="page-description">{{ getCurrentPageDescription() }}</p>
         </div>
-          <div class="avatar-actions">
-            <input type="file" #fileInput accept="image/*" (change)="onImageSelected($event)" style="display: none;">
-            <button type="button" (click)="fileInput.click()" class="btn-icon" [disabled]="uploadingImage">
-              <i class="icon">📷</i>
-            </button>
-            <button type="button" (click)="removeImage()" class="btn-icon danger" *ngIf="imagePreview || selectedImage" [disabled]="uploadingImage">
-              <i class="icon">🗑️</i>
-            </button>
-            <button type="button" (click)="uploadImage()" class="btn-upload" *ngIf="selectedImage" [disabled]="uploadingImage">
-              <span *ngIf="uploadingImage" class="loading-spinner"></span>
-              {{ uploadingImage ? 'جاري الرفع...' : 'رفع الصورة' }}
-            </button>
-          </div>
-        </div>
-        <div class="info">
-          <h2 class="name">{{ (form.value.firstName + ' ' + form.value.lastName) || '—' }}</h2>
-          <div class="contact">
-            <span class="pill email">{{ form.value.email || '—' }}</span>
-            <span class="pill plan" [class]="'plan-' + form.value.plan">{{ form.value.plan | uppercase }}</span>
-            <span class="pill phone" *ngIf="form.value.phoneNumber">{{ form.value.phoneNumber }}</span>
-          </div>
-          <p class="bio">{{ 'Create, manage, and optimize your ads with AI assistance.' }}</p>
-          <div class="account-status" *ngIf="dashboardData">
-            <span class="status-badge" [class.confirmed]="isEmailConfirmed">
-              {{ isEmailConfirmed ? 'البريد الإلكتروني مؤكد' : 'البريد الإلكتروني غير مؤكد' }}
-            </span>
-            <span class="status-badge member-since" *ngIf="memberSince">
-              عضو منذ {{ memberSince | date:'short' }}
-            </span>
-          </div>
+        <div class="header-actions">
+          <button class="action-btn secondary" (click)="onRefresh()">
+            <lucide-icon name="refresh-cw" size="16"></lucide-icon>
+            <span>تحديث</span>
+          </button>
         </div>
       </div>
-      
-      <!-- Header Quick Actions -->
-     <div class="header-actions d-flex align-items-center gap-3">
-  <a routerLink="/ads" class="h-action d-flex align-items-center gap-1">
-    <span class="icon">📢</span>
-    <span>{{ 'nav.ads' | t }}</span>
-  </a>
 
-  <a routerLink="/chat" class="h-action d-flex align-items-center gap-1">
-    <span class="icon">💬</span>
-    <span>{{ 'nav.chat' | t }}</span>
-    <span class="badge bg-danger" *ngIf="unreadMessages > 0">{{ unreadMessages }}</span>
-  </a>
+      <!-- Router Outlet for Child Components -->
+      <div class="content-body">
+        <router-outlet></router-outlet>
+      </div>
+    </div>
+  </div>
 
-  <a routerLink="/auth/change-password" class="h-action d-flex align-items-center gap-1">
-    <span class="icon">🔒</span>
-    <span>{{ 'auth.changePassword' | t }}</span>
-  </a>
-
-  <!-- زرار + -->
-  <button class="btn ad-btn rounded-circle shadow-sm d-flex align-items-center justify-content-center"
-          style="width: 40px; height: 40px;"
-          (click)="goToAddAd()">
-    <i class="bi bi-plus-lg"></i>
-  </button>
+<!-- Loading Overlay -->
+<div class="loading-overlay" *ngIf="isLoading">
+  <div class="loading-spinner">
+    <div class="spinner"></div>
+    <span>جاري التحميل...</span>
+  </div>
 </div>
-
-
-      <!-- Profile Stats -->
-      <div class="profile-stats">
-        <div class="stat-item">
-          <div class="stat-number">{{ totalAds }}</div>
-          <div class="stat-label">{{ 'profile.totalAds' | t }}</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-number">{{ activeAds }}</div>
-          <div class="stat-label">{{ 'profile.activeAds' | t }}</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-number">{{ totalViews }}</div>
-          <div class="stat-label">{{ 'profile.totalViews' | t }}</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-number">{{ totalClicks }}</div>
-          <div class="stat-label">{{ 'profile.totalClicks' | t }}</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-number">{{ unreadMessages }}</div>
-          <div class="stat-label">{{ 'profile.unreadMessages' | t }}</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Profile Content Tabs -->
-  <div class="profile-content">
-    <div class="tabs">
-      <button class="tab-button" [class.active]="activeTab === 'profile'" (click)="setActiveTab('profile')">
-        <i class="icon">👤</i>
-        {{ 'profile.profile' | t }}
-      </button>
-      <button class="tab-button" [class.active]="activeTab === 'ads'" (click)="setActiveTab('ads')">
-        <i class="icon">📊</i>
-        {{ 'profile.myAds' | t }}
-      </button>
-      <button class="tab-button" [class.active]="activeTab === 'chat'" (click)="setActiveTab('chat')">
-        <i class="icon">💬</i>
-        {{ 'profile.chat' | t }}
-        <span class="badge" *ngIf="unreadMessages > 0">{{ unreadMessages }}</span>
-      </button>
-    </div>
-
-    <!-- Profile Tab -->
-    <div class="tab-content" *ngIf="activeTab === 'profile'">
-      <div class="card glass">
-        <h3>{{ 'profile.editProfile' | t }}</h3>
-        <form [formGroup]="form" (ngSubmit)="save()" class="edit-form">
-          <div class="form-row">
-            <label>{{ 'profile.firstName' | t }}
-              <input type="text" formControlName="firstName" class="field-input" 
-                     [class]="'field-input ' + getFieldStatus('firstName')"
-                     placeholder="الاسم الأول">
-              <div class="field-error" *ngIf="hasFieldError('firstName')">{{ getFieldError('firstName') }}</div>
-            </label>
-            <label>{{ 'profile.lastName' | t }}
-              <input type="text" formControlName="lastName" class="field-input" 
-                     [class]="'field-input ' + getFieldStatus('lastName')"
-                     placeholder="الاسم الأخير">
-              <div class="field-error" *ngIf="hasFieldError('lastName')">{{ getFieldError('lastName') }}</div>
-            </label>
-          </div>
-          <div class="form-row">
-            <label>{{ 'common.email' | t }}
-              <input type="email" formControlName="email" class="field-input" [attr.disabled]="true">
-              <small class="field-hint">{{ 'profile.emailCannotChange' | t }}</small>
-            </label>
-            <label>{{ 'profile.phoneNumber' | t }}
-              <input type="tel" formControlName="phoneNumber" class="field-input" 
-                     [class]="'field-input ' + getFieldStatus('phoneNumber')"
-                     placeholder="رقم الهاتف">
-              <div class="field-error" *ngIf="hasFieldError('phoneNumber')">{{ getFieldError('phoneNumber') }}</div>
-            </label>
-          </div>
-          <div class="form-row">
-            <label>{{ 'profile.address' | t }}
-              <textarea formControlName="address" class="field-input" 
-                        [class]="'field-input ' + getFieldStatus('address')"
-                        placeholder="العنوان" rows="3"></textarea>
-              <div class="field-error" *ngIf="hasFieldError('address')">{{ getFieldError('address') }}</div>
-            </label>
-            <label>{{ 'profile.plan' | t }}
-              <select formControlName="plan" class="field-input">
-                <option value="free">{{ 'plan.free' | t }}</option>
-                <option value="pro">{{ 'plan.pro' | t }}</option>
-                <option value="enterprise">{{ 'plan.enterprise' | t }}</option>
-              </select>
-            </label>
-          </div>
-          <div class="form-row">
-            <label>{{ 'profile.accountStatus' | t }}
-              <div class="status-display">
-                <span class="status-item" [class.confirmed]="isEmailConfirmed">
-                  <i class="icon">{{ isEmailConfirmed ? '✓' : '✗' }}</i>
-                  {{ isEmailConfirmed ? 'البريد الإلكتروني مؤكد' : 'البريد الإلكتروني غير مؤكد' }}
-                </span>
-                <span class="status-item member-since" *ngIf="memberSince">
-                  <i class="icon">📅</i>
-                  عضو منذ {{ memberSince | date:'short' }}
-                </span>
-              </div>
-            </label>
-          </div>
-          <div class="form-actions">
-            <button type="submit" class="button primary" [disabled]="form.invalid || saving">
-              <span *ngIf="saving" class="loading-spinner"></span>
-              {{ saving ? ('common.saving' | t) : ('common.save' | t) }}
-            </button>
-            <a routerLink="/auth/change-password" class="button secondary">{{ 'auth.changePassword' | t }}</a>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Ads Tab in 2-column layout with chat sidebar -->
-    <div class="tab-content" *ngIf="activeTab === 'ads'">
-      <div class="grid-12">
-        <div class="col-span-8">
-          <div class="ads-section">
-            <div class="ads-header">
-              <h3>{{ 'profile.myAds' | t }}</h3>
-              <div class="actions">
-                <div class="filter-tabs" role="tablist">
-                  <button class="filter-tab" [class.active]="filter==='all'" (click)="setFilter('all')">
-                    {{ 'profile.all' | t }} ({{counts['all']}})
-                  </button>
-                  <button class="filter-tab" [class.active]="filter==='draft'" (click)="setFilter('draft')">
-                    {{ 'profile.draft' | t }} ({{counts['draft']}})
-                  </button>
-                  <button class="filter-tab" [class.active]="filter==='scheduled'" (click)="setFilter('scheduled')">
-                    {{ 'profile.scheduled' | t }} ({{counts['scheduled']}})
-                  </button>
-                  <button class="filter-tab" [class.active]="filter==='published'" (click)="setFilter('published')">
-                    {{ 'profile.published' | t }} ({{counts['published']}})
-                  </button>
-                </div>
-                <div class="view-controls">
-                  <button class="view-btn" [class.active]="viewMode==='grid'" (click)="setView('grid')" title="Grid View">
-                    <i class="icon">⊞</i>
-                  </button>
-                  <button class="view-btn" [class.active]="viewMode==='list'" (click)="setView('list')" title="List View">
-                    <i class="icon">☰</i>
-                  </button>
-                </div>
-                <a routerLink="/ads" class="button primary">
-                  <i class="icon">+</i>
-                  {{ 'profile.newAd' | t }}
-                </a>
-              </div>
-            </div>
-
-            <div [ngClass]="{ 'ads-grid': viewMode==='grid', 'ads-list': viewMode==='list' }" *ngIf="!loadingAds; else loadingAdsTpl">
-              <article class="ad-card" *ngFor="let ad of filteredAds">
-                <header class="ad-head">
-                  <span class="ad-icon">📢</span>
-                  <h4>{{ ad.title }}</h4>
-                  <span class="status" [attr.data-status]="ad.status">{{ ad.status }}</span>
-                </header>
-                <div class="ad-body">
-                  <p class="desc">{{ ad.description }}</p>
-                  <div class="price">{{ ad.price | currency }}</div>
-                  <div class="location">{{ ad.location }}</div>
-                </div>
-                <footer class="ad-foot">
-                  <span class="pill" *ngIf="ad.categoryName">#{{ad.categoryName}}</span>
-                  <span class="pill" *ngIf="ad.price">{{ad.price | number:'1.0-0'}} {{ 'profile.currency' | t }}</span>
-                  <span class="flex-spacer"></span>
-                  <a class="button secondary" [routerLink]="['/chat']">
-                    <i class="icon">💬</i>
-                    {{ 'profile.chat' | t }}
-                  </a>
-                  <button type="button" class="button ghost" (click)="editAd(ad)">
-                    <i class="icon">✏️</i>
-                    {{ 'common.edit' | t }}
-                  </button>
-                  <button type="button" class="button danger" (click)="deleteAd(ad)">
-                    <i class="icon">🗑️</i>
-                    {{ 'common.delete' | t }}
-                  </button>
-                </footer>
-              </article>
-            </div>
-
-            <ng-template #loadingAdsTpl>
-              <div class="ads-grid">
-                <article class="ad-card" *ngFor="let _ of [0,1,2]">
-                  <div class="skeleton" style="height:96px;border-radius:12px"></div>
-                </article>
-              </div>
-            </ng-template>
-          </div>
-        </div>
-        <aside class="col-span-4">
-          <div class="chat-section">
-            <div class="chat-header">
-              <h3>{{ 'profile.recentChats' | t }}</h3>
-              <a routerLink="/chat" class="button primary">
-                <i class="icon">💬</i>
-                {{ 'profile.viewAllChats' | t }}
-              </a>
-            </div>
-            <div class="chat-list" *ngIf="!loadingChats; else loadingChatsTplSide">
-              <div class="chat-item" *ngFor="let conversation of recentChats" [routerLink]="['/chat', conversation.id]">
-                <div class="chat-avatar">{{ (conversation.adTitle || 'C').slice(0,1) }}</div>
-                <div class="chat-info">
-                  <div class="chat-title">{{ conversation.adTitle || 'Untitled Chat' }}</div>
-                  <div class="chat-preview">{{ conversation.lastMessage || 'No messages yet' }}</div>
-                </div>
-                <div class="chat-meta">
-                  <div class="chat-time">{{ conversation.lastMessageAt | date:'short' }}</div>
-                  <span class="unread-badge" *ngIf="conversation.unreadCount > 0">{{ conversation.unreadCount }}</span>
-                </div>
-              </div>
-            </div>
-            <ng-template #loadingChatsTplSide>
-              <div class="chat-list">
-                <div class="chat-item" *ngFor="let _ of [0,1]">
-                  <div class="skeleton avatar"></div>
-                  <div class="skeleton content"></div>
-                </div>
-              </div>
-            </ng-template>
-          </div>
-        </aside>
-      </div>
-    </div>
-
-    <!-- Chat Tab -->
-    <div class="tab-content" *ngIf="activeTab === 'chat'">
-      <div class="chat-section">
-        <div class="chat-header">
-          <h3>{{ 'profile.recentChats' | t }}</h3>
-          <a routerLink="/chat" class="button primary">
-            <i class="icon">💬</i>
-            {{ 'profile.viewAllChats' | t }}
-          </a>
-        </div>
-        
-        <div class="chat-list" *ngIf="!loadingChats; else loadingChatsTpl">
-          <div class="chat-item" *ngFor="let conversation of recentChats" [routerLink]="['/chat', conversation.id]">
-            <div class="chat-avatar">
-              {{ (conversation.adTitle || 'C').slice(0,1) }}
-            </div>
-            <div class="chat-info">
-              <div class="chat-title">{{ conversation.adTitle || 'Untitled Chat' }}</div>
-              <div class="chat-preview">{{ conversation.lastMessage || 'No messages yet' }}</div>
-            </div>
-            <div class="chat-meta">
-              <div class="chat-time">{{ conversation.lastMessageAt | date:'short' }}</div>
-              <span class="unread-badge" *ngIf="conversation.unreadCount > 0">
-                {{ conversation.unreadCount }}
-              </span>
-            </div>
-          </div>
-          
-          <div class="empty-state" *ngIf="recentChats.length === 0">
-            <div class="empty-icon">💬</div>
-            <h4>{{ 'profile.noChats' | t }}</h4>
-            <p>{{ 'profile.noChatsDescription' | t }}</p>
-            <a routerLink="/chat" class="button primary">{{ 'profile.startChat' | t }}</a>
-          </div>
-        </div>
-        
-        <ng-template #loadingChatsTpl>
-          <div class="chat-list">
-            <div class="chat-item" *ngFor="let _ of [0,1,2]">
-              <div class="skeleton avatar"></div>
-              <div class="skeleton content"></div>
-            </div>
-          </div>
-        </ng-template>
-      </div>
-    </div>
-  </div>
-</section>

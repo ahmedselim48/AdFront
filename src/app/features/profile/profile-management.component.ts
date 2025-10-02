@@ -521,13 +521,15 @@ export class ProfileManagementComponent implements OnInit, OnDestroy {
     this.profileService.getProfile()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (profile) => {
-          this.profile = profile;
-          this.profileForm.patchValue({
-            firstName: profile.firstName,
-            lastName: profile.lastName,
-            phoneNumber: profile.phoneNumber || ''
-          });
+        next: (response) => {
+          if (response && response.success && response.data) {
+            this.profile = response.data;
+            this.profileForm.patchValue({
+              firstName: response.data.firstName,
+              lastName: response.data.lastName,
+              phoneNumber: response.data.phoneNumber || ''
+            });
+          }
           this.loading = false;
         },
         error: (error) => {
@@ -542,8 +544,10 @@ export class ProfileManagementComponent implements OnInit, OnDestroy {
     this.profileService.getSubscriptionStatus()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (status) => {
-          this.subscriptionStatus = status;
+        next: (response) => {
+          if (response && response.success && response.data) {
+            this.subscriptionStatus = response.data;
+          }
         },
         error: (error) => {
           console.error('Subscription status load error:', error);
@@ -567,8 +571,10 @@ export class ProfileManagementComponent implements OnInit, OnDestroy {
     this.profileService.updateProfile(updateRequest)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (updatedProfile) => {
-          this.profile = updatedProfile;
+        next: (response) => {
+          if (response && response.success && response.data) {
+            this.profile = response.data;
+          }
           this.updating = false;
           this.success = 'تم تحديث الملف الشخصي بنجاح';
         },
@@ -597,13 +603,13 @@ export class ProfileManagementComponent implements OnInit, OnDestroy {
     this.profileService.uploadProfileImage(file)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (response) => {
-          if (this.profile) {
-            this.profile.profileImageUrl = response.profileImageUrl;
+        next: (response: any) => {
+          if (response && response.success && response.data && this.profile) {
+            this.profile.profileImageUrl = response.data.profileImageUrl;
           }
           this.success = 'تم تحديث صورة الملف الشخصي بنجاح';
         },
-        error: (error) => {
+        error: (error: any) => {
           this.error = 'فشل في تحديث صورة الملف الشخصي';
           console.error('Image upload error:', error);
         }
@@ -620,7 +626,7 @@ export class ProfileManagementComponent implements OnInit, OnDestroy {
           }
           this.success = 'تم حذف صورة الملف الشخصي بنجاح';
         },
-        error: (error) => {
+        error: (error: any) => {
           this.error = 'فشل في حذف صورة الملف الشخصي';
           console.error('Image delete error:', error);
         }

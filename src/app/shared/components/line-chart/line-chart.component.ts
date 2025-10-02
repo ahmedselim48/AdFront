@@ -41,6 +41,7 @@ export class LineChartComponent {
   }
 
   pathFor(values: number[]): string {
+    if (!values || values.length === 0) return '';
     return values.map((v, i) => `${i === 0 ? 'M' : 'L'} ${this.x(i)} ${this.y(v)}`).join(' ');
   }
 
