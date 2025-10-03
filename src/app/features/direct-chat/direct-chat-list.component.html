@@ -1,23 +1,108 @@
-<section class="container">
-  <h2>{{ 'chat.directChat' | t }}</h2>
-  
-  <div *ngIf="loading" class="skeleton" style="height:60px;border-radius:12px"></div>
+<div class="chat-list-container">
+  <!-- Header -->
+  <div class="list-header">
+    <h1 class="page-title">المحادثات</h1>
+    <div class="header-actions">
+      <button class="action-button" matTooltip="بحث في المحادثات">
+        <lucide-icon name="search" size="20"></lucide-icon>
+      </button>
+      <button class="action-button" matTooltip="إعدادات">
+        <lucide-icon name="settings" size="20"></lucide-icon>
+      </button>
+    </div>
+  </div>
 
-  <ul class="list">
-    <li *ngFor="let c of conversations" class="card item">
-      <a [routerLink]="['/chat', c.id]" class="thread">
-        <img *ngIf="c.otherImageUrl" [src]="c.otherImageUrl" alt="avatar" class="avatar" />
-        <div class="meta">
-          <div class="top">
-            <span class="name">{{ c.otherName }}</span>
-            <small class="time">{{ c.lastAt | date:'short' }}</small>
-          </div>
-          <div class="bottom">
-            <span class="last">{{ c.lastMessage || ('chat.noMessages' | t) }}</span>
-            <span *ngIf="c.unreadCount > 0" class="badge">{{ c.unreadCount }}</span>
-          </div>
+  <!-- Search Bar -->
+  <div class="search-container">
+    <div class="search-input-wrapper">
+      <lucide-icon name="search" size="18" class="search-icon"></lucide-icon>
+      <input 
+        type="text" 
+        placeholder="البحث في المحادثات..." 
+        class="search-input"
+        [(ngModel)]="searchTerm"
+        (input)="onSearchChange($event)">
+    </div>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="filter-tabs">
+    <button 
+      class="filter-tab" 
+      [class.active]="!showUnreadOnly"
+      (click)="showUnreadOnly = false">
+      جميع المحادثات
+    </button>
+    <button 
+      class="filter-tab" 
+      [class.active]="showUnreadOnly"
+      (click)="showUnreadOnly = true">
+      غير المقروءة
+      <span *ngIf="totalUnreadCount > 0" class="unread-count">{{ totalUnreadCount }}</span>
+    </button>
+  </div>
+
+  <!-- Conversations List -->
+  <div class="conversations-container">
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-state">
+      <div class="skeleton-conversation" *ngFor="let i of [1,2,3,4,5]">
+        <div class="skeleton-avatar"></div>
+        <div class="skeleton-content">
+          <div class="skeleton-name"></div>
+          <div class="skeleton-message"></div>
         </div>
-      </a>
-    </li>
-  </ul>
-</section>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && filteredConversations.length === 0" class="empty-state">
+      <div class="empty-icon">
+        <lucide-icon name="message-circle" size="48"></lucide-icon>
+      </div>
+      <h3>لا توجد محادثات</h3>
+      <p *ngIf="!searchTerm && !showUnreadOnly">ابدأ محادثة جديدة مع المستخدمين</p>
+      <p *ngIf="searchTerm">لم يتم العثور على محادثات تطابق البحث</p>
+      <p *ngIf="showUnreadOnly">جميع المحادثات مقروءة</p>
+    </div>
+
+    <!-- Conversations -->
+    <div *ngIf="!loading && filteredConversations.length > 0" class="conversations-list">
+      <div 
+        *ngFor="let c of filteredConversations" 
+        class="conversation-item"
+        [class.unread]="c.unreadCount > 0"
+        [class.selected]="selectedConversationId === c.id">
+        
+        <a [routerLink]="['/direct-chat', c.id]" class="conversation-link">
+          <div class="conversation-avatar">
+            <img *ngIf="c.otherImageUrl" [src]="c.otherImageUrl" alt="avatar" class="avatar" />
+            <div *ngIf="!c.otherImageUrl" class="avatar-placeholder">
+              <lucide-icon name="user" size="20"></lucide-icon>
+            </div>
+            <div class="online-indicator" [class.online]="c.isOnline"></div>
+          </div>
+          
+          <div class="conversation-content">
+            <div class="conversation-header">
+              <h3 class="conversation-name">{{ c.otherName }}</h3>
+              <span class="conversation-time">{{ formatTime(c.lastAt) }}</span>
+            </div>
+            
+            <div class="conversation-preview">
+              <p class="last-message" [class.unread]="c.unreadCount > 0">
+                {{ getMessageContent(c.lastMessage) }}
+              </p>
+              <div class="conversation-meta">
+                <span *ngIf="c.unreadCount > 0" class="unread-badge">{{ c.unreadCount }}</span>
+                <div class="message-status" *ngIf="c.lastMessage">
+                  <lucide-icon name="check-circle" size="12" *ngIf="c.isLastMessageFromMe"></lucide-icon>
+                </div>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

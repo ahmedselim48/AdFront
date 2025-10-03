@@ -148,4 +148,16 @@ export class MessagesService implements OnDestroy {
   async markDirectConversationAsReadViaSignalR(conversationId: string): Promise<void> {
     await this.signalRService.markDirectConversationAsRead(conversationId);
   }
+
+  // Edit message
+  editMessage(messageId: string, content: string): Observable<GeneralResponse<ChatMessageDto>> {
+    return this.http.put<GeneralResponse<ChatMessageDto>>(`${this.apiUrl}/messages/${messageId}`, {
+      content: content
+    });
+  }
+
+  // Delete message
+  deleteMessage(messageId: string): Observable<GeneralResponse<boolean>> {
+    return this.http.delete<GeneralResponse<boolean>>(`${this.apiUrl}/messages/${messageId}`);
+  }
 }

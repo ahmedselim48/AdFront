@@ -35,7 +35,6 @@
     "lookForConfirmationEmail": "Look for a confirmation email from HarajAI",
     "clickConfirmationLink": "Click the confirmation link in the email",
     "returnToLogin": "Return to login page after confirmation",
-    "resendConfirmation": "Resend Confirmation",
     "didntReceiveEmail": "Didn't receive the email?",
     "checkSpamFolder": "Check your spam folder"
   },
@@ -75,5 +74,23 @@
     "daysRemaining": "{days} days remaining",
     "expiresOn": "Expires on {date}",
     "upgradeSubscription": "Upgrade Subscription"
+  },
+  "chat": {
+    "directChat": "Messages",
+    "typeMessage": "Type a message...",
+    "send": "Send",
+    "noMessages": "No messages",
+    "startConversation": "Start Conversation",
+    "searchConversations": "Search conversations...",
+    "allConversations": "All Conversations",
+    "unreadConversations": "Unread",
+    "noConversations": "No conversations",
+    "noConversationsFound": "No conversations found matching search",
+    "allRead": "All conversations are read",
+    "online": "Online now",
+    "lastSeen": "Last seen",
+    "yesterday": "Yesterday",
+    "today": "Today",
+    "now": "Now"
   }
 }

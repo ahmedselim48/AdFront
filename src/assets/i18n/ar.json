@@ -35,7 +35,6 @@
     "lookForConfirmationEmail": "ابحث عن رسالة التأكيد من HarajAI",
     "clickConfirmationLink": "انقر على رابط التأكيد في الرسالة",
     "returnToLogin": "عد إلى صفحة تسجيل الدخول بعد التأكيد",
-    "resendConfirmation": "إعادة إرسال التأكيد",
     "didntReceiveEmail": "لم تستلم الرسالة؟",
     "checkSpamFolder": "تحقق من مجلد الرسائل المزعجة (Spam)"
   },
@@ -75,5 +74,23 @@
     "daysRemaining": "متبقي {days} يوم",
     "expiresOn": "ينتهي في {date}",
     "upgradeSubscription": "ترقية الاشتراك"
+  },
+  "chat": {
+    "directChat": "المحادثات",
+    "typeMessage": "اكتب رسالة...",
+    "send": "إرسال",
+    "noMessages": "لا توجد رسائل",
+    "startConversation": "ابدأ المحادثة",
+    "searchConversations": "البحث في المحادثات...",
+    "allConversations": "جميع المحادثات",
+    "unreadConversations": "غير المقروءة",
+    "noConversations": "لا توجد محادثات",
+    "noConversationsFound": "لم يتم العثور على محادثات تطابق البحث",
+    "allRead": "جميع المحادثات مقروءة",
+    "online": "متصل الآن",
+    "lastSeen": "آخر ظهور منذ",
+    "yesterday": "أمس",
+    "today": "اليوم",
+    "now": "الآن"
   }
 }

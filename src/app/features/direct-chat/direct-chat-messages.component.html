@@ -1,33 +1,206 @@
-<section class="container">
-  <h2>{{ 'chat.directChat' | t }}</h2>
-  <div class="msgs card" *ngIf="!loading; else loadTpl" #scrollContainer>
-    <div class="msg" *ngFor="let m of messages" [class.me]="m.senderId === meId" [class.them]="m.senderId !== meId">
-      <div class="bubble">
-        <span *ngIf="getMessageContent(m) && getMessageContent(m) !== 'رسالة فارغة'; else emptyMessage">
-          {{ getMessageContent(m) }}
+<div class="chat-container">
+  <!-- Chat Header -->
+  <div class="chat-header">
+    <div class="header-left">
+      <button class="back-button" routerLink="/direct-chat" matTooltip="العودة للمحادثات">
+        <lucide-icon name="arrow-right" size="20"></lucide-icon>
+      </button>
+      <div class="user-info">
+        <div class="avatar-container">
+          <img *ngIf="otherUser?.imageUrl" [src]="otherUser?.imageUrl" alt="avatar" class="avatar" />
+          <div *ngIf="!otherUser?.imageUrl" class="avatar-placeholder">
+            <lucide-icon name="user" size="20"></lucide-icon>
+          </div>
+          <div class="online-indicator" [class.online]="otherUser?.isOnline"></div>
+        </div>
+        <div class="user-details">
+          <h3 class="user-name">{{ otherUser?.name || 'مستخدم' }}</h3>
+          <span class="user-status">{{ otherUser?.isOnline ? 'متصل الآن' : formatLastSeen(otherUser?.lastSeen) }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="action-button" matTooltip="مكالمة صوتية">
+        <lucide-icon name="phone" size="18"></lucide-icon>
+      </button>
+      <button class="action-button" matTooltip="مكالمة فيديو">
+        <lucide-icon name="video" size="18"></lucide-icon>
+      </button>
+      <button class="action-button" matTooltip="المزيد">
+        <lucide-icon name="more-vertical" size="18"></lucide-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="search-container" *ngIf="messages.length > 0">
+    <div class="search-input-wrapper">
+      <lucide-icon name="search" size="18" class="search-icon"></lucide-icon>
+      <input 
+        type="text" 
+        [placeholder]="'البحث في الرسائل...'" 
+        class="search-input"
+        [(ngModel)]="searchTerm"
+        (input)="onSearchChange($event)">
+      <button *ngIf="searchTerm" class="clear-search" (click)="clearSearch()">
+        <lucide-icon name="x" size="16"></lucide-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Messages Area -->
+  <div class="messages-container" *ngIf="!loading; else loadTpl" #scrollContainer>
+    <!-- Empty State -->
+    <div *ngIf="messages.length === 0" class="empty-state">
+      <div class="empty-icon">
+        <lucide-icon name="message-circle" size="48"></lucide-icon>
+      </div>
+      <h3>ابدأ المحادثة</h3>
+      <p>أرسل رسالة لبدء المحادثة مع {{ otherUser?.name || 'هذا المستخدم' }}</p>
+    </div>
+
+    <!-- Messages -->
+    <div class="messages-list" *ngIf="messages.length > 0">
+      <div class="message-group" *ngFor="let group of messageGroups">
+        <!-- Date Separator -->
+        <div class="date-separator">
+          <span>{{ group.date }}</span>
+        </div>
+        
+        <!-- Messages in Group -->
+        <div class="message" 
+             *ngFor="let message of group.messages; let isLast = last" 
+             [class.me]="message.senderId === meId" 
+             [class.them]="message.senderId !== meId"
+             [class.first-in-group]="message.isFirstInGroup"
+             [class.last-in-group]="isLast">
+          
+          <!-- Avatar for other user -->
+          <div class="message-avatar" *ngIf="message.senderId !== meId">
+            <img *ngIf="otherUser?.imageUrl" [src]="otherUser?.imageUrl" alt="avatar" class="avatar" />
+            <div *ngIf="!otherUser?.imageUrl" class="avatar-placeholder">
+              <lucide-icon name="user" size="16"></lucide-icon>
+            </div>
+          </div>
+          
+          <!-- Message Content -->
+          <div class="message-content">
+            <div class="message-bubble" [class.sent]="message.senderId === meId" [class.received]="message.senderId !== meId">
+              <div class="message-text">
+                <!-- Edit Mode -->
+                <div *ngIf="editingMessageId === message.id" class="edit-message-container">
+                  <textarea 
+                    class="edit-message-input"
+                    [(ngModel)]="editingMessageContent"
+                    (keydown)="onEditKeydown($event, message.id)"
+                    (blur)="onEditBlur($event)"
+                    autofocus>
+                  </textarea>
+                  <div class="edit-actions">
+                    <button class="edit-save-btn" (click)="saveEdit(message.id)" matTooltip="حفظ التعديل">
+                      <lucide-icon name="check" size="14"></lucide-icon>
+                      <span>حفظ</span>
+                    </button>
+                    <button class="edit-cancel-btn" (click)="cancelEdit()" matTooltip="إلغاء التعديل">
+                      <lucide-icon name="x" size="14"></lucide-icon>
+                      <span>إلغاء</span>
+                    </button>
+                  </div>
+                </div>
+                
+                <!-- Display Mode -->
+                <div *ngIf="editingMessageId !== message.id">
+                  <span *ngIf="getMessageContent(message) && getMessageContent(message) !== 'رسالة فارغة'; else emptyMessage">
+                    {{ getMessageContent(message) }}
+                    <span *ngIf="message.isEdited" class="edited-indicator">(تم التعديل)</span>
         </span>
         <ng-template #emptyMessage>
           <em class="empty-message">رسالة فارغة</em>
         </ng-template>
       </div>
-      <small class="time">{{ m.createdAt | date:'short' }}</small>
+              </div>
+              <div class="message-meta">
+                <span class="message-time">{{ message.createdAt | date:'short' }}</span>
+                <div class="message-actions">
+                  <div class="message-status" *ngIf="message.senderId === meId">
+                    <lucide-icon name="check" size="12" *ngIf="message.isDelivered && !message.isRead"></lucide-icon>
+                    <lucide-icon name="check" size="12" *ngIf="message.isRead"></lucide-icon>
+                  </div>
+                  <div class="message-action-buttons" *ngIf="message.senderId === meId && editingMessageId !== message.id">
+                    <button class="message-action-btn edit-btn" (click)="editMessage(message)" matTooltip="تعديل الرسالة">
+                      <lucide-icon name="edit-3" size="12"></lucide-icon>
+                    </button>
+                    <button class="message-action-btn delete-btn" (click)="deleteMessage(message.id)" matTooltip="حذف الرسالة">
+                      <lucide-icon name="trash" size="12"></lucide-icon>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="typing" *ngIf="isTyping"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+
+    <!-- Typing Indicator -->
+    <div class="typing-indicator" *ngIf="isTyping">
+      <div class="typing-avatar">
+        <img *ngIf="otherUser?.imageUrl" [src]="otherUser?.imageUrl" alt="avatar" class="avatar" />
+        <div *ngIf="!otherUser?.imageUrl" class="avatar-placeholder">
+          <lucide-icon name="user" size="16"></lucide-icon>
+        </div>
+      </div>
+      <div class="typing-bubble">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+    </div>
   </div>
+
+  <!-- Loading Template -->
   <ng-template #loadTpl>
-    <div class="skeleton" style="height:160px;border-radius:12px"></div>
+    <div class="loading-container">
+      <div class="skeleton-messages">
+        <div class="skeleton-message" *ngFor="let i of [1,2,3,4,5]">
+          <div class="skeleton-avatar"></div>
+          <div class="skeleton-bubble"></div>
+        </div>
+      </div>
+    </div>
   </ng-template>
-  <form [formGroup]="form" (keydown)="onKeydown($event)" (ngSubmit)="send()" class="row mt-3">
-    <input [placeholder]="('chat.typeMessage' | t)" 
+
+  <!-- Message Input -->
+  <div class="message-input-container">
+    <form [formGroup]="form" (keydown)="onKeydown($event)" (ngSubmit)="send()" class="input-form">
+      <div class="input-actions">
+        <button type="button" class="input-action-btn" matTooltip="إرفاق ملف">
+          <lucide-icon name="paperclip" size="18"></lucide-icon>
+        </button>
+        <button type="button" class="input-action-btn" matTooltip="إرسال صورة">
+          <lucide-icon name="image" size="18"></lucide-icon>
+        </button>
+        <button type="button" class="input-action-btn" matTooltip="إضافة إيموجي">
+          <lucide-icon name="smile" size="18"></lucide-icon>
+        </button>
+      </div>
+      
+      <div class="input-wrapper">
+        <textarea 
+          [placeholder]="('chat.typeMessage' | t)" 
            formControlName="content"
-           class="message-input"
-           autocomplete="off">
-    <button class="button send-button" 
+          class="message-textarea"
+          rows="1"
+          autocomplete="off"
+          (input)="onTextareaInput($event)">
+        </textarea>
+        <button class="send-button" 
             type="submit" 
             [disabled]="form.invalid || form.get('content')?.value?.trim() === ''"
             matTooltip="إرسال الرسالة">
-      <lucide-icon name="send" size="16"></lucide-icon>
-      <span>{{ 'chat.send' | t }}</span>
+          <lucide-icon name="send" size="18"></lucide-icon>
     </button>
+      </div>
   </form>
-</section>
+  </div>
+</div>
