@@ -12,12 +12,15 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatMenuModule } from '@angular/material/menu';
 import { LucideAngularModule, Send, MessageCircle, User, Clock, Check, CheckCheck, MoreVertical, Search, Filter } from 'lucide-angular';
+import { environment } from '../../../../../environments/environment';
 import { Subject, takeUntil } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 
 import { MessagesService } from '../../../../core/services/messages.service';
-import { DirectConversationDto, DirectMessageDto, SendDirectMessageDto } from '../../../../models/profile.models';
+import { AuthService } from '../../../../core/auth/auth.service';
+import { DirectConversationDto, DirectMessageDto, SendDirectMessageDto } from '../../../../models/chat.models';
 
 @Component({
   selector: 'app-profile-messages',
@@ -37,6 +40,7 @@ import { DirectConversationDto, DirectMessageDto, SendDirectMessageDto } from '.
     MatBadgeModule,
     MatDividerModule,
     MatTooltipModule,
+    MatMenuModule,
     LucideAngularModule
   ],
   templateUrl: './profile-messages.component.html',
@@ -50,6 +54,7 @@ export class ProfileMessagesComponent implements OnInit, AfterViewInit, OnDestro
   isSending = false;
   loadingOlder = false;
   page = 1;
+  readonly defaultAvatarPath = '/assets/images/default-avatar.svg';
 
   // Search and filters
   searchTerm = '';
@@ -64,6 +69,7 @@ export class ProfileMessagesComponent implements OnInit, AfterViewInit, OnDestro
   private cdr = inject(ChangeDetectorRef);
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
+  private authService = inject(AuthService);
 
   @ViewChild('scrollContainer') scrollContainer?: ElementRef<HTMLDivElement>;
   autoScroll = true;
@@ -73,8 +79,17 @@ export class ProfileMessagesComponent implements OnInit, AfterViewInit, OnDestro
   dayGroups: { dateKey: string; label: string; messages: (DirectMessageDto & { isMine: boolean; isFirstInBlock: boolean; isLastInBlock: boolean; showAvatar: boolean; showName: boolean; })[] }[] = [];
   isTyping = false;
 
+  // Inline edit state
+  editingMessageId?: string;
+  editingMessageContent: string = '';
+
   ngOnInit() {
     this.initializeMessageForm();
+    // set current user id for ownership checks
+    this.authService.currentUser$.pipe(takeUntil(this.destroy$)).subscribe(u => {
+      this.currentUserId = u?.id;
+      this.cdr.markForCheck();
+    });
     this.loadConversations();
     this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
       const convId = params['conversationId'];
@@ -185,10 +200,11 @@ export class ProfileMessagesComponent implements OnInit, AfterViewInit, OnDestro
         isMine,
         isFirstInBlock: !samePrev,
         isLastInBlock: !sameNext,
-        showAvatar: !isMine && (!sameNext),
+        // Show avatar for both participants at the end of a block (Messenger-like)
+        showAvatar: !sameNext,
         showName: !isMine && (!samePrev)
       };
-      const dateKey = new Date(m.sentAt).toISOString().slice(0, 10);
+      const dateKey = new Date(m.sentAt || m.createdAt).toISOString().slice(0, 10);
       if (!byDay.has(dateKey)) byDay.set(dateKey, []);
       byDay.get(dateKey)!.push(ui);
       return ui;
@@ -248,7 +264,7 @@ export class ProfileMessagesComponent implements OnInit, AfterViewInit, OnDestro
       this.isSending = true;
 
       const messageData: SendDirectMessageDto = {
-        directConversationId: this.selectedConversation.id,
+        conversationId: this.selectedConversation.id,
         content: this.messageForm.value.content
       };
 
@@ -258,15 +274,16 @@ export class ProfileMessagesComponent implements OnInit, AfterViewInit, OnDestro
             // Add the new message to the messages array
             const newMessage: DirectMessageDto = {
               id: response.data.id,
-              directConversationId: this.selectedConversation!.id,
+              conversationId: this.selectedConversation!.id,
               senderId: response.data.senderId,
               senderName: response.data.senderName,
+              senderType: 'User',
               content: response.data.content,
-              sentAt: response.data.sentAt,
-              messageType: response.data.messageType,
-              isRead: false,
-              isAutoReply: false,
-              status: response.data.status
+              messageType: 'Text',
+              status: 'Sent',
+              createdAt: new Date(response.data.sentAt),
+              sentAt: new Date(response.data.sentAt),
+              isRead: false
             };
 
             this.messages.push(newMessage);
@@ -291,7 +308,7 @@ export class ProfileMessagesComponent implements OnInit, AfterViewInit, OnDestro
   private updateConversationLastMessage(message: DirectMessageDto) {
     if (this.selectedConversation) {
       this.selectedConversation.lastMessage = message;
-      this.selectedConversation.lastMessageAt = message.sentAt;
+      this.selectedConversation.lastMessageAt = message.sentAt || message.createdAt;
     }
   }
 
@@ -352,6 +369,35 @@ export class ProfileMessagesComponent implements OnInit, AfterViewInit, OnDestro
     return conversation.user2Name;
   }
 
+  getOtherUserImage(conversation: DirectConversationDto): string | undefined {
+    // Access possibly untyped image fields safely
+    const conv = conversation as unknown as Record<string, unknown>;
+    // Decide which side is the other user based on current user id
+    const me = this.currentUserId;
+    const user1Id = conv['user1Id'] as string | undefined;
+    const user2Id = conv['user2Id'] as string | undefined;
+    const user1Image = conv['user1ImageUrl'] as string | undefined;
+    const user2Image = conv['user2ImageUrl'] as string | undefined;
+    let raw: string | undefined;
+    if (me && user1Id && user2Id) {
+      raw = me === user1Id ? (user2Image || undefined) : (user1Image || undefined);
+    } else {
+      raw = user2Image || user1Image || undefined;
+    }
+    return this.resolveImageUrl(raw);
+  }
+
+  getCurrentUserImage(): string | undefined {
+    try {
+      // Pull from auth current user if available
+      let img: string | undefined;
+      this.authService.currentUser$.pipe(takeUntil(this.destroy$)).subscribe(u => {
+        img = (u as any)?.profileImageUrl as string | undefined;
+      }).unsubscribe();
+      return this.resolveImageUrl(img);
+    } catch { return undefined; }
+  }
+
   getOtherUserInitials(conversation: DirectConversationDto): string {
     const name = this.getOtherUserName(conversation);
     return name
@@ -362,7 +408,7 @@ export class ProfileMessagesComponent implements OnInit, AfterViewInit, OnDestro
       .slice(0, 2);
   }
 
-  formatMessageTime(date: string): string {
+  formatMessageTime(date: string | Date): string {
     const messageDate = new Date(date);
     const now = new Date();
     const diffInHours = (now.getTime() - messageDate.getTime()) / (1000 * 60 * 60);
@@ -412,12 +458,109 @@ export class ProfileMessagesComponent implements OnInit, AfterViewInit, OnDestro
 
   getMessageStatusIcon(message: DirectMessageDto): string {
     if (message.isRead) {
-      return 'check-check';
+      return 'check';
     } else if (message.status === 'Delivered') {
       return 'check';
     } else {
       return 'clock';
     }
+  }
+
+  // Image helpers
+  resolveImageUrl(imageUrl?: string | null): string | undefined {
+    if (!imageUrl) return undefined;
+    const url = String(imageUrl).trim();
+    if (!url) return undefined;
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    if (url.startsWith('/uploads')) return `${environment.apiUrl}${url}`;
+    if (url.startsWith('uploads')) return `${environment.apiUrl}/${url}`;
+    // Assume it's a profile image filename
+    return `${environment.apiUrl}/uploads/profiles/${url}`;
+  }
+
+  onAvatarError(event: Event) {
+    const target = event.target as HTMLImageElement | null;
+    if (target && target.src !== this.defaultAvatarPath) {
+      target.src = this.defaultAvatarPath;
+    }
+  }
+
+  getMessagePreview(message: DirectMessageDto | null | undefined): string {
+    if (!message) return 'لا توجد رسائل';
+    const content: unknown = (message as any).content;
+    if (content == null) return 'لا توجد رسائل';
+    if (typeof content === 'string') return content.trim() || 'لا توجد رسائل';
+    if (typeof content === 'object') {
+      const obj = content as Record<string, unknown>;
+      const keys = ['text','content','message','body','value','data'];
+      for (const k of keys) {
+        const v = obj[k];
+        if (typeof v === 'string' && v.trim()) return v.trim();
+      }
+      const objKeys = Object.keys(obj);
+      if (objKeys.length === 1 && typeof obj[objKeys[0]] === 'string') {
+        return (obj[objKeys[0]] as string).trim();
+      }
+      return 'رسالة تحتوي على محتوى متعدد';
+    }
+    try { return String(content).trim() || 'لا توجد رسائل'; } catch { return 'رسالة غير قابلة للعرض'; }
+  }
+
+  // Inline edit/delete handlers
+  startEdit(message: DirectMessageDto) {
+    this.editingMessageId = message.id;
+    const content = (message as any).content;
+    this.editingMessageContent = typeof content === 'string' ? content : this.getMessagePreview(message);
+  }
+
+  cancelEdit() {
+    this.editingMessageId = undefined;
+    this.editingMessageContent = '';
+  }
+
+  saveEdit(messageId: string) {
+    const content = (this.editingMessageContent || '').trim();
+    if (!content) { return; }
+    this.isSending = true;
+    this.messagesService.editMessage(messageId, content).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (res) => {
+        this.isSending = false;
+        if (res?.success) {
+          // refresh messages
+          if (this.selectedConversation) this.loadMessages(this.selectedConversation.id);
+          this.cancelEdit();
+          this.toastr.success('تم تعديل الرسالة');
+        } else {
+          this.toastr.error(res?.message || 'فشل تعديل الرسالة');
+        }
+      },
+      error: (err) => {
+        this.isSending = false;
+        this.toastr.error('فشل تعديل الرسالة');
+        console.error(err);
+      }
+    });
+  }
+
+  deleteMessage(messageId: string) {
+    if (!confirm('هل أنت متأكد من حذف هذه الرسالة؟')) return;
+    this.isSending = true;
+    this.messagesService.deleteMessage(messageId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (res) => {
+        this.isSending = false;
+        if (res?.success) {
+          if (this.selectedConversation) this.loadMessages(this.selectedConversation.id);
+          this.toastr.success('تم حذف الرسالة');
+        } else {
+          this.toastr.error(res?.message || 'فشل حذف الرسالة');
+        }
+      },
+      error: (err) => {
+        this.isSending = false;
+        this.toastr.error('فشل حذف الرسالة');
+        console.error(err);
+      }
+    });
   }
 
   getMessageStatusColor(message: DirectMessageDto): string {

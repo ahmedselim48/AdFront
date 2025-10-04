@@ -36,16 +36,14 @@ import { NavbarChatComponent } from '../navbar-chat/navbar-chat.component';
           <button mat-icon-button (click)="toggleSidebar()" class="menu-button">
             <lucide-icon name="menu" size="24"></lucide-icon>
           </button>
-          <a routerLink="/dashboard" class="logo-link">
+          <a routerLink="/home" class="logo-link">
             <h1 class="app-title">HarajPlus</h1>
           </a>
         </div>
 
         <!-- Navigation -->
         <nav class="header-nav">
-          <a [routerLink]="isAdmin ? '/admin/dashboard' : '/dashboard'" routerLinkActive="active" class="nav-link">
-            لوحة التحكم
-          </a>
+          
           <a routerLink="/ads" routerLinkActive="active" class="nav-link">
             الإعلانات
           </a>

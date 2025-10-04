@@ -11,7 +11,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 
 import { SubscriptionService } from '../../../../core/services/subscription.service';
-import { SubscriptionDto, CheckoutSessionDto } from '../../../../models/profile.models';
+import { SubscriptionDto, CheckoutSessionDto, CreateSubscriptionRequestDto } from '../../../../models/payments.models';
 
 @Component({
   selector: 'app-profile-subscription',
@@ -83,7 +83,7 @@ export class ProfileSubscriptionComponent implements OnInit, OnDestroy {
   onUpgradeSubscription() {
     this.isProcessing = true;
     
-    const request = { provider: 'paypal' };
+    const request: CreateSubscriptionRequestDto = { provider: 'paypal' };
     this.subscriptionService.createSubscription(request).pipe(takeUntil(this.destroy$)).subscribe({
       next: (checkoutSession: any) => {
         // Redirect to payment page

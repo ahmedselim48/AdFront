@@ -1,0 +1,135 @@
+<!-- Notification Bell with Badge -->
+<div class="notification-container">
+  <button 
+    mat-icon-button 
+    [matMenuTriggerFor]="notificationMenu"
+    class="notification-bell"
+    [class.has-unread]="unreadCount > 0"
+    [class.connected]="isConnected"
+    [class.disconnected]="!isConnected"
+    matTooltip="الإشعارات"
+    matTooltipPosition="below">
+    
+    <mat-icon class="bell-icon">notifications</mat-icon>
+    
+    <!-- Unread Badge -->
+    <span 
+      *ngIf="showBadge && unreadCount > 0" 
+      class="notification-badge"
+      [class.urgent]="unreadCount > 10">
+      {{ unreadCount > 99 ? '99+' : unreadCount }}
+    </span>
+    
+    <!-- Connection Status Indicator -->
+    <span 
+      class="connection-indicator"
+      [class]="getConnectionStatusClass()"
+      [matTooltip]="getConnectionStatusText()"
+      matTooltipPosition="below">
+    </span>
+  </button>
+
+  <!-- Notification Menu -->
+  <mat-menu #notificationMenu="matMenu" class="notification-menu" yPosition="below">
+    <!-- Menu Header -->
+    <div class="menu-header">
+      <div class="header-content">
+        <h3 class="menu-title">الإشعارات</h3>
+        <span class="unread-count" *ngIf="unreadCount > 0">
+          {{ unreadCount }} غير مقروء
+        </span>
+      </div>
+      
+      <!-- Connection Status -->
+      <div class="connection-status">
+        <mat-icon 
+          [class]="getConnectionStatusClass()" 
+          class="status-icon">
+          {{ isConnected ? 'wifi' : 'wifi_off' }}
+        </mat-icon>
+        <span class="status-text">{{ getConnectionStatusText() }}</span>
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Notifications List -->
+    <div class="notifications-list" *ngIf="notifications.length > 0; else noNotifications">
+      <div 
+        *ngFor="let notification of notifications; trackBy: trackByNotificationId"
+        class="notification-item"
+        [class.unread]="!notification.isRead"
+        [class.recent]="isRecentNotification(notification.createdAt)"
+        [class]="getPriorityClass(notification.priority)"
+        (click)="onNotificationClick(notification, $event)">
+        
+        <!-- Notification Icon -->
+        <div class="notification-icon">
+          <mat-icon 
+            [class]="getPriorityClass(notification.priority)"
+            class="category-icon">
+            {{ getNotificationIcon(notification.category) }}
+          </mat-icon>
+          
+          <!-- Priority Indicator -->
+          <div 
+            *ngIf="notification.priority === 'Urgent' || notification.priority === 'High'"
+            class="priority-indicator"
+            [class]="getPriorityClass(notification.priority)">
+          </div>
+        </div>
+
+        <!-- Notification Content -->
+        <div class="notification-content">
+          <div class="notification-header">
+            <h4 class="notification-title">{{ notification.title }}</h4>
+            <span class="notification-time">{{ getRelativeTime(notification.createdAt) }}</span>
+          </div>
+          
+          <p class="notification-message">{{ notification.message }}</p>
+          
+          <!-- Action Button -->
+          <div *ngIf="notification.actionText" class="notification-action">
+            <span class="action-text">{{ notification.actionText }}</span>
+            <mat-icon class="action-icon">arrow_forward</mat-icon>
+          </div>
+        </div>
+
+        <!-- Unread Indicator -->
+        <div *ngIf="!notification.isRead" class="unread-indicator"></div>
+      </div>
+    </div>
+
+    <!-- No Notifications State -->
+    <ng-template #noNotifications>
+      <div class="no-notifications">
+        <mat-icon class="no-notifications-icon">notifications_none</mat-icon>
+        <p class="no-notifications-text">لا توجد إشعارات جديدة</p>
+        <p class="no-notifications-subtext">ستظهر الإشعارات الجديدة هنا</p>
+      </div>
+    </ng-template>
+
+    <mat-divider></mat-divider>
+
+    <!-- Menu Actions -->
+    <div class="menu-actions">
+      <button 
+        mat-button 
+        class="action-button mark-all-read"
+        [disabled]="unreadCount === 0 || isLoading"
+        (click)="onMarkAllAsRead()">
+        <mat-icon *ngIf="!isLoading">done_all</mat-icon>
+        <mat-spinner *ngIf="isLoading" diameter="16"></mat-spinner>
+        <span>تعيين الكل كمقروء</span>
+      </button>
+      
+      <button 
+        mat-button 
+        class="action-button view-all"
+        (click)="onViewAll()">
+        <mat-icon>list</mat-icon>
+        <span>عرض الكل</span>
+      </button>
+    </div>
+  </mat-menu>
+</div>

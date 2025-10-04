@@ -10,7 +10,7 @@ import {
   ConfirmSubscriptionRequestDto, 
   PaymentRequestDto, 
   PaymentResponseDto 
-} from '../../models/profile.models';
+} from '../../models/payments.models';
 
 @Injectable({
   providedIn: 'root'

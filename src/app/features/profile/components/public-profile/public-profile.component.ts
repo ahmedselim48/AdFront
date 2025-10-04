@@ -15,7 +15,7 @@ import { PublicProfileService, PublicProfileDto } from '../../../../core/service
 import { DirectChatService } from '../../../../core/services/direct-chat.service';
 import { AdsService } from '../../../../core/services/ads.service';
 import { AuthService } from '../../../../core/auth/auth.service';
-import { AdDto } from '../../../../models/profile.models';
+import { AdDto } from '../../../../models/ads.models';
 import { ImageUrlHelper } from '../../../../core/utils/image-url.helper';
 
 @Component({

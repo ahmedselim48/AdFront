@@ -12,12 +12,12 @@ import { ForgotPasswordComponent } from './features/auth/components/forgot-passw
 import { VerifyEmailComponent } from './features/auth/components/verify-email/verify-email.component';
 import { ResendConfirmationComponent } from './features/auth/components/resend-confirmation/resend-confirmation.component';
 import { ChangePasswordComponent } from './features/auth/components/change-password/change-password.component';
-import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { AdsListComponent } from './features/ads-list/ads-list.component';
 import { SmartRepliesComponent } from './features/smart-replies/smart-replies.component';
 import { CompetitionComponent } from './features/competition/competition.component';
-import { ReportsComponent } from './features/reports/reports.component';
 import { NotificationsComponent } from './features/notifications/notifications.component';
+import { NotificationsPageComponent } from './features/notifications/notifications-page/notifications-page.component';
+import { NotificationSettingsComponent } from './features/notifications/notification-settings/notification-settings.component';
 import { ChatListComponent } from './features/chat/chat-list.component';
 import { TemplatesComponent } from './features/chat/templates.component';
 import { ChatMessagesComponent } from './features/chat/chat-messages.component';
@@ -91,12 +91,13 @@ export const routes: Routes = [
   { path: 'subscription', component: SubscriptionComponent },
   { path: 'payments', redirectTo: 'subscription', pathMatch: 'full' },
   
-  // Dashboard & Analytics - Available without auth for testing
-  { path: 'dashboard', component: DashboardComponent },
+  // Dashboard removed
   // { path: 'smart-replies', component: SmartRepliesComponent }, // disabled
   { path: 'competition', component: CompetitionComponent },
-  { path: 'reports', component: ReportsComponent },
+  // Reports removed
   { path: 'notifications', component: NotificationsComponent },
+  { path: 'notifications-page', component: NotificationsPageComponent },
+  { path: 'notification-settings', component: NotificationSettingsComponent },
   
   // Chat & Communication - Available without auth for testing
   // Legacy chat routes (disabled while focusing on direct chat)
@@ -132,6 +133,7 @@ export const routes: Routes = [
     { path: 'ads', loadComponent: () => import('./features/profile/components/profile-ads/profile-ads.component').then(m => m.ProfileAdsComponent) },
     { path: 'messages', loadComponent: () => import('./features/profile/components/profile-messages/profile-messages.component').then(m => m.ProfileMessagesComponent) },
     { path: 'notifications', loadComponent: () => import('./features/profile/components/profile-notifications/profile-notifications.component').then(m => m.ProfileNotificationsComponent) },
+    { path: 'notification-settings', component: NotificationSettingsComponent },
     { path: 'subscription', loadComponent: () => import('./features/profile/components/profile-subscription/profile-subscription.component').then(m => m.ProfileSubscriptionComponent) },
     { path: 'management', component: ProfileManagementComponent },
     { path: 'settings', redirectTo: 'profile-settings', pathMatch: 'full' },

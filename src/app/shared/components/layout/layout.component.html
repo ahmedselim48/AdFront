@@ -48,6 +48,8 @@
           <lucide-icon name="search" size="20"></lucide-icon>
         </button>
 
+        <!-- Notifications -->
+        <app-navbar-notifications></app-navbar-notifications>
 
         <!-- User Menu -->
         <button 
@@ -236,10 +238,6 @@
   <button mat-menu-item routerLink="/profile">
     <lucide-icon name="user" size="18" class="me-2"></lucide-icon>
     الملف الشخصي
-  </button>
-  <button mat-menu-item [routerLink]="isAdmin ? '/admin/dashboard' : '/dashboard'">
-    <lucide-icon name="bar-chart-3" size="18" class="me-2"></lucide-icon>
-    لوحة التحكم
   </button>
   <mat-divider></mat-divider>
   <button mat-menu-item (click)="logout()">

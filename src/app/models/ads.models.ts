@@ -12,8 +12,10 @@ export interface AdDto {
   categoryName?: string;
   createdAt: Date;
   viewsCount: number;
+  views: number;
   clicksCount: number;
   likesCount: number;
+  likes: number;
   commentsCount: number;
   status: AdStatus;
   scheduledAtUtc?: Date;
@@ -224,6 +226,67 @@ export interface AdStatsDto {
   conversionRate: number;
   generatedAt: Date;
   period: 'Hourly' | 'Daily' | 'Weekly' | 'Monthly' | 'Yearly';
+}
+
+// Additional interfaces
+export interface AdImageDto {
+  id: string;
+  adId: string;
+  imageUrl: string;
+  isPrimary: boolean;
+  order: number;
+  createdAt: Date;
+}
+
+export interface CreateAdDto {
+  title: string;
+  description?: string;
+  price: number;
+  location?: string;
+  categoryId?: number;
+  contactNumber?: string;
+  contactMethod?: 'Call' | 'WhatsApp';
+  contactInfo?: {
+    phoneNumber?: string;
+    whatsappNumber?: string;
+    email?: string;
+    preferredContactMethod?: 'phone' | 'whatsapp' | 'email' | 'chat';
+  };
+  tags?: string[]; // Add tags for backward compatibility
+  images?: string[];
+  keywords?: string[];
+  scheduledAtUtc?: Date;
+}
+
+export interface UpdateAdDto {
+  id: string;
+  title?: string;
+  description?: string;
+  price?: number;
+  location?: string;
+  categoryId?: number;
+  contactNumber?: string;
+  contactMethod?: 'Call' | 'WhatsApp';
+  images?: string[];
+  keywords?: string[];
+  scheduledAtUtc?: Date;
+}
+
+export interface AdFilters {
+  searchTerm?: string;
+  keyword?: string; // Add keyword for backward compatibility
+  categoryId?: number;
+  minPrice?: number;
+  maxPrice?: number;
+  location?: string;
+  status?: AdStatus;
+  userId?: string;
+  dateFrom?: Date;
+  dateTo?: Date;
+  sortBy?: 'createdAt' | 'price' | 'views' | 'clicks' | 'likes';
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  pageSize?: number;
 }
 
 // Legacy aliases for backward compatibility

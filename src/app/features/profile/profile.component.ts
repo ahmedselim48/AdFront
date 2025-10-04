@@ -15,8 +15,10 @@ import { ToastrService } from 'ngx-toastr';
 
 import { AuthService } from '../../core/auth/auth.service';
 import { ProfileService } from '../../core/services/profile.service';
-import { NotificationsService } from '../../core/services/notifications.service';
-import { ProfileDto, UserDashboardDto, SubscriptionStatusDto, NotificationDto } from '../../models/profile.models';
+import { NotificationService } from '../../core/services/notification.service';
+import { ProfileDto, SubscriptionStatusDto } from '../../models/profile.models';
+import { UserDashboardDto } from '../../models/auth.models';
+import { NotificationDto } from '../../models/notification.model';
 
 @Component({
   selector: 'app-profile',
@@ -64,7 +66,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   // Inject services
   private authService = inject(AuthService);
   private profileService = inject(ProfileService);
-  private notificationsService = inject(NotificationsService);
+  private notificationService = inject(NotificationService);
   private toastr = inject(ToastrService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -162,7 +164,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     });
 
     // Load notifications count
-    this.notificationsService.unreadCount$.pipe(takeUntil(this.destroy$)).subscribe(count => {
+    this.notificationService.unreadCount$.pipe(takeUntil(this.destroy$)).subscribe((count: number) => {
       this.unreadNotifications = count;
       this.updateMenuBadges();
     });

@@ -17,7 +17,7 @@ export * from './categories.models';
 export * from './dashboard.models';
 
 // Notifications Models
-export * from './notifications.models';
+export * from './notification.model';
 
 // Chat Models
 export * from './chat.models';

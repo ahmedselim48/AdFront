@@ -3,7 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { GeneralResponse } from '../../models/common.models';
-import { ProfileDto, ProfileUpdateDto, UserDashboardDto, SubscriptionStatusDto } from '../../models/profile.models';
+import { ProfileDto, ProfileUpdateDto, SubscriptionStatusDto } from '../../models/profile.models';
+import { UserDashboardDto } from '../../models/auth.models';
 
 @Injectable({
   providedIn: 'root'

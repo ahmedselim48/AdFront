@@ -50,7 +50,7 @@
                     (click)="markAllAsRead()"
                     matTooltip="تعليم الكل كمقروء"
                     *ngIf="getUnreadCount() > 0">
-              <lucide-icon name="check-double" size="16"></lucide-icon>
+              <lucide-icon name="check-check" size="16"></lucide-icon>
               <span>تعليم الكل كمقروء</span>
             </button>
           </div>
@@ -67,10 +67,13 @@
                class="conversation-item"
                [class.active]="selectedConversation?.id === conversation.id"
                (click)="selectConversation(conversation)">
-            <div class="conversation-avatar">
-              <div class="avatar-placeholder">
-                {{ getOtherUserInitials(conversation) }}
-              </div>
+              <div class="conversation-avatar">
+              <img *ngIf="getOtherUserImage(conversation); else initials1" [src]="getOtherUserImage(conversation) || defaultAvatarPath" (error)="onAvatarError($event)" class="avatar-img" alt=""/>
+              <ng-template #initials1>
+                <div class="avatar-placeholder">
+                  {{ getOtherUserInitials(conversation) }}
+                </div>
+              </ng-template>
               <div *ngIf="conversation.unreadMessageCount > 0" 
                    class="unread-badge">
                 {{ conversation.unreadMessageCount }}
@@ -80,12 +83,12 @@
             <div class="conversation-content">
               <div class="conversation-header">
                 <h3 class="conversation-name">{{ getOtherUserName(conversation) }}</h3>
-                <span class="conversation-time">{{ formatConversationTime(conversation.lastMessageAt || conversation.createdAt) }}</span>
+                <span class="conversation-time">{{ conversation.lastMessageAt || conversation.createdAt | date:'short' }}</span>
               </div>
               
               <div class="conversation-preview">
                 <p class="last-message" *ngIf="conversation.lastMessage">
-                  {{ conversation.lastMessage.content | slice:0:50 }}{{ conversation.lastMessage.content.length > 50 ? '...' : '' }}
+                  {{ getMessagePreview(conversation.lastMessage) | slice:0:50 }}{{ getMessagePreview(conversation.lastMessage).length > 50 ? '...' : '' }}
                 </p>
                 <p class="no-messages" *ngIf="!conversation.lastMessage">
                   لا توجد رسائل بعد
@@ -111,15 +114,18 @@
           <div class="conversation-header">
             <div class="conversation-info">
               <div class="conversation-avatar">
-                <div class="avatar-placeholder">
-                  {{ getOtherUserInitials(selectedConversation) }}
-                </div>
+                <img *ngIf="getOtherUserImage(selectedConversation!); else initials2" [src]="getOtherUserImage(selectedConversation!) || defaultAvatarPath" (error)="onAvatarError($event)" class="avatar-img" alt=""/>
+                <ng-template #initials2>
+                  <div class="avatar-placeholder">
+                    {{ getOtherUserInitials(selectedConversation) }}
+                  </div>
+                </ng-template>
                 <div class="online-indicator" *ngIf="isUserOnline(selectedConversation)"></div>
               </div>
               <div class="conversation-details">
                 <h3>{{ getOtherUserName(selectedConversation) }}</h3>
                 <p [class.online]="isUserOnline(selectedConversation)">
-                  {{ isUserOnline(selectedConversation) ? 'متصل الآن' : 'آخر ظهور: ' + formatConversationTime(selectedConversation.lastMessageAt || selectedConversation.createdAt) }}
+                  {{ isUserOnline(selectedConversation) ? 'متصل الآن' : 'آخر ظهور: ' + (selectedConversation.lastMessageAt || selectedConversation.createdAt | date:'short') }}
                 </p>
               </div>
             </div>
@@ -155,15 +161,41 @@
                    [class.mine]="m.senderId === currentUserId"
                    [class.first]="m.isFirstInBlock"
                    [class.last]="m.isLastInBlock">
-                <img class="avatar" *ngIf="m.showAvatar" [src]="'/assets/default-avatar.png'" alt="" />
+                <img class="avatar" *ngIf="m.showAvatar"
+                     [src]="m.isMine ? (getCurrentUserImage() || defaultAvatarPath) : (getOtherUserImage(selectedConversation!) || defaultAvatarPath)"
+                     (error)="onAvatarError($event)"
+                     alt="" />
                 <div class="bubble">
                   <div class="sender" *ngIf="m.showName">{{ m.senderName }}</div>
-                  <div class="content">{{ m.content }}</div>
+                  <div class="content" *ngIf="editingMessageId !== m.id">{{ getMessagePreview(m) }}</div>
+                  <div class="content edit-mode" *ngIf="editingMessageId === m.id">
+                    <textarea [(ngModel)]="editingMessageContent"
+                              (keydown)="onComposerKeydown($event)"
+                              rows="1"></textarea>
+                    <div class="edit-actions">
+                      <button mat-stroked-button color="primary" (click)="saveEdit(m.id)">
+                        <lucide-icon name="check" size="14"></lucide-icon>
+                        حفظ
+                      </button>
+                      <button mat-stroked-button color="warn" (click)="cancelEdit()">
+                        <lucide-icon name="x" size="14"></lucide-icon>
+                        إلغاء
+                      </button>
+                    </div>
+                  </div>
                   <div class="meta">
-                    <span class="time">{{ formatMessageTime(m.sentAt) }}</span>
-                    <span class="ticks" [class.read]="m.status === 'Read'">
-                      {{ m.status === 'Read' ? '✓✓' : (m.status === 'Delivered' ? '✓' : '⌛') }}
+                    <span class="time">{{ formatMessageTime(m.sentAt || m.createdAt) }}</span>
+                    <span class="ticks" *ngIf="m.status === 'Delivered' || m.status === 'Read'" [class.read]="m.status === 'Read'">
+                      {{ m.status === 'Read' ? '✓✓' : '✓' }}
                     </span>
+                  </div>
+                  <div class="bubble-actions" *ngIf="m.isMine && editingMessageId !== m.id">
+                    <button mat-icon-button matTooltip="تعديل الرسالة" class="message-action-btn edit-btn" (click)="startEdit(m)">
+                      <lucide-icon name="edit-3" size="12"></lucide-icon>
+                    </button>
+                    <button mat-icon-button matTooltip="حذف الرسالة" class="message-action-btn delete-btn" (click)="deleteMessage(m.id)">
+                      <lucide-icon name="trash" size="12"></lucide-icon>
+                    </button>
                   </div>
                 </div>
               </div>

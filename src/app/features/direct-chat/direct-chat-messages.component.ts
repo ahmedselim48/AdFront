@@ -6,7 +6,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { DirectChatService } from '../../core/services/direct-chat.service';
 import { MessagesService } from '../../core/services/messages.service';
 import { SignalRService } from '../../core/services/signalr.service';
-import { DirectMessage } from '../../models/chat.models';
+import { DirectMessageDto } from '../../models/chat.models';
 import { AuthService } from '../../core/auth/auth.service';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 import { LucideAngularModule } from 'lucide-angular';
@@ -20,15 +20,15 @@ import { LucideAngularModule } from 'lucide-angular';
 })
 export class DirectChatMessagesComponent implements OnInit, OnDestroy {
   id!: string;
-  messages: DirectMessage[] = [];
+  messages: DirectMessageDto[] = [];
   loading = true;
   form!: FormGroup;
   meId?: string;
   isTyping = false;
   otherUser?: { name: string; imageUrl?: string; isOnline: boolean; lastSeen?: Date };
-  messageGroups: Array<{ date: string; messages: (DirectMessage & { isFirstInGroup: boolean; isDelivered: boolean; isRead: boolean; isEdited?: boolean })[] }> = [];
+  messageGroups: Array<{ date: string; messages: (DirectMessageDto & { isFirstInGroup: boolean; isDelivered: boolean; isRead: boolean; isEdited?: boolean })[] }> = [];
   searchTerm = '';
-  filteredMessages: DirectMessage[] = [];
+  filteredMessages: DirectMessageDto[] = [];
   editingMessageId?: string;
   editingMessageContent = '';
   private typingTimeout?: any;
@@ -68,8 +68,8 @@ export class DirectChatMessagesComponent implements OnInit, OnDestroy {
     this.directChat.listDirectMessages(this.id).subscribe({ 
       next: m => { 
         console.log('Raw messages from API:', m);
-        this.messages = m; 
-        this.filteredMessages = m;
+        this.messages = m as DirectMessageDto[];
+        this.filteredMessages = m as DirectMessageDto[];
         this.loading = false; 
         this.groupMessages();
         this.loadOtherUserInfo();
@@ -93,7 +93,7 @@ export class DirectChatMessagesComponent implements OnInit, OnDestroy {
     this.filterMessages();
   }
 
-  editMessage(message: DirectMessage) {
+  editMessage(message: DirectMessageDto) {
     console.log('Starting edit for message:', message);
     this.editingMessageId = message.id;
     this.editingMessageContent = this.getMessageContent(message);
@@ -239,7 +239,7 @@ export class DirectChatMessagesComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const groups = new Map<string, (DirectMessage & { isFirstInGroup: boolean; isDelivered: boolean; isRead: boolean })[]>();
+    const groups = new Map<string, (DirectMessageDto & { isFirstInGroup: boolean; isDelivered: boolean; isRead: boolean })[]>();
     
     messagesToGroup.forEach((message, index) => {
       const date = new Date(message.createdAt).toDateString();
@@ -376,7 +376,7 @@ export class DirectChatMessagesComponent implements OnInit, OnDestroy {
     if(el){ el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' }); }
   }
 
-  getMessageContent(message: DirectMessage): string {
+  getMessageContent(message: DirectMessageDto): string {
     // Handle different content types
     if (message.content === null || message.content === undefined) {
       return 'رسالة فارغة';

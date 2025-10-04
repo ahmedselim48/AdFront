@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { GeneralResponse } from '../../models/common.models';
-import { AdDto, AdImageDto, AdStatus, CreateAdDto, UpdateAdDto, AdFilters } from '../../models/profile.models';
+import { AdDto, AdImageDto, AdStatus, CreateAdDto, UpdateAdDto, AdFilters } from '../../models/ads.models';
 
 // Ad-related interfaces are now imported from profile.models.ts
 
@@ -102,15 +102,16 @@ export class AdsService {
     
     // Add ad data
     formData.append('title', adData.title);
-    formData.append('description', adData.description);
+    formData.append('description', adData.description || '');
     formData.append('price', adData.price.toString());
     if (adData.categoryId) formData.append('categoryId', adData.categoryId.toString());
     if (adData.location) formData.append('location', adData.location);
-    if (adData.contactInfo) formData.append('contactInfo', adData.contactInfo);
-    if (adData.tags) formData.append('tags', JSON.stringify(adData.tags));
+    if (adData.contactNumber) formData.append('contactNumber', adData.contactNumber);
+    if (adData.contactMethod) formData.append('contactMethod', adData.contactMethod);
+    if (adData.keywords) formData.append('keywords', JSON.stringify(adData.keywords));
     
     // Add files
-    adData.files.forEach((file, index) => {
+    adData.files.forEach((file: File, index: number) => {
       formData.append(`images`, file);
     });
 
@@ -144,10 +145,10 @@ export class AdsService {
       params = params.set('maxPrice', filters.maxPrice.toString());
     }
     if (filters?.dateFrom) {
-      params = params.set('dateFrom', filters.dateFrom);
+      params = params.set('dateFrom', filters.dateFrom.toISOString());
     }
     if (filters?.dateTo) {
-      params = params.set('dateTo', filters.dateTo);
+      params = params.set('dateTo', filters.dateTo.toISOString());
     }
 
     return this.http.get<GeneralResponse<AdDto[]>>(this.apiUrl, { params });

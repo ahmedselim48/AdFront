@@ -28,9 +28,10 @@ export interface DirectConversationDto {
   user2Id: string;
   user2Name: string;
   status: ConversationStatus;
-  lastMessage?: string;
+  lastMessage?: DirectMessageDto;
   lastMessageAt?: Date;
   unreadCount: number;
+  unreadMessageCount: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -69,12 +70,7 @@ export interface SendMessageDto {
   replyToId?: string;
 }
 
-export interface SendDirectMessageDto {
-  content: string;
-  messageType?: 'Text' | 'Image' | 'File';
-  replyToId?: string;
-  directConversationId: string;
-}
+// Note: SendDirectMessageDto is defined later in the file
 
 // Smart Replies Models
 export interface ReplyRequestCommand {
@@ -157,9 +153,39 @@ export interface PagedResult<T> {
   totalPages: number;
 }
 
+// Additional types
+export type MessageType = 'Text' | 'Image' | 'File' | 'System';
+export type MessageStatus = 'Sent' | 'Delivered' | 'Read' | 'Failed';
+export type SenderType = 'User' | 'System' | 'Bot';
+
+export interface DirectMessageDto {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  senderName: string;
+  senderType: SenderType;
+  content: string;
+  messageType: MessageType;
+  status: MessageStatus;
+  createdAt: Date;
+  sentAt?: Date; // Add sentAt for backward compatibility
+  readAt?: Date;
+  isRead?: boolean; // Add isRead for backward compatibility
+  replyToId?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface SendDirectMessageDto {
+  conversationId: string;
+  content: string;
+  messageType?: 'Text' | 'Image' | 'File';
+  replyToId?: string;
+  metadata?: Record<string, unknown>;
+}
+
 // Legacy aliases for backward compatibility
 export type Conversation = ConversationDto;
 export type DirectConversation = DirectConversationDto;
 export type Message = ChatMessageDto;
-export type DirectMessage = ChatMessageDto;
+export type DirectMessage = DirectMessageDto;
 export type ReplyTemplate = TemplateDto;

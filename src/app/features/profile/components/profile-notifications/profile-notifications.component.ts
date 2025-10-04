@@ -16,8 +16,14 @@ import { LucideAngularModule, Bell, Check, Trash2, Settings, Filter, Search, Ref
 import { Subject, takeUntil } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 
-import { NotificationsService } from '../../../../core/services/notifications.service';
-import { NotificationDto, NotificationSettingsDto, NotificationFilters } from '../../../../models/profile.models';
+import { NotificationService } from '../../../../core/services/notification.service';
+import { 
+  NotificationDto, 
+  NotificationSettingsDto, 
+  NotificationFilterDto,
+  NotificationListResponseDto,
+  NotificationStatsDto
+} from '../../../../models/notification.model';
 
 @Component({
   selector: 'app-profile-notifications',
@@ -60,22 +66,59 @@ export class ProfileNotificationsComponent implements OnInit, OnDestroy {
   currentPage = 1;
   pageSize = 20;
   totalPages = 1;
+  totalCount = 0;
+  
+  // Connection state
+  isConnected = false;
+  connectionError = '';
+  
+  // Stats
+  stats: NotificationStatsDto | null = null;
 
   private destroy$ = new Subject<void>();
-  private notificationsService = inject(NotificationsService);
+  private notificationService = inject(NotificationService);
   private toastr = inject(ToastrService);
   private fb = inject(FormBuilder);
 
   ngOnInit() {
     this.initializeFilterForm();
     this.initializeSettingsForm();
+    this.subscribeToNotifications();
+    this.subscribeToConnectionState();
     this.loadNotifications();
     this.loadSettings();
+    this.loadStats();
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private subscribeToNotifications() {
+    this.notificationService.notifications$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(notifications => {
+        this.notifications = notifications;
+        this.applyFilters();
+      });
+  }
+
+  private subscribeToConnectionState() {
+    this.notificationService.connectionState$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(isConnected => {
+        this.isConnected = isConnected;
+      });
+
+    this.notificationService.connectionError$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(error => {
+        this.connectionError = error;
+        if (error) {
+          this.toastr.warning(error, 'تحذير');
+        }
+      });
   }
 
   private initializeFilterForm() {
@@ -92,31 +135,67 @@ export class ProfileNotificationsComponent implements OnInit, OnDestroy {
 
   private initializeSettingsForm() {
     this.settingsForm = this.fb.group({
+      // General notification settings
       emailNotifications: [true],
       pushNotifications: [true],
       smsNotifications: [false],
-      marketingEmails: [true],
-      adUpdates: [true],
-      chatMessages: [true],
-      systemUpdates: [true],
-      performanceAlerts: [true],
-      competitionReports: [true],
-      securityAlerts: [true]
+      
+      // Email specific settings
+      emailAdUpdates: [true],
+      emailChatMessages: [true],
+      emailSystemAlerts: [true],
+      emailSecurityAlerts: [true],
+      emailPerformanceAlerts: [true],
+      emailMarketingEmails: [true],
+      
+      // Push notification settings
+      pushAdUpdates: [true],
+      pushChatMessages: [true],
+      pushSystemAlerts: [true],
+      pushSecurityAlerts: [true],
+      pushPerformanceAlerts: [true],
+      
+      // SMS settings
+      smsSecurityAlerts: [false],
+      smsPaymentAlerts: [false],
+      
+      // Quiet hours settings
+      enableQuietHours: [false],
+      quietHoursStart: ['22:00'],
+      quietHoursEnd: ['08:00'],
+      timeZone: ['Asia/Riyadh'],
+      
+      // Frequency settings
+      emailFrequency: ['Daily'],
+      pushFrequency: ['Instant'],
+      
+      // Priority settings
+      receiveLowPriority: [true],
+      receiveMediumPriority: [true],
+      receiveHighPriority: [true],
+      receiveUrgentPriority: [true]
     });
   }
 
   loadNotifications() {
     this.isLoading = true;
     
-    this.notificationsService.getNotifications(this.currentPage, this.pageSize).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (response: any) => {
-        if (response && response.success && response.data) {
-          this.notifications = response.data;
-          this.applyFilters();
-        }
+    const filters: NotificationFilterDto = {
+      page: this.currentPage,
+      pageSize: this.pageSize,
+      ...this.filterForm.value
+    };
+
+    this.notificationService.getAll(filters).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (response: NotificationListResponseDto) => {
+        // Update local state through service
+        this.notifications = response.notifications;
+        this.totalCount = response.totalCount;
+        this.totalPages = response.totalPages;
+        this.applyFilters();
         this.isLoading = false;
       },
-      error: (error: any) => {
+      error: (error: unknown) => {
         console.error('Error loading notifications:', error);
         this.toastr.error('فشل في تحميل الإشعارات', 'خطأ');
         this.isLoading = false;
@@ -125,15 +204,24 @@ export class ProfileNotificationsComponent implements OnInit, OnDestroy {
   }
 
   loadSettings() {
-    this.notificationsService.getNotificationSettings().pipe(takeUntil(this.destroy$)).subscribe({
-      next: (response: any) => {
-        if (response && response.success && response.data) {
-          this.settings = response.data;
-          this.settingsForm.patchValue(response.data);
-        }
+    this.notificationService.getSettings().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (settings: NotificationSettingsDto) => {
+        this.settings = settings;
+        this.settingsForm.patchValue(settings);
       },
-      error: (error: any) => {
+      error: (error: unknown) => {
         console.error('Error loading notification settings:', error);
+      }
+    });
+  }
+
+  loadStats() {
+    this.notificationService.getStats().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (stats: NotificationStatsDto) => {
+        this.stats = stats;
+      },
+      error: (error: unknown) => {
+        console.error('Error loading notification stats:', error);
       }
     });
   }
@@ -148,7 +236,8 @@ export class ProfileNotificationsComponent implements OnInit, OnDestroy {
       filtered = filtered.filter(notification => 
         notification.title.toLowerCase().includes(searchLower) ||
         notification.message.toLowerCase().includes(searchLower) ||
-        notification.type.toLowerCase().includes(searchLower)
+        notification.type.toLowerCase().includes(searchLower) ||
+        notification.category.toLowerCase().includes(searchLower)
       );
     }
 
@@ -166,6 +255,17 @@ export class ProfileNotificationsComponent implements OnInit, OnDestroy {
     if (this.showUnreadOnly) {
       filtered = filtered.filter(notification => !notification.isRead);
     }
+
+    // Sort by priority and date
+    filtered.sort((a, b) => {
+      // First by priority
+      const priorityOrder = { 'Urgent': 4, 'High': 3, 'Medium': 2, 'Low': 1 };
+      const priorityDiff = (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
+      if (priorityDiff !== 0) return priorityDiff;
+      
+      // Then by date (newest first)
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
 
     this.filteredNotifications = filtered;
     this.updatePagination();
@@ -195,14 +295,14 @@ export class ProfileNotificationsComponent implements OnInit, OnDestroy {
 
   onMarkAsRead(notification: NotificationDto) {
     if (!notification.isRead) {
-      this.notificationsService.markAsRead(notification.id).pipe(takeUntil(this.destroy$)).subscribe({
-        next: (response: any) => {
-          if (response && response.success) {
-            notification.isRead = true;
-            this.toastr.success('تم تمييز الإشعار كمقروء', 'تم');
-          }
+      this.notificationService.markAsRead(notification.id).pipe(takeUntil(this.destroy$)).subscribe({
+        next: () => {
+          // Local state will be updated automatically through the service
+          this.toastr.success('تم تمييز الإشعار كمقروء', 'تم');
+          // Track the action
+          this.notificationService.trackAction(notification.id, 'read').subscribe();
         },
-        error: (error: any) => {
+        error: (error: unknown) => {
           console.error('Error marking notification as read:', error);
           this.toastr.error('فشل في تمييز الإشعار كمقروء', 'خطأ');
         }
@@ -213,16 +313,14 @@ export class ProfileNotificationsComponent implements OnInit, OnDestroy {
   onMarkAllAsRead() {
     this.isSaving = true;
     
-    this.notificationsService.markAllAsRead().pipe(takeUntil(this.destroy$)).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.notifications.forEach(notification => notification.isRead = true);
-          this.applyFilters();
-          this.toastr.success('تم تمييز جميع الإشعارات كمقروءة', 'تم');
-        }
+    this.notificationService.markAllAsRead().pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        // Local state will be updated automatically through the service
+        this.applyFilters();
+        this.toastr.success('تم تمييز جميع الإشعارات كمقروءة', 'تم');
         this.isSaving = false;
       },
-      error: (error) => {
+      error: (error: unknown) => {
         console.error('Error marking all notifications as read:', error);
         this.toastr.error('فشل في تمييز الإشعارات كمقروءة', 'خطأ');
         this.isSaving = false;
@@ -232,15 +330,13 @@ export class ProfileNotificationsComponent implements OnInit, OnDestroy {
 
   onDeleteNotification(notification: NotificationDto) {
     if (confirm('هل أنت متأكد من حذف هذا الإشعار؟')) {
-      this.notificationsService.deleteNotification(notification.id).pipe(takeUntil(this.destroy$)).subscribe({
-        next: (response: any) => {
-          if (response && response.success) {
-            this.notifications = this.notifications.filter(n => n.id !== notification.id);
-            this.applyFilters();
-            this.toastr.success('تم حذف الإشعار', 'تم');
-          }
+      this.notificationService.delete(notification.id).pipe(takeUntil(this.destroy$)).subscribe({
+        next: () => {
+          // Local state will be updated automatically through the service
+          this.applyFilters();
+          this.toastr.success('تم حذف الإشعار', 'تم');
         },
-        error: (error: any) => {
+        error: (error: unknown) => {
           console.error('Error deleting notification:', error);
           this.toastr.error('فشل في حذف الإشعار', 'خطأ');
         }
@@ -252,16 +348,15 @@ export class ProfileNotificationsComponent implements OnInit, OnDestroy {
     if (confirm('هل أنت متأكد من حذف جميع الإشعارات؟')) {
       this.isSaving = true;
       
-      this.notificationsService.deleteAllNotifications().pipe(takeUntil(this.destroy$)).subscribe({
-        next: (response: any) => {
-          if (response && response.success) {
-            this.notifications = [];
-            this.applyFilters();
-            this.toastr.success('تم حذف جميع الإشعارات', 'تم');
-          }
+      const allIds = this.notifications.map(n => n.id);
+      this.notificationService.deleteMultiple(allIds).pipe(takeUntil(this.destroy$)).subscribe({
+        next: () => {
+          // Local state will be updated automatically through the service
+          this.applyFilters();
+          this.toastr.success('تم حذف جميع الإشعارات', 'تم');
           this.isSaving = false;
         },
-        error: (error: any) => {
+        error: (error: unknown) => {
           console.error('Error deleting all notifications:', error);
           this.toastr.error('فشل في حذف الإشعارات', 'خطأ');
           this.isSaving = false;
@@ -278,19 +373,15 @@ export class ProfileNotificationsComponent implements OnInit, OnDestroy {
     if (this.settingsForm.valid) {
       this.isSaving = true;
       
-      const settingsData = this.settingsForm.value;
-      this.notificationsService.updateNotificationSettings(settingsData).pipe(takeUntil(this.destroy$)).subscribe({
-        next: (response: any) => {
-          if (response && response.success) {
-            this.settings = settingsData;
-            this.toastr.success('تم حفظ إعدادات الإشعارات', 'تم');
-            this.showSettings = false;
-          } else {
-            this.toastr.error('فشل في حفظ إعدادات الإشعارات', 'خطأ');
-          }
+      const settingsData = this.settingsForm.value as NotificationSettingsDto;
+      this.notificationService.updateSettings(settingsData).pipe(takeUntil(this.destroy$)).subscribe({
+        next: () => {
+          this.settings = settingsData;
+          this.toastr.success('تم حفظ إعدادات الإشعارات', 'تم');
+          this.showSettings = false;
           this.isSaving = false;
         },
-        error: (error: any) => {
+        error: (error: unknown) => {
           console.error('Error updating notification settings:', error);
           this.toastr.error('فشل في حفظ إعدادات الإشعارات', 'خطأ');
           this.isSaving = false;
@@ -301,31 +392,124 @@ export class ProfileNotificationsComponent implements OnInit, OnDestroy {
 
   onRefresh() {
     this.loadNotifications();
+    this.loadStats();
     this.toastr.success('تم تحديث الإشعارات', 'تم');
   }
 
   getNotificationIcon(type: string): string {
     switch (type.toLowerCase()) {
-      case 'ad_published': return 'eye';
-      case 'ad_expired': return 'calendar';
-      case 'message_received': return 'message-circle';
-      case 'performance_alert': return 'trending-up';
-      case 'competition_report': return 'bar-chart-3';
-      case 'security_alert': return 'shield';
-      case 'system_update': return 'settings';
+      // Ad related
+      case 'adpublished': return 'eye';
+      case 'adpublishfailed': return 'x-circle';
+      case 'adexpired': return 'calendar';
+      case 'adstatuschanged': return 'refresh-cw';
+      
+      // Competition related
+      case 'competitionanalysis': return 'bar-chart-3';
+      case 'competitionreport': return 'file-text';
+      case 'newcompetitor': return 'user-plus';
+      case 'cheapercompetitor': return 'trending-down';
+      
+      // Performance related
+      case 'performancealert': return 'trending-up';
+      case 'performanceimprovement': return 'trending-up';
+      case 'weeklysummary': return 'calendar';
+      case 'dailyreport': return 'file-text';
+      case 'abtesting': return 'flask';
+      
+      // Market insights
+      case 'marketinsights': return 'lightbulb';
+      case 'smartrecommendation': return 'zap';
+      case 'trendingcategory': return 'trending-up';
+      
+      // Chat related
+      case 'newmessage': return 'message-circle';
+      case 'contactrequest': return 'user-plus';
+      case 'messagereaction': return 'heart';
+      
+      // Security related
+      case 'security': return 'shield';
+      case 'accountsecurity': return 'shield-check';
+      case 'passwordchanged': return 'key';
+      case 'emailverification': return 'mail';
+      
+      // Payment related
+      case 'payment': return 'credit-card';
+      case 'subscriptionexpiring': return 'clock';
+      case 'subscriptionrenewed': return 'check-circle';
+      case 'subscriptioncancelled': return 'x-circle';
+      
+      // System related
+      case 'systemmaintenance': return 'wrench';
+      case 'systemupdate': return 'settings';
+      case 'featureannouncement': return 'megaphone';
+      
+      // General
+      case 'general': return 'info';
+      case 'broadcast': return 'radio';
+      case 'group': return 'users';
+      case 'urgent': return 'alert-triangle';
+      case 'highpriority': return 'star';
+      
       default: return 'bell';
     }
   }
 
   getNotificationColor(type: string): string {
     switch (type.toLowerCase()) {
-      case 'ad_published': return 'success';
-      case 'ad_expired': return 'warn';
-      case 'message_received': return 'primary';
-      case 'performance_alert': return 'accent';
-      case 'competition_report': return 'info';
-      case 'security_alert': return 'warn';
-      case 'system_update': return 'basic';
+      // Ad related - Green for success, Orange for warnings
+      case 'adpublished': return 'success';
+      case 'adpublishfailed': return 'error';
+      case 'adexpired': return 'warn';
+      case 'adstatuschanged': return 'info';
+      
+      // Competition related - Blue
+      case 'competitionanalysis': return 'primary';
+      case 'competitionreport': return 'primary';
+      case 'newcompetitor': return 'info';
+      case 'cheapercompetitor': return 'warn';
+      
+      // Performance related - Purple/Accent
+      case 'performancealert': return 'accent';
+      case 'performanceimprovement': return 'success';
+      case 'weeklysummary': return 'info';
+      case 'dailyreport': return 'info';
+      case 'abtesting': return 'accent';
+      
+      // Market insights - Blue
+      case 'marketinsights': return 'primary';
+      case 'smartrecommendation': return 'accent';
+      case 'trendingcategory': return 'success';
+      
+      // Chat related - Blue
+      case 'newmessage': return 'primary';
+      case 'contactrequest': return 'info';
+      case 'messagereaction': return 'accent';
+      
+      // Security related - Red/Orange
+      case 'security': return 'warn';
+      case 'accountsecurity': return 'error';
+      case 'passwordchanged': return 'warn';
+      case 'emailverification': return 'info';
+      
+      // Payment related - Green/Orange
+      case 'payment': return 'success';
+      case 'subscriptionexpiring': return 'warn';
+      case 'subscriptionrenewed': return 'success';
+      case 'subscriptioncancelled': return 'error';
+      
+      // System related - Gray
+      case 'systemmaintenance': return 'basic';
+      case 'systemupdate': return 'basic';
+      case 'featureannouncement': return 'accent';
+      
+      // General - Default colors
+      case 'general': return 'primary';
+      case 'broadcast': return 'accent';
+      case 'group': return 'info';
+      case 'urgent': return 'error';
+      case 'highpriority': return 'warn';
+      
       default: return 'primary';
     }
   }
@@ -367,5 +551,154 @@ export class ProfileNotificationsComponent implements OnInit, OnDestroy {
 
   getReadNotificationsCount(): number {
     return this.notifications.filter(n => n.isRead).length;
+  }
+
+  onNotificationClick(notification: NotificationDto) {
+    // Track click action
+    this.notificationService.trackAction(notification.id, 'click').subscribe();
+    
+    // Mark as read if not already read
+    if (!notification.isRead) {
+      this.onMarkAsRead(notification);
+    }
+    
+    // Handle action if available
+    if (notification.actionUrl) {
+      // Navigate to action URL or handle action
+      console.log('Navigate to:', notification.actionUrl);
+    }
+  }
+
+  onNotificationAction(notification: NotificationDto) {
+    // Track action
+    this.notificationService.trackAction(notification.id, 'action', notification.actionType).subscribe();
+    
+    // Handle specific action based on type
+    switch (notification.actionType) {
+      case 'View':
+        if (notification.actionUrl) {
+          // Navigate to URL
+          console.log('Navigate to:', notification.actionUrl);
+        }
+        break;
+      case 'Delete':
+        this.onDeleteNotification(notification);
+        break;
+      default:
+        console.log('Unknown action type:', notification.actionType);
+    }
+  }
+
+  getConnectionStatusText(): string {
+    if (this.isConnected) {
+      return 'متصل';
+    } else if (this.connectionError) {
+      return 'خطأ في الاتصال';
+    } else {
+      return 'غير متصل';
+    }
+  }
+
+  getConnectionStatusClass(): string {
+    if (this.isConnected) {
+      return 'connected';
+    } else if (this.connectionError) {
+      return 'error';
+    } else {
+      return 'disconnected';
+    }
+  }
+
+  getPriorityClass(priority: string): string {
+    switch (priority.toLowerCase()) {
+      case 'urgent': return 'urgent';
+      case 'high': return 'high';
+      case 'medium': return 'medium';
+      case 'low': return 'low';
+      default: return 'medium';
+    }
+  }
+
+  getCategoryClass(category: string): string {
+    switch (category.toLowerCase()) {
+      case 'ad': return 'ad-category';
+      case 'chat': return 'chat-category';
+      case 'system': return 'system-category';
+      case 'security': return 'security-category';
+      case 'payment': return 'payment-category';
+      case 'analysis': return 'analysis-category';
+      case 'performance': return 'performance-category';
+      case 'competition': return 'competition-category';
+      case 'insights': return 'insights-category';
+      case 'recommendation': return 'recommendation-category';
+      case 'trends': return 'trends-category';
+      case 'contact': return 'contact-category';
+      case 'subscription': return 'subscription-category';
+      case 'general': return 'general-category';
+      case 'group': return 'group-category';
+      default: return 'general-category';
+    }
+  }
+
+  getNotificationTypeText(type: string): string {
+    switch (type.toLowerCase()) {
+      case 'adpublished': return 'تم نشر الإعلان';
+      case 'adpublishfailed': return 'فشل في نشر الإعلان';
+      case 'adexpired': return 'انتهت صلاحية الإعلان';
+      case 'adstatuschanged': return 'تغيرت حالة الإعلان';
+      case 'competitionanalysis': return 'تحليل المنافسة';
+      case 'competitionreport': return 'تقرير المنافسة';
+      case 'newcompetitor': return 'منافس جديد';
+      case 'cheapercompetitor': return 'منافس أرخص';
+      case 'performancealert': return 'تنبيه الأداء';
+      case 'performanceimprovement': return 'تحسن الأداء';
+      case 'weeklysummary': return 'ملخص أسبوعي';
+      case 'dailyreport': return 'تقرير يومي';
+      case 'abtesting': return 'اختبار A/B';
+      case 'marketinsights': return 'رؤى السوق';
+      case 'smartrecommendation': return 'توصية ذكية';
+      case 'trendingcategory': return 'فئة رائجة';
+      case 'newmessage': return 'رسالة جديدة';
+      case 'contactrequest': return 'طلب اتصال';
+      case 'messagereaction': return 'تفاعل مع الرسالة';
+      case 'security': return 'أمان';
+      case 'accountsecurity': return 'أمان الحساب';
+      case 'passwordchanged': return 'تم تغيير كلمة المرور';
+      case 'emailverification': return 'التحقق من البريد الإلكتروني';
+      case 'payment': return 'دفع';
+      case 'subscriptionexpiring': return 'انتهاء الاشتراك';
+      case 'subscriptionrenewed': return 'تجديد الاشتراك';
+      case 'subscriptioncancelled': return 'إلغاء الاشتراك';
+      case 'systemmaintenance': return 'صيانة النظام';
+      case 'systemupdate': return 'تحديث النظام';
+      case 'featureannouncement': return 'إعلان ميزة جديدة';
+      case 'general': return 'عام';
+      case 'broadcast': return 'بث';
+      case 'group': return 'مجموعة';
+      case 'urgent': return 'عاجل';
+      case 'highpriority': return 'أولوية عالية';
+      default: return type;
+    }
+  }
+
+  getCategoryText(category: string): string {
+    switch (category.toLowerCase()) {
+      case 'ad': return 'إعلانات';
+      case 'chat': return 'دردشة';
+      case 'system': return 'نظام';
+      case 'security': return 'أمان';
+      case 'payment': return 'دفع';
+      case 'analysis': return 'تحليل';
+      case 'performance': return 'أداء';
+      case 'competition': return 'منافسة';
+      case 'insights': return 'رؤى';
+      case 'recommendation': return 'توصيات';
+      case 'trends': return 'اتجاهات';
+      case 'contact': return 'اتصال';
+      case 'subscription': return 'اشتراك';
+      case 'general': return 'عام';
+      case 'group': return 'مجموعة';
+      default: return category;
+    }
   }
 }

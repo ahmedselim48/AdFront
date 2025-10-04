@@ -25,6 +25,18 @@ export interface SubscriptionDto {
   daysLeft: number;
 }
 
+export interface PaymentRequestDto {
+  provider: string;
+  amount: number;
+}
+
+export interface PaymentResponseDto {
+  success: boolean;
+  transactionId: string;
+  provider: string;
+  expiryDate: string;
+}
+
 export interface PaymentLogDto {
   id: string;
   provider: string;

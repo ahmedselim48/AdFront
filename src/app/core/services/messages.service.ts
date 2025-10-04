@@ -14,7 +14,7 @@ import {
   MessageType,
   MessageStatus,
   SenderType
-} from '../../models/profile.models';
+} from '../../models/chat.models';
 import { SignalRService } from './signalr.service';
 
 @Injectable({
@@ -48,7 +48,7 @@ export class MessagesService implements OnDestroy {
     // Listen for new messages from SignalR
     this.signalRService.newMessage$.pipe(takeUntil(this.destroy$)).subscribe(message => {
       if (message) {
-        this.newMessageSubject.next(message);
+        this.newMessageSubject.next(message as DirectMessageDto);
       }
     });
 

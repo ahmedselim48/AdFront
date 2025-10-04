@@ -4,10 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { Subject, takeUntil, filter } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
-import { NotificationsService } from '../../../core/services/notifications.service';
 import { UserProfile } from '../../../models/auth.models';
-import { GeneralResponse } from '../../../models/common.models';
-import { NotificationDto } from '../../../models/profile.models';
+import { NotificationService } from '../../../core/services/notification.service';
+import { NotificationDto } from '../../../models/notification.model';
 import { 
   LucideAngularModule,
   Home, 
@@ -74,12 +73,6 @@ import {
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" [routerLink]="isAdmin ? '/admin/dashboard' : '/dashboard'" (click)="closeMobileMenu()" *ngIf="isLoggedIn">
-                  <lucide-icon name="bar-chart-3" size="20" class="me-2"></lucide-icon>
-                  لوحة التحكم
-                </a>
-              </li>
-              <li class="nav-item">
                 <a class="nav-link" routerLink="/chat" (click)="closeMobileMenu()" *ngIf="isLoggedIn">
                   <lucide-icon name="message-circle" size="20" class="me-2"></lucide-icon>
                   المحادثات
@@ -133,12 +126,6 @@ import {
                 <a class="nav-link" routerLink="/ads" routerLinkActive="active">
                   <lucide-icon name="trending-up" size="20" class="me-2"></lucide-icon>
                   الإعلانات
-                </a>
-              </li>
-              <li class="nav-item" *ngIf="isLoggedIn">
-                <a class="nav-link" [routerLink]="isAdmin ? '/admin/dashboard' : '/dashboard'" routerLinkActive="active">
-                  <lucide-icon name="bar-chart-3" size="20" class="me-2"></lucide-icon>
-                  لوحة التحكم
                 </a>
               </li>
               <li class="nav-item" *ngIf="isLoggedIn">
@@ -403,7 +390,7 @@ import {
 })
 export class LayoutComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
-  private notificationsService = inject(NotificationsService);
+  private notificationsService = inject(NotificationService);
   private router = inject(Router);
   private destroy$ = new Subject<void>();
 
@@ -427,7 +414,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     // Subscribe to notifications count
     this.notificationsService.unreadCount$.pipe(
       takeUntil(this.destroy$)
-    ).subscribe(count => {
+    ).subscribe((count: number) => {
       this.unreadCount = count;
     });
 
@@ -481,12 +468,9 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   private loadUnreadCount() {
     // Load notifications to get unread count
-    this.notificationsService.getNotifications(1, 50).subscribe({
-      next: (response: GeneralResponse<NotificationDto[]>) => {
-        if (response.success && response.data) {
-          const unreadCount = response.data.filter(n => !n.isRead).length;
-          this.unreadCount = unreadCount;
-        }
+    this.notificationsService.getUnreadCount().subscribe({
+      next: (count: number) => {
+        this.unreadCount = count;
       },
       error: () => {
         // Ignore errors for notifications count

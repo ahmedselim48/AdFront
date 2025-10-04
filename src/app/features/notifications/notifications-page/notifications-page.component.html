@@ -1,0 +1,326 @@
+<div class="notifications-page">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">الإشعارات</h1>
+      <p class="page-subtitle">إدارة جميع إشعاراتك في مكان واحد</p>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <button 
+        mat-raised-button 
+        color="primary"
+        [disabled]="areAllNotificationsRead() || isBulkActionLoading"
+        (click)="markAllAsRead()">
+        <mat-icon>done_all</mat-icon>
+        <span>تعيين الكل كمقروء</span>
+      </button>
+      
+      <button 
+        mat-button 
+        routerLink="/profile/notification-settings">
+        <mat-icon>settings</mat-icon>
+        <span>إعدادات الإشعارات</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="stats-cards" *ngIf="stats">
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <mat-icon class="stat-icon total">notifications</mat-icon>
+          <div class="stat-info">
+            <span class="stat-number">{{ stats.total }}</span>
+            <span class="stat-label">إجمالي الإشعارات</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <mat-icon class="stat-icon unread">mark_email_unread</mat-icon>
+          <div class="stat-info">
+            <span class="stat-number">{{ stats.unread }}</span>
+            <span class="stat-label">غير مقروء</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <mat-icon class="stat-icon urgent">priority_high</mat-icon>
+          <div class="stat-info">
+            <span class="stat-number">{{ stats.byPriority['Urgent'] || 0 }}</span>
+            <span class="stat-label">عاجل</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <mat-icon class="stat-icon high">trending_up</mat-icon>
+          <div class="stat-info">
+            <span class="stat-number">{{ stats.byPriority['High'] || 0 }}</span>
+            <span class="stat-label">أولوية عالية</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Filters Section -->
+  <mat-card class="filters-card">
+    <mat-card-header>
+      <mat-card-title>تصفية الإشعارات</mat-card-title>
+      <mat-card-subtitle>ابحث وصفف الإشعارات حسب احتياجاتك</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <form [formGroup]="filterForm" class="filters-form">
+        <!-- Basic Filters -->
+        <div class="filters-row">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>البحث في الإشعارات</mat-label>
+            <input matInput formControlName="search" placeholder="ابحث في العنوان أو المحتوى...">
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+
+          <button 
+            mat-button 
+            type="button"
+            (click)="toggleAdvancedFilters()"
+            class="toggle-filters-btn">
+            <mat-icon>{{ showAdvancedFilters ? 'expand_less' : 'expand_more' }}</mat-icon>
+            <span>فلتر متقدم</span>
+          </button>
+        </div>
+
+        <!-- Advanced Filters -->
+        <div class="advanced-filters" *ngIf="showAdvancedFilters">
+          <div class="filters-row">
+            <mat-form-field appearance="outline">
+              <mat-label>نوع الإشعار</mat-label>
+              <mat-select formControlName="type">
+                <mat-option value="">الكل</mat-option>
+                <mat-option *ngFor="let type of notificationTypes" [value]="type.value">
+                  {{ type.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>الفئة</mat-label>
+              <mat-select formControlName="category">
+                <mat-option value="">الكل</mat-option>
+                <mat-option *ngFor="let category of categories" [value]="category.value">
+                  {{ category.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>الأولوية</mat-label>
+              <mat-select formControlName="priority">
+                <mat-option value="">الكل</mat-option>
+                <mat-option *ngFor="let priority of priorities" [value]="priority.value">
+                  {{ priority.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>الحالة</mat-label>
+              <mat-select formControlName="isRead">
+                <mat-option value="">الكل</mat-option>
+                <mat-option *ngFor="let status of readStatusOptions" [value]="status.value">
+                  {{ status.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="filters-row">
+            <mat-form-field appearance="outline">
+              <mat-label>من تاريخ</mat-label>
+              <input matInput [matDatepicker]="fromPicker" formControlName="fromDate">
+              <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+              <mat-datepicker #fromPicker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>إلى تاريخ</mat-label>
+              <input matInput [matDatepicker]="toPicker" formControlName="toDate">
+              <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+              <mat-datepicker #toPicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Filter Actions -->
+        <div class="filter-actions">
+          <button 
+            mat-button 
+            type="button"
+            (click)="clearFilters()"
+            class="clear-filters-btn">
+            <mat-icon>clear</mat-icon>
+            <span>مسح الفلاتر</span>
+          </button>
+
+          <button 
+            mat-raised-button 
+            color="primary"
+            type="button"
+            (click)="applyFilters()"
+            [disabled]="isFiltering">
+            <mat-icon *ngIf="!isFiltering">filter_list</mat-icon>
+            <mat-spinner *ngIf="isFiltering" diameter="16"></mat-spinner>
+            <span>تطبيق الفلاتر</span>
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Notifications List -->
+  <mat-card class="notifications-card">
+    <mat-card-header>
+      <div class="card-header-content">
+        <div class="header-info">
+          <mat-card-title>قائمة الإشعارات</mat-card-title>
+          <mat-card-subtitle *ngIf="totalCount > 0">
+            عرض {{ (currentPage * pageSize) + 1 }} - {{ Math.min((currentPage + 1) * pageSize, totalCount) }} من {{ totalCount }} إشعار
+          </mat-card-subtitle>
+        </div>
+
+        <!-- Bulk Actions -->
+        <div class="bulk-actions" *ngIf="hasSelectedNotifications()">
+          <span class="selected-count">{{ getSelectedCount() }} محدد</span>
+          <button 
+            mat-button 
+            (click)="markSelectedAsRead()"
+            [disabled]="isBulkActionLoading">
+            <mat-icon>done</mat-icon>
+            <span>تعيين كمقروء</span>
+          </button>
+          <button 
+            mat-button 
+            color="warn"
+            (click)="deleteSelected()"
+            [disabled]="isBulkActionLoading">
+            <mat-icon>delete</mat-icon>
+            <span>حذف</span>
+          </button>
+        </div>
+      </div>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="loading-state">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>جاري تحميل الإشعارات...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!isLoading && notifications.length === 0" class="empty-state">
+        <mat-icon class="empty-icon">notifications_none</mat-icon>
+        <h3>لا توجد إشعارات</h3>
+        <p>لم يتم العثور على إشعارات تطابق معايير البحث المحددة</p>
+        <button mat-button (click)="clearFilters()">مسح الفلاتر</button>
+      </div>
+
+      <!-- Notifications List -->
+      <div *ngIf="!isLoading && notifications.length > 0" class="notifications-list">
+        <!-- Select All Checkbox -->
+        <div class="select-all-row">
+          <mat-checkbox 
+            [checked]="selectAll"
+            [indeterminate]="hasSelectedNotifications() && !selectAll"
+            (change)="onSelectAll($event)">
+            تحديد الكل
+          </mat-checkbox>
+        </div>
+
+        <!-- Notification Items -->
+        <div 
+          *ngFor="let notification of notifications; trackBy: trackByNotificationId"
+          class="notification-item"
+          [class.unread]="!notification.isRead"
+          [class.selected]="selectedNotifications.has(notification.id)"
+          [class]="getPriorityClass(notification.priority)">
+          
+          <!-- Selection Checkbox -->
+          <div class="selection-checkbox">
+            <mat-checkbox 
+              [checked]="selectedNotifications.has(notification.id)"
+              (change)="onNotificationSelect(notification, $event)">
+            </mat-checkbox>
+          </div>
+
+          <!-- Notification Icon -->
+          <div class="notification-icon">
+            <mat-icon 
+              [class]="getPriorityClass(notification.priority)"
+              class="category-icon">
+              {{ getNotificationIcon(notification.category) }}
+            </mat-icon>
+            
+            <!-- Priority Indicator -->
+            <div 
+              *ngIf="notification.priority === 'Urgent' || notification.priority === 'High'"
+              class="priority-indicator"
+              [class]="getPriorityClass(notification.priority)">
+            </div>
+          </div>
+
+          <!-- Notification Content -->
+          <div class="notification-content" (click)="onNotificationClick(notification)">
+            <div class="notification-header">
+              <h4 class="notification-title">{{ notification.title }}</h4>
+              <div class="notification-meta">
+                <span class="notification-time">{{ getRelativeTime(notification.createdAt) }}</span>
+                <span class="notification-priority" [class]="getPriorityClass(notification.priority)">
+                  {{ notification.priority }}
+                </span>
+              </div>
+            </div>
+            
+            <p class="notification-message">{{ notification.message }}</p>
+            
+            <!-- Action Button -->
+            <div *ngIf="notification.actionText" class="notification-action">
+              <span class="action-text">{{ notification.actionText }}</span>
+              <mat-icon class="action-icon">arrow_forward</mat-icon>
+            </div>
+          </div>
+
+          <!-- Unread Indicator -->
+          <div *ngIf="!notification.isRead" class="unread-indicator"></div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <mat-paginator 
+        *ngIf="!isLoading && notifications.length > 0"
+        #paginator
+        [length]="totalCount"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="pageSizeOptions"
+        [pageIndex]="currentPage"
+        (page)="onPageChange($event)"
+        showFirstLastButtons
+        class="notifications-paginator">
+      </mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</div>

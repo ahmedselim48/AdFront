@@ -2,8 +2,8 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { NotificationDto } from '../../models/profile.models';
-import { DirectMessageDto } from '../../models/profile.models';
+import { NotificationDto } from '../../models/notification.model';
+import { DirectMessageDto } from '../../models/chat.models';
 import { TokenStorageService } from '../auth/token-storage.service';
 
 @Injectable({

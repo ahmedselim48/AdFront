@@ -1,0 +1,438 @@
+.notification-settings-page {
+  padding: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+  direction: rtl;
+}
+
+// Page Header
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e5e7eb;
+
+  .header-content {
+    .page-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: #1f2937;
+      margin: 0 0 8px 0;
+    }
+
+    .page-subtitle {
+      font-size: 16px;
+      color: #6b7280;
+      margin: 0;
+    }
+  }
+
+  .save-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+
+    button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+}
+
+// Loading State
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #6b7280;
+
+  p {
+    margin-top: 16px;
+    font-size: 16px;
+  }
+}
+
+// Settings Form
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+// Settings Section
+.settings-section {
+  &.disabled-section {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  .mat-card-header {
+    .mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 20px;
+      font-weight: 600;
+      color: #1f2937;
+
+      .section-icon {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+        color: #3b82f6;
+      }
+
+      .coming-soon-chip {
+        background: #f59e0b;
+        color: white;
+        font-size: 12px;
+        height: 24px;
+        margin-left: 8px;
+      }
+    }
+
+    .mat-card-subtitle {
+      font-size: 14px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+  }
+
+  .mat-card-content {
+    padding-top: 16px;
+  }
+}
+
+// Settings Grid
+.settings-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// Setting Item
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #d1d5db;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  &.main-toggle {
+    background: #f8fafc;
+    border-color: #3b82f6;
+    border-width: 2px;
+
+    .setting-title {
+      color: #1f2937;
+      font-weight: 600;
+    }
+  }
+
+  .setting-info {
+    flex: 1;
+    margin-left: 16px;
+
+    .setting-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: #374151;
+      margin: 0 0 4px 0;
+    }
+
+    .setting-description {
+      font-size: 14px;
+      color: #6b7280;
+      margin: 0;
+      line-height: 1.4;
+    }
+  }
+
+  // Form Controls
+  mat-slide-toggle {
+    flex-shrink: 0;
+  }
+
+  mat-form-field {
+    min-width: 200px;
+    flex-shrink: 0;
+  }
+}
+
+// Sub-settings
+.sub-settings {
+  margin-top: 8px;
+  padding-right: 24px;
+  border-right: 2px solid #e5e7eb;
+  transition: all 0.2s ease;
+
+  &.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .setting-item {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    margin-bottom: 8px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .setting-title {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .setting-description {
+      font-size: 13px;
+    }
+  }
+}
+
+// Error Message
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 14px;
+  margin-top: 16px;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+// Bottom Save Actions
+.bottom-save-actions {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 24px;
+
+  .save-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 32px;
+    font-size: 16px;
+    font-weight: 500;
+    min-width: 200px;
+    justify-content: center;
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .notification-settings-page {
+    padding: 16px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+
+    .save-actions {
+      justify-content: stretch;
+
+      button {
+        flex: 1;
+        justify-content: center;
+      }
+    }
+  }
+
+  .settings-section {
+    .mat-card-header {
+      .mat-card-title {
+        font-size: 18px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+
+        .coming-soon-chip {
+          margin-left: 0;
+          margin-top: 4px;
+        }
+      }
+    }
+  }
+
+  .setting-item {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+
+    .setting-info {
+      margin-left: 0;
+    }
+
+    mat-form-field {
+      min-width: auto;
+      width: 100%;
+    }
+  }
+
+  .sub-settings {
+    padding-right: 16px;
+    border-right-width: 1px;
+  }
+
+  .bottom-save-actions {
+    .save-button {
+      width: 100%;
+      min-width: auto;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-section {
+    .mat-card-header {
+      .mat-card-title {
+        font-size: 16px;
+      }
+    }
+  }
+
+  .setting-item {
+    padding: 12px;
+
+    .setting-info {
+      .setting-title {
+        font-size: 14px;
+      }
+
+      .setting-description {
+        font-size: 12px;
+      }
+    }
+  }
+
+  .sub-settings {
+    padding-right: 12px;
+
+    .setting-item {
+      padding: 10px;
+    }
+  }
+}
+
+// RTL Support
+[dir="rtl"] {
+  .setting-item {
+    .setting-info {
+      margin-left: 0;
+      margin-right: 16px;
+    }
+  }
+
+  .sub-settings {
+    padding-right: 0;
+    padding-left: 24px;
+    border-right: none;
+    border-left: 2px solid #e5e7eb;
+
+    &.disabled {
+      border-left-color: #d1d5db;
+    }
+  }
+
+  .settings-section {
+    .mat-card-header {
+      .mat-card-title {
+        .coming-soon-chip {
+          margin-left: 0;
+          margin-right: 8px;
+        }
+      }
+    }
+  }
+}
+
+// Dark mode support (optional)
+@media (prefers-color-scheme: dark) {
+  .notification-settings-page {
+    .page-header {
+      border-bottom-color: #374151;
+    }
+
+    .settings-section {
+      .mat-card-header {
+        .mat-card-title {
+          color: #f9fafb;
+        }
+
+        .mat-card-subtitle {
+          color: #d1d5db;
+        }
+      }
+    }
+
+    .setting-item {
+      background: #1f2937;
+      border-color: #374151;
+
+      &:hover {
+        border-color: #4b5563;
+      }
+
+      &.main-toggle {
+        background: #111827;
+        border-color: #3b82f6;
+      }
+
+      .setting-info {
+        .setting-title {
+          color: #f9fafb;
+        }
+
+        .setting-description {
+          color: #d1d5db;
+        }
+      }
+    }
+
+    .sub-settings {
+      border-color: #374151;
+
+      .setting-item {
+        background: #111827;
+        border-color: #374151;
+      }
+    }
+
+    .error-message {
+      background: #7f1d1d;
+      border-color: #dc2626;
+      color: #fecaca;
+    }
+
+    .bottom-save-actions {
+      border-top-color: #374151;
+    }
+  }
+}

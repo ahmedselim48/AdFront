@@ -14,7 +14,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { AdsService } from '../../core/services/ads.service';
 import { AdItem } from '../../models/ads.models';
-import { AdFilters } from '../../models/profile.models';
+import { AdFilters } from '../../models/ads.models';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { ChatService } from '../../core/services/chat.service';
 import { NotificationService } from '../../shared/services/notification.service';
@@ -302,9 +302,11 @@ export class HomeComponent implements OnInit {
               price: 4200,
               status: 'Published',
               createdAt: new Date(),
-              viewsCount: 0,
-              clicksCount: 0,
-              likesCount: 0,
+            viewsCount: 0,
+            views: 0,
+            clicksCount: 0,
+            likesCount: 0,
+            likes: 0,
               commentsCount: 0,
               userId: 'user-1',
               userName: 'User',
@@ -320,9 +322,11 @@ export class HomeComponent implements OnInit {
               price: 52000,
               status: 'Published',
               createdAt: new Date(),
-              viewsCount: 0,
-              clicksCount: 0,
-              likesCount: 0,
+            viewsCount: 0,
+            views: 0,
+            clicksCount: 0,
+            likesCount: 0,
+            likes: 0,
               commentsCount: 0,
               userId: 'user-2',
               userName: 'User',

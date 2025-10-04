@@ -1,0 +1,478 @@
+<div class="notification-settings-page">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">إعدادات الإشعارات</h1>
+      <p class="page-subtitle">تخصيص كيفية استلام الإشعارات وتوقيتاتها</p>
+    </div>
+    
+    <!-- Save Actions -->
+    <div class="save-actions" *ngIf="hasChanges()">
+      <button 
+        mat-button 
+        (click)="resetSettings()"
+        [disabled]="isSaving">
+        <mat-icon>refresh</mat-icon>
+        <span>إعادة تعيين</span>
+      </button>
+      
+      <button 
+        mat-raised-button 
+        color="primary"
+        (click)="saveSettings()"
+        [disabled]="isSaving || settingsForm.invalid">
+        <mat-icon *ngIf="!isSaving">save</mat-icon>
+        <mat-spinner *ngIf="isSaving" diameter="16"></mat-spinner>
+        <span>حفظ الإعدادات</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>جاري تحميل إعدادات الإشعارات...</p>
+  </div>
+
+  <!-- Settings Form -->
+  <form [formGroup]="settingsForm" *ngIf="!isLoading" class="settings-form">
+    
+    <!-- Email Notifications Section -->
+    <mat-card class="settings-section">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon class="section-icon">email</mat-icon>
+          الإشعارات الإلكترونية
+        </mat-card-title>
+        <mat-card-subtitle>{{ getSectionDescription('email') }}</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="settings-grid">
+          <!-- Main Email Toggle -->
+          <div class="setting-item main-toggle">
+            <div class="setting-info">
+              <h4 class="setting-title">الإشعارات الإلكترونية</h4>
+              <p class="setting-description">{{ getSettingDescription('emailNotifications') }}</p>
+            </div>
+            <mat-slide-toggle 
+              formControlName="emailNotifications"
+              color="primary">
+            </mat-slide-toggle>
+          </div>
+
+          <!-- Email Sub-settings -->
+          <div class="sub-settings" [class.disabled]="!settingsForm.get('emailNotifications')?.value">
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4 class="setting-title">تحديثات الإعلانات</h4>
+                <p class="setting-description">{{ getSettingDescription('emailAdUpdates') }}</p>
+              </div>
+              <mat-slide-toggle 
+                formControlName="emailAdUpdates"
+                color="primary"
+                [disabled]="isSettingDisabled('emailAdUpdates')">
+              </mat-slide-toggle>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4 class="setting-title">رسائل الدردشة</h4>
+                <p class="setting-description">{{ getSettingDescription('emailChatMessages') }}</p>
+              </div>
+              <mat-slide-toggle 
+                formControlName="emailChatMessages"
+                color="primary"
+                [disabled]="isSettingDisabled('emailChatMessages')">
+              </mat-slide-toggle>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4 class="setting-title">تنبيهات النظام</h4>
+                <p class="setting-description">{{ getSettingDescription('emailSystemAlerts') }}</p>
+              </div>
+              <mat-slide-toggle 
+                formControlName="emailSystemAlerts"
+                color="primary"
+                [disabled]="isSettingDisabled('emailSystemAlerts')">
+              </mat-slide-toggle>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4 class="setting-title">تنبيهات الأمان</h4>
+                <p class="setting-description">{{ getSettingDescription('emailSecurityAlerts') }}</p>
+              </div>
+              <mat-slide-toggle 
+                formControlName="emailSecurityAlerts"
+                color="primary"
+                [disabled]="isSettingDisabled('emailSecurityAlerts')">
+              </mat-slide-toggle>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4 class="setting-title">تنبيهات الأداء</h4>
+                <p class="setting-description">{{ getSettingDescription('emailPerformanceAlerts') }}</p>
+              </div>
+              <mat-slide-toggle 
+                formControlName="emailPerformanceAlerts"
+                color="primary"
+                [disabled]="isSettingDisabled('emailPerformanceAlerts')">
+              </mat-slide-toggle>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4 class="setting-title">رسائل التسويق</h4>
+                <p class="setting-description">{{ getSettingDescription('emailMarketingEmails') }}</p>
+              </div>
+              <mat-slide-toggle 
+                formControlName="emailMarketingEmails"
+                color="primary"
+                [disabled]="isSettingDisabled('emailMarketingEmails')">
+              </mat-slide-toggle>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Push Notifications Section -->
+    <mat-card class="settings-section">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon class="section-icon">notifications</mat-icon>
+          الإشعارات الفورية
+        </mat-card-title>
+        <mat-card-subtitle>{{ getSectionDescription('push') }}</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="settings-grid">
+          <!-- Main Push Toggle -->
+          <div class="setting-item main-toggle">
+            <div class="setting-info">
+              <h4 class="setting-title">الإشعارات الفورية</h4>
+              <p class="setting-description">{{ getSettingDescription('pushNotifications') }}</p>
+            </div>
+            <mat-slide-toggle 
+              formControlName="pushNotifications"
+              color="primary">
+            </mat-slide-toggle>
+          </div>
+
+          <!-- Push Sub-settings -->
+          <div class="sub-settings" [class.disabled]="!settingsForm.get('pushNotifications')?.value">
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4 class="setting-title">تحديثات الإعلانات</h4>
+                <p class="setting-description">{{ getSettingDescription('pushAdUpdates') }}</p>
+              </div>
+              <mat-slide-toggle 
+                formControlName="pushAdUpdates"
+                color="primary"
+                [disabled]="isSettingDisabled('pushAdUpdates')">
+              </mat-slide-toggle>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4 class="setting-title">رسائل الدردشة</h4>
+                <p class="setting-description">{{ getSettingDescription('pushChatMessages') }}</p>
+              </div>
+              <mat-slide-toggle 
+                formControlName="pushChatMessages"
+                color="primary"
+                [disabled]="isSettingDisabled('pushChatMessages')">
+              </mat-slide-toggle>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4 class="setting-title">تنبيهات النظام</h4>
+                <p class="setting-description">{{ getSettingDescription('pushSystemAlerts') }}</p>
+              </div>
+              <mat-slide-toggle 
+                formControlName="pushSystemAlerts"
+                color="primary"
+                [disabled]="isSettingDisabled('pushSystemAlerts')">
+              </mat-slide-toggle>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4 class="setting-title">تنبيهات الأمان</h4>
+                <p class="setting-description">{{ getSettingDescription('pushSecurityAlerts') }}</p>
+              </div>
+              <mat-slide-toggle 
+                formControlName="pushSecurityAlerts"
+                color="primary"
+                [disabled]="isSettingDisabled('pushSecurityAlerts')">
+              </mat-slide-toggle>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4 class="setting-title">تنبيهات الأداء</h4>
+                <p class="setting-description">{{ getSettingDescription('pushPerformanceAlerts') }}</p>
+              </div>
+              <mat-slide-toggle 
+                formControlName="pushPerformanceAlerts"
+                color="primary"
+                [disabled]="isSettingDisabled('pushPerformanceAlerts')">
+              </mat-slide-toggle>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- SMS Notifications Section (Placeholder) -->
+    <mat-card class="settings-section disabled-section">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon class="section-icon">sms</mat-icon>
+          الإشعارات النصية
+          <mat-chip class="coming-soon-chip">قريباً</mat-chip>
+        </mat-card-title>
+        <mat-card-subtitle>{{ getSectionDescription('sms') }}</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="settings-grid">
+          <div class="setting-item main-toggle">
+            <div class="setting-info">
+              <h4 class="setting-title">الإشعارات النصية</h4>
+              <p class="setting-description">{{ getSettingDescription('smsNotifications') }}</p>
+            </div>
+            <mat-slide-toggle 
+              formControlName="smsNotifications"
+              color="primary"
+              [disabled]="true">
+            </mat-slide-toggle>
+          </div>
+
+          <div class="sub-settings disabled">
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4 class="setting-title">تنبيهات الأمان العاجلة</h4>
+                <p class="setting-description">{{ getSettingDescription('smsSecurityAlerts') }}</p>
+              </div>
+              <mat-slide-toggle 
+                formControlName="smsSecurityAlerts"
+                color="primary"
+                [disabled]="true">
+              </mat-slide-toggle>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4 class="setting-title">تنبيهات المدفوعات</h4>
+                <p class="setting-description">{{ getSettingDescription('smsPaymentAlerts') }}</p>
+              </div>
+              <mat-slide-toggle 
+                formControlName="smsPaymentAlerts"
+                color="primary"
+                [disabled]="true">
+              </mat-slide-toggle>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Quiet Hours Section -->
+    <mat-card class="settings-section">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon class="section-icon">schedule</mat-icon>
+          أوقات الهدوء
+        </mat-card-title>
+        <mat-card-subtitle>{{ getSectionDescription('quiet') }}</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="settings-grid">
+          <div class="setting-item main-toggle">
+            <div class="setting-info">
+              <h4 class="setting-title">تفعيل أوقات الهدوء</h4>
+              <p class="setting-description">{{ getSettingDescription('enableQuietHours') }}</p>
+            </div>
+            <mat-slide-toggle 
+              formControlName="enableQuietHours"
+              color="primary">
+            </mat-slide-toggle>
+          </div>
+
+          <div class="sub-settings" [class.disabled]="!settingsForm.get('enableQuietHours')?.value">
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4 class="setting-title">وقت البداية</h4>
+                <p class="setting-description">{{ getSettingDescription('quietHoursStart') }}</p>
+              </div>
+              <mat-form-field appearance="outline">
+                <mat-select formControlName="quietHoursStart" [disabled]="isSettingDisabled('quietHoursStart')">
+                  <mat-option *ngFor="let time of timeOptions" [value]="time">
+                    {{ time }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4 class="setting-title">وقت النهاية</h4>
+                <p class="setting-description">{{ getSettingDescription('quietHoursEnd') }}</p>
+              </div>
+              <mat-form-field appearance="outline">
+                <mat-select formControlName="quietHoursEnd" [disabled]="isSettingDisabled('quietHoursEnd')">
+                  <mat-option *ngFor="let time of timeOptions" [value]="time">
+                    {{ time }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="setting-item">
+              <div class="setting-info">
+                <h4 class="setting-title">المنطقة الزمنية</h4>
+                <p class="setting-description">{{ getSettingDescription('timeZone') }}</p>
+              </div>
+              <mat-form-field appearance="outline">
+                <mat-select formControlName="timeZone">
+                  <mat-option *ngFor="let tz of timeZoneOptions" [value]="tz.value">
+                    {{ tz.label }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <!-- Quiet Hours Error -->
+          <div *ngIf="getQuietHoursError()" class="error-message">
+            <mat-icon>error</mat-icon>
+            <span>{{ getQuietHoursError() }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Frequency Settings Section -->
+    <mat-card class="settings-section">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon class="section-icon">schedule</mat-icon>
+          تكرار الإشعارات
+        </mat-card-title>
+        <mat-card-subtitle>{{ getSectionDescription('frequency') }}</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="settings-grid">
+          <div class="setting-item">
+            <div class="setting-info">
+              <h4 class="setting-title">تكرار الإشعارات الإلكترونية</h4>
+              <p class="setting-description">{{ getSettingDescription('emailFrequency') }}</p>
+            </div>
+            <mat-form-field appearance="outline">
+              <mat-select formControlName="emailFrequency">
+                <mat-option *ngFor="let freq of frequencyOptions" [value]="freq.value">
+                  {{ freq.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <h4 class="setting-title">تكرار الإشعارات الفورية</h4>
+              <p class="setting-description">{{ getSettingDescription('pushFrequency') }}</p>
+            </div>
+            <mat-form-field appearance="outline">
+              <mat-select formControlName="pushFrequency">
+                <mat-option *ngFor="let freq of frequencyOptions" [value]="freq.value">
+                  {{ freq.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Priority Settings Section -->
+    <mat-card class="settings-section">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon class="section-icon">priority_high</mat-icon>
+          أولويات الإشعارات
+        </mat-card-title>
+        <mat-card-subtitle>{{ getSectionDescription('priority') }}</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="settings-grid">
+          <div class="setting-item">
+            <div class="setting-info">
+              <h4 class="setting-title">الأولوية المنخفضة</h4>
+              <p class="setting-description">{{ getSettingDescription('receiveLowPriority') }}</p>
+            </div>
+            <mat-slide-toggle 
+              formControlName="receiveLowPriority"
+              color="primary">
+            </mat-slide-toggle>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <h4 class="setting-title">الأولوية المتوسطة</h4>
+              <p class="setting-description">{{ getSettingDescription('receiveMediumPriority') }}</p>
+            </div>
+            <mat-slide-toggle 
+              formControlName="receiveMediumPriority"
+              color="primary">
+            </mat-slide-toggle>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <h4 class="setting-title">الأولوية العالية</h4>
+              <p class="setting-description">{{ getSettingDescription('receiveHighPriority') }}</p>
+            </div>
+            <mat-slide-toggle 
+              formControlName="receiveHighPriority"
+              color="primary">
+            </mat-slide-toggle>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <h4 class="setting-title">الأولوية العاجلة</h4>
+              <p class="setting-description">{{ getSettingDescription('receiveUrgentPriority') }}</p>
+            </div>
+            <mat-slide-toggle 
+              formControlName="receiveUrgentPriority"
+              color="primary">
+            </mat-slide-toggle>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Save Button (Bottom) -->
+    <div class="bottom-save-actions" *ngIf="hasChanges()">
+      <button 
+        mat-raised-button 
+        color="primary"
+        (click)="saveSettings()"
+        [disabled]="isSaving || settingsForm.invalid"
+        class="save-button">
+        <mat-icon *ngIf="!isSaving">save</mat-icon>
+        <mat-spinner *ngIf="isSaving" diameter="16"></mat-spinner>
+        <span>حفظ جميع الإعدادات</span>
+      </button>
+    </div>
+  </form>
+</div>

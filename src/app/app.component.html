@@ -30,10 +30,6 @@
         <lucide-icon name="trending-up" size="18"></lucide-icon>
         الإعلانات
       </a>
-      <a class="nav-link" [routerLink]="isAdmin ? '/admin/dashboard' : '/dashboard'" routerLinkActive="active" *ngIf="storage?.accessToken">
-        <lucide-icon name="bar-chart-3" size="18"></lucide-icon>
-        لوحة التحكم
-      </a>
     </nav>
 
     <!-- Actions Section -->
@@ -113,10 +109,6 @@
       <a class="mobile-nav-link" routerLink="/ads" (click)="closeMenu()">
         <lucide-icon name="trending-up" size="18"></lucide-icon>
         الإعلانات
-      </a>
-      <a class="mobile-nav-link" [routerLink]="isAdmin ? '/admin/dashboard' : '/dashboard'" (click)="closeMenu()" *ngIf="storage?.accessToken">
-        <lucide-icon name="bar-chart-3" size="18"></lucide-icon>
-        لوحة التحكم
       </a>
       <a class="mobile-nav-link" routerLink="/direct-chat" (click)="closeMenu()" *ngIf="storage?.accessToken">
         <lucide-icon name="message-circle" size="18"></lucide-icon>

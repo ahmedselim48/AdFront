@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, of, delay } from 'rxjs';
 import { GeneralResponse } from '../../models/general-response';
 import { UserDashboard, SubscriptionStatus } from '../../models/auth.models';
-import { NotificationDto } from '../../models/notifications.models';
+import { NotificationDto } from '../../models/notification.model';
 import { AdDto } from '../../models/ads.models';
 
 @Injectable({
@@ -95,29 +95,56 @@ export class MockApiService {
     const mockNotifications: NotificationDto[] = [
       {
         id: '1',
+        userId: 'user-123',
         type: 'AdPublished',
         title: 'تم نشر إعلانك',
         message: 'تم نشر إعلان "سيارة تويوتا 2020" بنجاح',
+        priority: 'Medium',
+        category: 'Advertisements' as any,
         isRead: false,
         createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+        actionUrl: '/ads/123',
+        actionText: 'عرض الإعلان',
+        actionType: 'View',
+        clickCount: 0,
+        isArchived: false,
+        status: 'Active' as any,
         data: { adId: '123' }
       },
       {
         id: '2',
+        userId: 'user-123',
         type: 'NewMessage',
         title: 'رسالة جديدة',
         message: 'لديك رسالة جديدة من مشتري محتمل',
+        priority: 'High',
+        category: 'Chat',
         isRead: false,
         createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4 hours ago
+        actionUrl: '/chat',
+        actionText: 'عرض الرسالة',
+        actionType: 'View',
+        clickCount: 0,
+        isArchived: false,
+        status: 'Active' as any,
         data: { messageId: '456' }
       },
       {
         id: '3',
+        userId: 'user-123',
         type: 'ContactRequest',
         title: 'طلب اتصال',
         message: 'شخص مهتم بمنتجك يريد التواصل معك',
+        priority: 'Low',
+        category: 'General',
         isRead: true,
         createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
+        actionUrl: '/profile/contacts',
+        actionText: 'عرض الطلب',
+        actionType: 'View',
+        clickCount: 0,
+        isArchived: false,
+        status: 'Read',
         data: { contactId: '789' }
       }
     ];
@@ -134,6 +161,7 @@ export class MockApiService {
     return [
       {
         id: '1',
+        userId: 'user-123',
         title: 'سيارة تويوتا كامري 2020',
         description: 'سيارة تويوتا كامري 2020 بحالة ممتازة، موديل 2020، لون أبيض، ماشية 50000 كم',
         price: 85000,
@@ -141,7 +169,9 @@ export class MockApiService {
         categoryName: 'سيارات',
         location: 'الرياض',
         status: 'Published',
+        views: 245,
         viewsCount: 245,
+        likes: 12,
         likesCount: 12,
         commentsCount: 3,
         clicksCount: 15,
@@ -153,6 +183,7 @@ export class MockApiService {
       },
       {
         id: '2',
+        userId: 'user-123',
         title: 'شقة للإيجار في حي النرجس',
         description: 'شقة 3 غرف نوم، 2 حمام، صالة، مطبخ مجهز، مكيفات، موقف سيارة',
         price: 2500,
@@ -160,7 +191,9 @@ export class MockApiService {
         categoryName: 'عقارات',
         location: 'الرياض',
         status: 'Published',
+        views: 189,
         viewsCount: 189,
+        likes: 8,
         likesCount: 8,
         commentsCount: 1,
         clicksCount: 8,
@@ -172,6 +205,7 @@ export class MockApiService {
       },
       {
         id: '3',
+        userId: 'user-123',
         title: 'لابتوب Dell Inspiron 15',
         description: 'لابتوب Dell Inspiron 15، معالج Intel i7، 16GB RAM، 512GB SSD',
         price: 3500,
@@ -179,7 +213,9 @@ export class MockApiService {
         categoryName: 'إلكترونيات',
         location: 'جدة',
         status: 'Draft',
+        views: 67,
         viewsCount: 67,
+        likes: 3,
         likesCount: 3,
         commentsCount: 0,
         clicksCount: 3,

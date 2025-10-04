@@ -58,13 +58,16 @@ export interface CategoryStatsDto {
 
 export interface ActivityDto {
   id: string;
-  type: 'UserRegistration' | 'AdCreated' | 'AdPublished' | 'AdRejected' | 'UserBlocked' | 'UserUnblocked';
+  type: 'UserRegistration' | 'AdCreated' | 'AdPublished' | 'AdRejected' | 'UserBlocked' | 'UserUnblocked' | 'ad_published' | 'message_received' | 'view_increase';
+  title?: string; // Add title for backward compatibility
   description: string;
+  timestamp?: Date; // Add timestamp for backward compatibility
   userId?: string;
   userName?: string;
   adId?: string;
   adTitle?: string;
   createdAt: Date;
+  data?: any; // Add data property for additional activity data
 }
 
 export interface AdminReportDto {

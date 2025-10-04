@@ -1,7 +1,0 @@
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1rem}
-.row{display:flex;gap:.5rem}
-label{display:flex;flex-direction:column;gap:.25rem}
-input,select{padding:.5rem;border:1px solid #e5e7eb;border-radius:.375rem}
-button{padding:.5rem .75rem;border-radius:.375rem;border:1px solid #111827;background:#111827;color:#fff}
-@media(max-width:760px){.grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:480px){.grid{grid-template-columns:1fr}}

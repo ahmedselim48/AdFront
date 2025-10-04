@@ -11,7 +11,8 @@ import { ToastrService } from 'ngx-toastr';
 
 import { ProfileService } from '../../../../core/services/profile.service';
 import { AdsService } from '../../../ads/ads.service';
-import { UserDashboardDto, DashboardStatsDto } from '../../../../models/profile.models';
+import { UserDashboardDto } from '../../../../models/auth.models';
+import { DashboardStatsDto } from '../../../../models/profile.models';
 import { AdItem } from '../../../../models/ads.models';
 import { Router } from '@angular/router';
 
@@ -94,7 +95,8 @@ export class ProfileDashboardComponent implements OnInit, OnDestroy {
           type: 'ad_published',
           title: 'تم نشر إعلان جديد',
           description: 'سيارة تويوتا كامري 2020',
-          timestamp: new Date().toISOString(),
+          timestamp: new Date(),
+          createdAt: new Date(),
           data: { adId: '1' }
         },
         {
@@ -102,7 +104,8 @@ export class ProfileDashboardComponent implements OnInit, OnDestroy {
           type: 'message_received',
           title: 'رسالة جديدة',
           description: 'استفسار عن السعر',
-          timestamp: new Date(Date.now() - 3600000).toISOString(),
+          timestamp: new Date(Date.now() - 3600000),
+          createdAt: new Date(Date.now() - 3600000),
           data: { messageId: '1' }
         },
         {
@@ -110,7 +113,8 @@ export class ProfileDashboardComponent implements OnInit, OnDestroy {
           type: 'view_increase',
           title: 'زيادة في المشاهدات',
           description: 'إعلانك حصل على 50 مشاهدة جديدة',
-          timestamp: new Date(Date.now() - 7200000).toISOString(),
+          timestamp: new Date(Date.now() - 7200000),
+          createdAt: new Date(Date.now() - 7200000),
           data: { adId: '2' }
         }
       ]
@@ -184,7 +188,10 @@ export class ProfileDashboardComponent implements OnInit, OnDestroy {
     return num.toString();
   }
 
-  formatDate(date: string | Date): string {
+  formatDate(date: string | Date | undefined): string {
+    if (!date) {
+      return 'غير محدد';
+    }
     const dateObj = typeof date === 'string' ? new Date(date) : date;
     return dateObj.toLocaleDateString('ar-SA', {
       year: 'numeric',
