@@ -194,7 +194,7 @@
               </div>
             </div>
             <div class="plan-price">
-              <span class="price">99 ر.س</span>
+              <span class="price">200 ر.س</span>
               <span class="period">شهرياً</span>
             </div>
           </mat-card-header>
@@ -221,9 +221,13 @@
           </mat-card-content>
           
           <mat-card-actions>
-            <button mat-raised-button color="primary" (click)="onUpgradeSubscription()">
-              <lucide-icon name="external-link" size="16"></lucide-icon>
-              <span>ترقية الآن</span>
+            <button mat-raised-button 
+                    color="primary" 
+                    (click)="onUpgradeSubscription()"
+                    [disabled]="isProcessing">
+              <lucide-icon name="credit-card" size="16"></lucide-icon>
+              <span>اشتراك الآن - 200 ر.س</span>
+              <mat-spinner *ngIf="isProcessing" diameter="20"></mat-spinner>
             </button>
           </mat-card-actions>
         </mat-card>
@@ -233,7 +237,7 @@
           <mat-card-header>
             <div class="plan-header">
               <div class="plan-icon premium">
-                <lucide-icon name="star" size="24"></lucide-icon>
+                <lucide-icon name="crown" size="24"></lucide-icon>
               </div>
               <div class="plan-title">
                 <h3>بريميوم</h3>
@@ -241,7 +245,7 @@
               </div>
             </div>
             <div class="plan-price">
-              <span class="price">199 ر.س</span>
+              <span class="price">200 ر.س</span>
               <span class="period">شهرياً</span>
             </div>
           </mat-card-header>
@@ -268,9 +272,13 @@
           </mat-card-content>
           
           <mat-card-actions>
-            <button mat-raised-button color="accent" (click)="onUpgradeSubscription()">
-              <lucide-icon name="external-link" size="16"></lucide-icon>
-              <span>ترقية الآن</span>
+            <button mat-raised-button 
+                    color="accent" 
+                    (click)="onUpgradeSubscription()"
+                    [disabled]="isProcessing">
+              <lucide-icon name="credit-card" size="16"></lucide-icon>
+              <span>اشتراك الآن - 200 ر.س</span>
+              <mat-spinner *ngIf="isProcessing" diameter="20"></mat-spinner>
             </button>
           </mat-card-actions>
         </mat-card>

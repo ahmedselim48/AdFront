@@ -56,6 +56,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
     { label: 'الملف الشخصي', icon: 'user', route: 'profile-settings', badge: null },
     { label: 'لوحة التحكم', icon: 'home', route: 'dashboard', badge: null },
     { label: 'الإعلانات', icon: 'eye', route: 'ads', badge: null },
+    { label: 'اختبارات A/B', icon: 'test-tube', route: 'ab-testing', badge: null },
+    { label: 'تحليل المنافسة', icon: 'bar-chart-3', route: 'competition', badge: null },
     { label: 'الرسائل', icon: 'message-circle', route: 'messages', badge: null },
     { label: 'الإشعارات', icon: 'bell', route: 'notifications', badge: null },
     { label: 'الاشتراك', icon: 'credit-card', route: 'subscription', badge: null }
@@ -226,6 +228,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
       'profile-settings': 'إدارة معلوماتك الشخصية وإعدادات الحساب',
       'dashboard': 'عرض إحصائياتك وأداء إعلاناتك',
       'ads': 'إدارة إعلاناتك والتحكم في حالتها',
+      'ab-testing': 'إدارة اختبارات A/B وتحليل الأداء',
+      'competition': 'تحليل المنافسة واقتراحات تحسين الأداء',
       'messages': 'متابعة المحادثات والرسائل',
       'notifications': 'إدارة الإشعارات والتنبيهات',
       'subscription': 'إدارة اشتراكك وخطة الدفع'

@@ -1,0 +1,219 @@
+<div class="start-ab-test-dialog">
+  <div class="dialog-header">
+    <div class="header-content">
+      <div class="header-icon">
+        <mat-icon>science</mat-icon>
+      </div>
+      <div class="header-text">
+        <h2>بدء اختبار A/B جديد</h2>
+        <p>قارن أداء إعلاناتك واختر الأفضل</p>
+      </div>
+    </div>
+  </div>
+  
+  <mat-dialog-content class="dialog-content">
+    <form [formGroup]="abTestForm" class="ab-test-form">
+      <!-- Test Information Section -->
+      <div class="form-section test-info-section">
+        <div class="section-header">
+          <div class="section-icon">
+            <mat-icon>info</mat-icon>
+          </div>
+          <div class="section-title">
+            <h3>معلومات الاختبار</h3>
+            <p>أدخل تفاصيل الاختبار الأساسية</p>
+          </div>
+        </div>
+        
+        <div class="form-grid">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>اسم الاختبار</mat-label>
+            <input matInput formControlName="testName" placeholder="مثال: مقارنة عناوين الإعلانات">
+            <mat-icon matSuffix>title</mat-icon>
+            <mat-error *ngIf="hasError('testName')">{{ getErrorMessage('testName') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>وصف الاختبار (اختياري)</mat-label>
+            <textarea matInput formControlName="description" rows="3" placeholder="وصف مختصر عن الهدف من الاختبار"></textarea>
+            <mat-icon matSuffix>description</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>تاريخ انتهاء الاختبار</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="endsAtUtc">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-icon matSuffix>schedule</mat-icon>
+            <mat-hint>سيتم إنهاء الاختبار تلقائياً في هذا التاريخ</mat-hint>
+            <mat-error *ngIf="hasError('endsAtUtc')">{{ getErrorMessage('endsAtUtc') }}</mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Ads Selection Section -->
+      <div class="form-section ads-selection-section">
+        <div class="section-header">
+          <div class="section-icon">
+            <mat-icon>compare_arrows</mat-icon>
+          </div>
+          <div class="section-title">
+            <h3>اختيار الإعلانات للمقارنة</h3>
+            <p>اختر إعلانين من إعلاناتك المنشورة للمقارنة بين أدائهما</p>
+          </div>
+        </div>
+        
+        <div class="ads-selection">
+
+          <!-- Loading State -->
+          <div class="loading-ads" *ngIf="loading">
+            <mat-spinner diameter="30"></mat-spinner>
+            <p>جاري تحميل الإعلانات...</p>
+          </div>
+
+          <!-- No Ads Message -->
+          <div class="no-ads-message" *ngIf="!loading && myAds.length === 0">
+            <mat-icon>campaign</mat-icon>
+            <h4>لا توجد إعلانات منشورة</h4>
+            <p>يجب أن يكون لديك إعلان واحد على الأقل منشور لبدء اختبار A/B</p>
+            <button mat-button color="primary" (click)="onCancel()">
+              <mat-icon>add</mat-icon>
+              إنشاء إعلان جديد
+            </button>
+          </div>
+
+          <!-- Ads Selection -->
+          <div class="ads-selection-grid" *ngIf="!loading && myAds.length > 0">
+            <!-- Ad A Selection -->
+            <div class="ad-selection-card ad-a-card">
+              <div class="ad-card-header">
+                <div class="ad-number">
+                  <span class="number-badge">A</span>
+                </div>
+                <div class="ad-title-section">
+                  <h4>الإعلان الأول</h4>
+                  <p>اختر الإعلان الذي تريد اختباره</p>
+                </div>
+              </div>
+              
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>اختر الإعلان الأول</mat-label>
+                <mat-select formControlName="adAId">
+                  <mat-option *ngFor="let ad of myAds" [value]="ad.id">
+                    {{ ad.title }}
+                  </mat-option>
+                </mat-select>
+                <mat-icon matSuffix>campaign</mat-icon>
+                <mat-error *ngIf="hasError('adAId')">{{ getErrorMessage('adAId') }}</mat-error>
+              </mat-form-field>
+              
+              <!-- Debug info -->
+              <div *ngIf="myAds.length === 0 && !loading" style="color: red; margin-top: 10px;">
+                لا توجد إعلانات منشورة
+              </div>
+              <div *ngIf="myAds.length > 0" style="color: green; margin-top: 10px;">
+                تم تحميل {{ myAds.length }} إعلان
+              </div>
+
+            </div>
+
+            <div class="vs-divider">
+              <div class="vs-content">
+                <mat-icon>compare_arrows</mat-icon>
+                <span>مقارنة</span>
+                <small>اختبار A/B</small>
+              </div>
+            </div>
+
+            <!-- Ad B Selection -->
+            <div class="ad-selection-card ad-b-card">
+              <div class="ad-card-header">
+                <div class="ad-number">
+                  <span class="number-badge">B</span>
+                </div>
+                <div class="ad-title-section">
+                  <h4>الإعلان الثاني</h4>
+                  <p>اختر الإعلان الذي تريد مقارنته</p>
+                </div>
+              </div>
+              
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>اختر الإعلان الثاني</mat-label>
+                <mat-select formControlName="adBId">
+                  <mat-option *ngFor="let ad of myAds" [value]="ad.id">
+                    {{ ad.title }}
+                  </mat-option>
+                </mat-select>
+                <mat-icon matSuffix>campaign</mat-icon>
+                <mat-error *ngIf="hasError('adBId')">{{ getErrorMessage('adBId') }}</mat-error>
+              </mat-form-field>
+              
+              <!-- Debug info -->
+              <div *ngIf="myAds.length === 0 && !loading" style="color: red; margin-top: 10px;">
+                لا توجد إعلانات منشورة
+              </div>
+              <div *ngIf="myAds.length > 0" style="color: green; margin-top: 10px;">
+                تم تحميل {{ myAds.length }} إعلان
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="form-error" *ngIf="abTestForm.hasError('sameAds')">
+          <mat-icon>error</mat-icon>
+          <span>يجب اختيار إعلانين مختلفين للمقارنة</span>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <mat-card class="info-card">
+          <mat-card-content>
+            <div class="info-header">
+              <mat-icon>lightbulb</mat-icon>
+              <h4>كيف يعمل اختبار A/B؟</h4>
+            </div>
+            <div class="info-steps">
+              <div class="step">
+                <mat-icon>looks_one</mat-icon>
+                <span>سيتم عرض الإعلان أ لـ 50% من الزوار</span>
+              </div>
+              <div class="step">
+                <mat-icon>looks_two</mat-icon>
+                <span>سيتم عرض الإعلان ب لـ 50% من الزوار</span>
+              </div>
+              <div class="step">
+                <mat-icon>analytics</mat-icon>
+                <span>سيتم تتبع المشاهدات والنقرات لكل إعلان</span>
+              </div>
+              <div class="step">
+                <mat-icon>emoji_events</mat-icon>
+                <span>ستحصل على تقرير مفصل عن النتائج والفائز</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-actions">
+    <div class="actions-content">
+      <button mat-button (click)="onCancel()" [disabled]="loading" class="cancel-btn">
+        <mat-icon>close</mat-icon>
+        إلغاء
+      </button>
+      <button 
+        mat-raised-button 
+        color="primary" 
+        (click)="onSubmit()" 
+        [disabled]="abTestForm.invalid || loading"
+        class="submit-btn">
+        <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+        <mat-icon *ngIf="!loading">science</mat-icon>
+        <span *ngIf="!loading">بدء الاختبار</span>
+        <span *ngIf="loading">جاري البدء...</span>
+      </button>
+    </div>
+  </mat-dialog-actions>
+</div>

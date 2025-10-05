@@ -1,24 +1,42 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 import { FileService } from '../../core/services/file.service';
 import { AdsService } from './ads.service';
 import { OpenAiService } from '../../infrastructure/openai/openai.service';
 import { AuthService } from '../../core/auth/auth.service';
+import { SubscriptionService } from '../../core/services/subscription.service';
+import { SubscriptionRequiredDialogComponent } from '../../shared/components/subscription-required-dialog/subscription-required-dialog.component';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { ABTestDashboardComponent } from './components/ab-test-dashboard/ab-test-dashboard.component';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-ads',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TranslatePipe],
+  imports: [
+    CommonModule, 
+    ReactiveFormsModule, 
+    TranslatePipe,
+    MatTabsModule,
+    MatButtonModule,
+    MatIconModule,
+    MatDialogModule,
+    ABTestDashboardComponent
+  ],
   templateUrl: './ads.component.html',
   styleUrls: ['./ads.component.scss']
 })
-export class AdsComponent implements OnInit {
+export class AdsComponent implements OnInit, OnDestroy {
   form!: FormGroup;
   saving = false;
   generating = false;
+  private destroy$ = new Subject<void>();
 
   get variants(){ return this.form.get('variants') as FormArray<FormGroup>; }
 
@@ -47,7 +65,9 @@ export class AdsComponent implements OnInit {
     private ads: AdsService, 
     private ai: OpenAiService,
     private authService: AuthService,
-    private router: Router
+    private subscriptionService: SubscriptionService,
+    private router: Router,
+    private dialog: MatDialog
   ){
     this.form = this.fb.group({
       name: ['', Validators.required],
@@ -95,9 +115,52 @@ export class AdsComponent implements OnInit {
   save(){
     if(this.form.invalid || this.saving) return;
     this.saving = true;
+    
+    // Check subscription before creating ad
+    this.subscriptionService.hasActiveSubscription().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (hasActiveSubscription) => {
+        if (hasActiveSubscription) {
+          this.createAd();
+        } else {
+          this.showSubscriptionRequiredDialog();
+        }
+      },
+      error: (error) => {
+        console.error('Error checking subscription:', error);
+        // If we can't check subscription, allow creation but show warning
+        this.createAd();
+      }
+    });
+  }
+
+  private createAd() {
     this.ads.create(this.form.value).subscribe({
-      next: () => { this.saving = false; this.form.reset({ name: '', category: '', price: null, status: 'draft', scheduleAt: '' }); this.variants.clear(); this.variants.push(this.createVariant(true)); },
+      next: () => { 
+        this.saving = false; 
+        this.form.reset({ name: '', category: '', price: null, status: 'draft', scheduleAt: '' }); 
+        this.variants.clear(); 
+        this.variants.push(this.createVariant(true)); 
+      },
       error: () => { this.saving = false; }
     });
+  }
+
+  private showSubscriptionRequiredDialog() {
+    const dialogRef = this.dialog.open(SubscriptionRequiredDialogComponent, {
+      width: '500px',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      this.saving = false;
+      if (result === 'subscribe') {
+        this.router.navigate(['/profile/subscription']);
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

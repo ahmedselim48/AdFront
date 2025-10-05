@@ -1,0 +1,141 @@
+.ads-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+
+  .tab-content {
+    padding: 24px 0;
+  }
+
+  .ad-form {
+    .form-section {
+      margin-bottom: 32px;
+      padding: 24px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      background-color: #fafafa;
+
+      h3 {
+        margin: 0 0 20px;
+        color: #333;
+        font-size: 1.2rem;
+        font-weight: 500;
+        border-bottom: 2px solid #2196f3;
+        padding-bottom: 8px;
+      }
+
+      .form-row {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 16px;
+
+        .full-width {
+          flex: 1;
+        }
+
+        .half-width {
+          flex: 1;
+        }
+      }
+
+      .variants-container {
+        .variant-item {
+          margin-bottom: 24px;
+          padding: 20px;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          background-color: white;
+
+          .variant-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+
+            h4 {
+              margin: 0;
+              color: #555;
+              font-size: 1.1rem;
+              font-weight: 500;
+            }
+          }
+
+          .variant-content {
+            .variant-actions {
+              display: flex;
+              gap: 12px;
+              margin-top: 16px;
+
+              button {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 16px;
+      padding: 24px 0;
+      border-top: 1px solid #e0e0e0;
+
+      button {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 160px;
+
+        mat-spinner {
+          margin-right: 8px;
+        }
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .ads-container {
+    padding: 16px;
+
+    .ad-form {
+      .form-section {
+        padding: 16px;
+
+        .form-row {
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .variants-container {
+          .variant-item {
+            padding: 16px;
+
+            .variant-header {
+              flex-direction: column;
+              align-items: flex-start;
+              gap: 8px;
+            }
+          }
+        }
+      }
+
+      .form-actions {
+        flex-direction: column;
+        align-items: stretch;
+
+        button {
+          justify-content: center;
+        }
+      }
+    }
+  }
+}
+
+
+

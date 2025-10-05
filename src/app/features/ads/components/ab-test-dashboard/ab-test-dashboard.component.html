@@ -1,0 +1,210 @@
+<div class="ab-test-dashboard">
+  <div class="dashboard-header">
+    <div class="header-content">
+      <div class="title-section">
+        <mat-icon class="title-icon">science</mat-icon>
+        <h2>لوحة تحكم اختبارات A/B</h2>
+        <p class="subtitle">قارن أداء إعلاناتك واختر الأفضل</p>
+      </div>
+      <button mat-raised-button color="primary" (click)="openStartTestDialog()" class="start-test-btn">
+        <mat-icon>add_circle</mat-icon>
+        بدء اختبار جديد
+      </button>
+    </div>
+  </div>
+
+  <div class="dashboard-content" *ngIf="!loading; else loadingTemplate">
+    <!-- Statistics Cards -->
+    <div class="stats-cards" *ngIf="abTests.length > 0">
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-content">
+            <mat-icon class="stat-icon">timeline</mat-icon>
+            <div class="stat-info">
+              <h3>{{ getActiveTestsCount() }}</h3>
+              <p>اختبارات نشطة</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-content">
+            <mat-icon class="stat-icon">check_circle</mat-icon>
+            <div class="stat-info">
+              <h3>{{ getCompletedTestsCount() }}</h3>
+              <p>اختبارات مكتملة</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-content">
+            <mat-icon class="stat-icon">trending_up</mat-icon>
+            <div class="stat-info">
+              <h3>{{ getAverageImprovement() }}%</h3>
+              <p>متوسط التحسن</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Tests Grid -->
+    <div class="tests-section" *ngIf="abTests.length > 0; else noTestsTemplate">
+      <h3 class="section-title">
+        <mat-icon>analytics</mat-icon>
+        اختباراتك الحالية والسابقة
+      </h3>
+      
+      <div class="tests-grid">
+        <mat-card *ngFor="let test of abTests" class="test-card" [class.active]="test.isActive">
+          <mat-card-header>
+            <div class="test-header">
+              <div class="test-info">
+                <h3 class="test-name">{{ test.testName }}</h3>
+                <p class="test-description" *ngIf="test.description">{{ test.description }}</p>
+              </div>
+              <div class="test-titles">
+                <h4 class="test-title">{{ test.adATitle }}</h4>
+                <mat-icon class="vs-icon">compare_arrows</mat-icon>
+                <h4 class="test-title">{{ test.adBTitle }}</h4>
+              </div>
+              <div class="test-status">
+                <mat-chip [color]="getStatusColor(test.testStatus)" [class]="getStatusClass(test.testStatus)">
+                  <mat-icon>{{ getStatusIcon(test.testStatus) }}</mat-icon>
+                  {{ getStatusText(test.testStatus) }}
+                </mat-chip>
+              </div>
+            </div>
+            <mat-card-subtitle class="test-dates">
+              <mat-icon>schedule</mat-icon>
+              {{ formatDate(test.startedAtUtc) }} - {{ test.endsAtUtc ? formatDate(test.endsAtUtc) : 'مستمر' }}
+            </mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="test-metrics">
+              <div class="metric-comparison">
+                <div class="metric-side ad-a">
+                  <div class="metric-header">
+                    <mat-icon class="variant-icon">looks_one</mat-icon>
+                    <span class="variant-label">الإعلان أ</span>
+                  </div>
+                  <div class="metric-values">
+                    <div class="metric-item">
+                      <mat-icon>visibility</mat-icon>
+                      <span>{{ test.adAViews | number }}</span>
+                    </div>
+                    <div class="metric-item">
+                      <mat-icon>mouse</mat-icon>
+                      <span>{{ test.adAClicks | number }}</span>
+                    </div>
+                    <div class="metric-item highlight">
+                      <mat-icon>trending_up</mat-icon>
+                      <span>{{ formatPercentage(test.adAClickRate) }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="metric-divider">
+                  <mat-icon>vs</mat-icon>
+                </div>
+
+                <div class="metric-side ad-b">
+                  <div class="metric-header">
+                    <mat-icon class="variant-icon">looks_two</mat-icon>
+                    <span class="variant-label">الإعلان ب</span>
+                  </div>
+                  <div class="metric-values">
+                    <div class="metric-item">
+                      <mat-icon>visibility</mat-icon>
+                      <span>{{ test.adBViews | number }}</span>
+                    </div>
+                    <div class="metric-item">
+                      <mat-icon>mouse</mat-icon>
+                      <span>{{ test.adBClicks | number }}</span>
+                    </div>
+                    <div class="metric-item highlight">
+                      <mat-icon>trending_up</mat-icon>
+                      <span>{{ formatPercentage(test.adBClickRate) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="winner-section" *ngIf="test.winnerAdId">
+                <div class="winner-badge">
+                  <mat-icon>emoji_events</mat-icon>
+                  <span>الفائز: {{ test.winnerAdId === test.adAId ? 'الإعلان أ' : 'الإعلان ب' }}</span>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+
+          <mat-card-actions>
+            <button mat-button (click)="viewResults(test.testId)" class="action-btn">
+              <mat-icon>analytics</mat-icon>
+              عرض النتائج
+            </button>
+            <button 
+              mat-button 
+              color="warn" 
+              *ngIf="test.isActive"
+              (click)="endTest(test.testId)"
+              class="action-btn">
+              <mat-icon>stop_circle</mat-icon>
+              إنهاء الاختبار
+            </button>
+            <button mat-button (click)="viewAd(test.adAId)" class="action-btn">
+              <mat-icon>open_in_new</mat-icon>
+              عرض الإعلان أ
+            </button>
+            <button mat-button (click)="viewAd(test.adBId)" class="action-btn">
+              <mat-icon>open_in_new</mat-icon>
+              عرض الإعلان ب
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+    </div>
+
+    <ng-template #noTestsTemplate>
+      <div class="no-tests">
+        <div class="no-tests-content">
+          <mat-icon class="no-tests-icon">science</mat-icon>
+          <h3>لا توجد اختبارات A/B</h3>
+          <p>ابدأ بإنشاء اختبار A/B لمقارنة أداء إعلاناتك وتحسين النتائج</p>
+          <div class="no-tests-benefits">
+            <div class="benefit-item">
+              <mat-icon>insights</mat-icon>
+              <span>اكتشف أي إعلان يحقق نتائج أفضل</span>
+            </div>
+            <div class="benefit-item">
+              <mat-icon>trending_up</mat-icon>
+              <span>حسن معدل النقر والتفاعل</span>
+            </div>
+            <div class="benefit-item">
+              <mat-icon>analytics</mat-icon>
+              <span>احصل على بيانات مفصلة</span>
+            </div>
+          </div>
+          <button mat-raised-button color="primary" (click)="openStartTestDialog()" class="start-first-test-btn">
+            <mat-icon>add_circle</mat-icon>
+            بدء أول اختبار
+          </button>
+        </div>
+      </div>
+    </ng-template>
+  </div>
+
+  <ng-template #loadingTemplate>
+    <div class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>جاري تحميل اختبارات A/B...</p>
+    </div>
+  </ng-template>
+</div>

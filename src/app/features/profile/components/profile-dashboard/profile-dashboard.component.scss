@@ -516,3 +516,21 @@ mat-card-header {
   border-radius: 8px;
   border: 1px dashed #e2e8f0;
 }
+
+// Competition Overview Card
+.competition-overview-card {
+  margin-bottom: 1.5rem;
+  
+  mat-card-header {
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #2d3748;
+    }
+    
+    mat-card-subtitle {
+      color: #718096;
+    }
+  }
+}

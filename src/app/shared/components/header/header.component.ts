@@ -43,7 +43,10 @@ import { NavbarChatComponent } from '../navbar-chat/navbar-chat.component';
 
         <!-- Navigation -->
         <nav class="header-nav">
+<<<<<<< Updated upstream
           
+=======
+>>>>>>> Stashed changes
           <a routerLink="/ads" routerLinkActive="active" class="nav-link">
             الإعلانات
           </a>

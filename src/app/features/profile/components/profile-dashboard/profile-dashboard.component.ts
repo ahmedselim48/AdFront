@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -15,18 +16,21 @@ import { UserDashboardDto } from '../../../../models/auth.models';
 import { DashboardStatsDto } from '../../../../models/profile.models';
 import { AdItem } from '../../../../models/ads.models';
 import { Router } from '@angular/router';
+import { CompetitionOverviewComponent } from '../competition-overview/competition-overview.component';
 
 @Component({
   selector: 'app-profile-dashboard',
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
     MatChipsModule,
-    LucideAngularModule
+    LucideAngularModule,
+    CompetitionOverviewComponent
   ],
   templateUrl: './profile-dashboard.component.html',
   styleUrls: ['./profile-dashboard.component.scss']

@@ -156,29 +156,44 @@ export interface StartAdABTestRequest {
   adAId: string;
   adBId: string;
   endsAtUtc: Date;
+  testName?: string;
+  description?: string;
 }
 
 export interface ABTestDto {
-  id: string;
+  testId: string;
   adAId: string;
   adBId: string;
-  status: 'Running' | 'Completed' | 'Cancelled';
-  startDate: Date;
-  endDate: Date;
-  results?: ABTestResult;
+  adATitle: string;
+  adBTitle: string;
+  testName: string;
+  description?: string;
+  startedAtUtc: Date;
+  endsAtUtc?: Date;
+  isActive: boolean;
+  adAViews: number;
+  adAClicks: number;
+  adBViews: number;
+  adBClicks: number;
+  adAClickRate: number;
+  adBClickRate: number;
+  winnerAdId?: string;
+  testStatus: string;
 }
 
 export interface ABTestResult {
-  winner: 'A' | 'B' | 'Tie';
-  metrics: {
-    viewsA: number;
-    viewsB: number;
-    clicksA: number;
-    clicksB: number;
-    conversionsA: number;
-    conversionsB: number;
-  };
-  confidence: number;
+  testId: string;
+  adAId: string;
+  adBId: string;
+  testName?: string;
+  description?: string;
+  viewsA: number;
+  clicksA: number;
+  viewsB: number;
+  clicksB: number;
+  winnerAdId?: string;
+  ctrA: number;
+  ctrB: number;
 }
 
 export interface CommentDto {

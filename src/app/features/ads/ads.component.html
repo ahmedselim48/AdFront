@@ -1,0 +1,122 @@
+<div class="ads-container">
+  <mat-tab-group>
+    <!-- Create Ad Tab -->
+    <mat-tab label="إنشاء إعلان">
+      <div class="tab-content">
+        <form [formGroup]="form" (ngSubmit)="save()" class="ad-form">
+          <div class="form-section">
+            <h3>معلومات الإعلان الأساسية</h3>
+            
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>اسم المنتج</mat-label>
+                <input matInput formControlName="name" placeholder="أدخل اسم المنتج">
+                <mat-error *ngIf="form.get('name')?.hasError('required')">اسم المنتج مطلوب</mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>الفئة</mat-label>
+                <mat-select formControlName="category">
+                  <mat-option value="electronics">إلكترونيات</mat-option>
+                  <mat-option value="clothing">ملابس</mat-option>
+                  <mat-option value="home">منزل</mat-option>
+                  <mat-option value="automotive">سيارات</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>السعر</mat-label>
+                <input matInput type="number" formControlName="price" placeholder="0">
+                <span matSuffix>ريال</span>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>الحالة</mat-label>
+                <mat-select formControlName="status">
+                  <mat-option value="draft">مسودة</mat-option>
+                  <mat-option value="published">منشور</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>تاريخ النشر</mat-label>
+                <input matInput [matDatepicker]="picker" formControlName="scheduleAt">
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>متغيرات الإعلان</h3>
+            <div formArrayName="variants" class="variants-container">
+              <div *ngFor="let variant of variants.controls; let i = index" [formGroupName]="i" class="variant-item">
+                <div class="variant-header">
+                  <h4>المتغير {{ i + 1 }}</h4>
+                  <button type="button" mat-icon-button color="warn" (click)="removeVariant(i)" *ngIf="variants.length > 1">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+                
+                <div class="variant-content">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>العنوان</mat-label>
+                    <input matInput formControlName="title" placeholder="عنوان الإعلان">
+                    <mat-error *ngIf="variant.get('title')?.hasError('required')">العنوان مطلوب</mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>الوصف</mat-label>
+                    <textarea matInput formControlName="body" rows="4" placeholder="وصف الإعلان"></textarea>
+                    <mat-error *ngIf="variant.get('body')?.hasError('required')">الوصف مطلوب</mat-error>
+                  </mat-form-field>
+
+                  <div class="variant-actions">
+                    <button type="button" mat-button (click)="onFile($event, i)">
+                      <mat-icon>attach_file</mat-icon>
+                      إضافة صورة
+                    </button>
+                    <input type="file" accept="image/*" style="display: none" #fileInput (change)="onFile($event, i)">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button type="button" mat-button color="primary" (click)="addVariant()">
+              <mat-icon>add</mat-icon>
+              إضافة متغير جديد
+            </button>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" mat-button (click)="generateFromAI()" [disabled]="generating">
+              <mat-spinner *ngIf="generating" diameter="20"></mat-spinner>
+              <mat-icon *ngIf="!generating">auto_fix_high</mat-icon>
+              {{ generating ? 'جاري التوليد...' : 'توليد بالذكاء الاصطناعي' }}
+            </button>
+
+            <button type="submit" mat-raised-button color="primary" [disabled]="form.invalid || saving">
+              <mat-spinner *ngIf="saving" diameter="20"></mat-spinner>
+              <mat-icon *ngIf="!saving">save</mat-icon>
+              {{ saving ? 'جاري الحفظ...' : 'حفظ الإعلان' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </mat-tab>
+
+    <!-- A/B Testing Tab -->
+    <mat-tab label="اختبارات A/B">
+      <div class="tab-content">
+        <app-ab-test-dashboard></app-ab-test-dashboard>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>
+
+
+

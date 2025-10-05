@@ -90,8 +90,14 @@ export const routes: Routes = [
   // Payment & Subscription Routes
   { path: 'subscription', component: SubscriptionComponent },
   { path: 'payments', redirectTo: 'subscription', pathMatch: 'full' },
+  { path: 'payment/success', loadComponent: () => import('./features/payment/payment-success/payment-success.component').then(m => m.PaymentSuccessComponent) },
+  { path: 'payment/cancel', loadComponent: () => import('./features/payment/payment-cancel/payment-cancel.component').then(m => m.PaymentCancelComponent) },
   
+<<<<<<< Updated upstream
   // Dashboard removed
+=======
+  // Dashboard & Analytics - Available without auth for testing
+>>>>>>> Stashed changes
   // { path: 'smart-replies', component: SmartRepliesComponent }, // disabled
   { path: 'competition', component: CompetitionComponent },
   // Reports removed
@@ -131,6 +137,8 @@ export const routes: Routes = [
     { path: 'profile-settings', component: ProfileSettingsComponent },
     { path: 'dashboard', component: ProfileDashboardComponent },
     { path: 'ads', loadComponent: () => import('./features/profile/components/profile-ads/profile-ads.component').then(m => m.ProfileAdsComponent) },
+    { path: 'ab-testing', loadComponent: () => import('./features/ads/components/ab-test-dashboard/ab-test-dashboard.component').then(m => m.ABTestDashboardComponent) },
+    { path: 'competition', loadChildren: () => import('./features/competition/competition-routing.module').then(m => m.routes) },
     { path: 'messages', loadComponent: () => import('./features/profile/components/profile-messages/profile-messages.component').then(m => m.ProfileMessagesComponent) },
     { path: 'notifications', loadComponent: () => import('./features/profile/components/profile-notifications/profile-notifications.component').then(m => m.ProfileNotificationsComponent) },
     { path: 'notification-settings', component: NotificationSettingsComponent },

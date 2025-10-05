@@ -1,0 +1,252 @@
+<div class="ab-test-results-dialog">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
+      <mat-icon>analytics</mat-icon>
+      نتائج اختبار A/B
+    </h2>
+    <button mat-icon-button (click)="onClose()" class="close-btn">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    <div class="results-content" *ngIf="!loading && testResult; else loadingTemplate">
+      <!-- Test Overview -->
+      <div class="test-overview">
+        <mat-card class="overview-card">
+          <mat-card-content>
+            <div class="overview-header">
+              <h2 class="test-name">{{ testResult.testName || 'اختبار A/B' }}</h2>
+              <p class="test-description" *ngIf="testResult.description">{{ testResult.description }}</p>
+              <h3>{{ data.adATitle }} vs {{ data.adBTitle }}</h3>
+              <mat-chip [color]="getWinnerColor()" class="winner-chip">
+                <mat-icon>emoji_events</mat-icon>
+                {{ getWinnerText() }}
+              </mat-chip>
+            </div>
+            
+            <div class="test-metrics">
+              <div class="metric-item">
+                <mat-icon>schedule</mat-icon>
+                <span>مدة الاختبار: {{ getTestDuration() }}</span>
+              </div>
+              <div class="metric-item">
+                <mat-icon>trending_up</mat-icon>
+                <span>مستوى الثقة: {{ getConfidenceLevel() }}</span>
+              </div>
+              <div class="metric-item">
+                <mat-icon>insights</mat-icon>
+                <span>التحسن: {{ formatPercentage(getImprovementPercentage()) }}</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Detailed Results -->
+      <div class="detailed-results">
+        <div class="results-comparison">
+          <!-- Ad A Results -->
+          <mat-card class="ad-result-card" [class.winner]="testResult.winnerAdId === testResult.adAId">
+            <mat-card-header>
+              <div mat-card-avatar class="ad-avatar">
+                <mat-icon>looks_one</mat-icon>
+              </div>
+              <mat-card-title>الإعلان أ</mat-card-title>
+              <mat-card-subtitle>{{ data.adATitle }}</mat-card-subtitle>
+            </mat-card-header>
+            
+            <mat-card-content>
+              <div class="metrics-grid">
+                <div class="metric">
+                  <div class="metric-value">{{ formatNumber(testResult.viewsA) }}</div>
+                  <div class="metric-label">
+                    <mat-icon>visibility</mat-icon>
+                    المشاهدات
+                  </div>
+                </div>
+                
+                <div class="metric">
+                  <div class="metric-value">{{ formatNumber(testResult.clicksA) }}</div>
+                  <div class="metric-label">
+                    <mat-icon>mouse</mat-icon>
+                    النقرات
+                  </div>
+                </div>
+                
+                <div class="metric highlight">
+                  <div class="metric-value">{{ formatPercentage(testResult.ctrA) }}</div>
+                  <div class="metric-label">
+                    <mat-icon>trending_up</mat-icon>
+                    معدل النقر
+                  </div>
+                </div>
+              </div>
+              
+              <div class="performance-bar">
+                <div class="bar-label">الأداء النسبي</div>
+                <mat-progress-bar 
+                  mode="determinate" 
+                  [value]="(testResult.ctrA / getMaxValue(testResult.ctrA, testResult.ctrB)) * 100"
+                  class="performance-progress">
+                </mat-progress-bar>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- VS Divider -->
+          <div class="vs-divider">
+            <mat-icon>compare_arrows</mat-icon>
+            <span>مقارنة</span>
+          </div>
+
+          <!-- Ad B Results -->
+          <mat-card class="ad-result-card" [class.winner]="testResult.winnerAdId === testResult.adBId">
+            <mat-card-header>
+              <div mat-card-avatar class="ad-avatar">
+                <mat-icon>looks_two</mat-icon>
+              </div>
+              <mat-card-title>الإعلان ب</mat-card-title>
+              <mat-card-subtitle>{{ data.adBTitle }}</mat-card-subtitle>
+            </mat-card-header>
+            
+            <mat-card-content>
+              <div class="metrics-grid">
+                <div class="metric">
+                  <div class="metric-value">{{ formatNumber(testResult.viewsB) }}</div>
+                  <div class="metric-label">
+                    <mat-icon>visibility</mat-icon>
+                    المشاهدات
+                  </div>
+                </div>
+                
+                <div class="metric">
+                  <div class="metric-value">{{ formatNumber(testResult.clicksB) }}</div>
+                  <div class="metric-label">
+                    <mat-icon>mouse</mat-icon>
+                    النقرات
+                  </div>
+                </div>
+                
+                <div class="metric highlight">
+                  <div class="metric-value">{{ formatPercentage(testResult.ctrB) }}</div>
+                  <div class="metric-label">
+                    <mat-icon>trending_up</mat-icon>
+                    معدل النقر
+                  </div>
+                </div>
+              </div>
+              
+              <div class="performance-bar">
+                <div class="bar-label">الأداء النسبي</div>
+                <mat-progress-bar 
+                  mode="determinate" 
+                  [value]="(testResult.ctrB / getMaxValue(testResult.ctrA, testResult.ctrB)) * 100"
+                  class="performance-progress">
+                </mat-progress-bar>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <!-- Statistical Analysis -->
+        <div class="statistical-analysis">
+          <mat-card class="analysis-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>science</mat-icon>
+                التحليل الإحصائي
+              </mat-card-title>
+            </mat-card-header>
+            
+            <mat-card-content>
+              <div class="analysis-grid">
+                <div class="analysis-item">
+                  <div class="analysis-label">الفرق في معدل النقر</div>
+                  <div class="analysis-value">
+                    {{ formatPercentage(getAbsValue(testResult.ctrA - testResult.ctrB)) }}
+                  </div>
+                </div>
+                
+                <div class="analysis-item">
+                  <div class="analysis-label">إجمالي المشاهدات</div>
+                  <div class="analysis-value">
+                    {{ formatNumber(testResult.viewsA + testResult.viewsB) }}
+                  </div>
+                </div>
+                
+                <div class="analysis-item">
+                  <div class="analysis-label">إجمالي النقرات</div>
+                  <div class="analysis-value">
+                    {{ formatNumber(testResult.clicksA + testResult.clicksB) }}
+                  </div>
+                </div>
+                
+                <div class="analysis-item">
+                  <div class="analysis-label">متوسط معدل النقر</div>
+                  <div class="analysis-value">
+                    {{ formatPercentage((testResult.ctrA + testResult.ctrB) / 2) }}
+                  </div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="recommendations">
+          <mat-card class="recommendations-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>lightbulb</mat-icon>
+                التوصيات
+              </mat-card-title>
+            </mat-card-header>
+            
+            <mat-card-content>
+              <div class="recommendation-list">
+                <div class="recommendation-item" *ngIf="testResult.winnerAdId">
+                  <mat-icon>check_circle</mat-icon>
+                  <span>استخدم الإعلان الفائز كنسخة أساسية للإعلانات المستقبلية</span>
+                </div>
+                
+                <div class="recommendation-item">
+                  <mat-icon>insights</mat-icon>
+                  <span>حلل العناصر التي جعلت الإعلان الفائز أكثر فعالية</span>
+                </div>
+                
+                <div class="recommendation-item">
+                  <mat-icon>trending_up</mat-icon>
+                  <span>طبق نفس الاستراتيجية على إعلانات أخرى مشابهة</span>
+                </div>
+                
+                <div class="recommendation-item">
+                  <mat-icon>refresh</mat-icon>
+                  <span>كرر الاختبار مع متغيرات أخرى لتحسين مستمر</span>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #loadingTemplate>
+      <div class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>جاري تحميل النتائج...</p>
+      </div>
+    </ng-template>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onExportResults()" [disabled]="!testResult">
+      <mat-icon>download</mat-icon>
+      تصدير النتائج
+    </button>
+    <button mat-button (click)="onClose()">
+      <mat-icon>close</mat-icon>
+      إغلاق
+    </button>
+  </mat-dialog-actions>
+</div>

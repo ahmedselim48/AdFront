@@ -88,14 +88,27 @@ export class ProfileSubscriptionComponent implements OnInit, OnDestroy {
       next: (checkoutSession: any) => {
         // Redirect to payment page
         if (checkoutSession && checkoutSession.url) {
-          window.open(checkoutSession.url, '_blank');
+          // Open in same window for better UX
+          window.location.href = checkoutSession.url;
           this.toastr.info('سيتم توجيهك إلى صفحة الدفع', 'توجيه');
+        } else {
+          this.toastr.error('فشل في إنشاء جلسة الدفع', 'خطأ');
         }
         this.isProcessing = false;
       },
       error: (error: any) => {
         console.error('Error creating subscription:', error);
-        this.toastr.error('فشل في إنشاء الاشتراك', 'خطأ');
+        let errorMessage = 'فشل في إنشاء الاشتراك';
+        
+        if (error.error && error.error.message) {
+          if (error.error.message.includes('still active')) {
+            errorMessage = 'لديك اشتراك نشط بالفعل';
+          } else {
+            errorMessage = error.error.message;
+          }
+        }
+        
+        this.toastr.error(errorMessage, 'خطأ');
         this.isProcessing = false;
       }
     });

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ApiClientService } from '../../core/services/api-client.service';
 import { Observable, map } from 'rxjs';
-import { AdItem, AdSearchRequest, PaginatedAdsResponse, AdPerformanceDto, ABTestDto, CommentDto } from '../../models/ads.models';
+import { AdItem, AdSearchRequest, PaginatedAdsResponse, AdPerformanceDto, ABTestDto, ABTestResult, CommentDto } from '../../models/ads.models';
 import { ImageValidationService } from '../../core/services/image-validation.service';
 
 @Injectable({ providedIn: 'root' })
@@ -133,7 +133,13 @@ export class AdsService {
 
   getMyAds(status?: string): Observable<AdItem[]> {
     const url = status ? `/ads/my?status=${status}` : '/ads/my';
-    return this.api.get$<AdItem[]>(url);
+    console.log('Getting my ads with URL:', url);
+    return this.api.get$<AdItem[]>(url).pipe(
+      map(response => {
+        console.log('getMyAds response:', response);
+        return response;
+      })
+    );
   }
 
   getDrafts(): Observable<AdItem[]> {
@@ -299,11 +305,13 @@ export class AdsService {
     return this.api.delete$(`/ads/comments/${commentId}`);
   }
 
-  startABTest(adAId: string, adBId: string, endsAt: Date): Observable<ABTestDto> {
+  startABTest(adAId: string, adBId: string, endsAt: Date, testName?: string, description?: string): Observable<ABTestDto> {
     return this.api.post$('/ads/ab-tests/start', {
       adAId,
       adBId,
-      endsAtUtc: endsAt.toISOString()
+      endsAtUtc: endsAt.toISOString(),
+      testName,
+      description
     });
   }
 
@@ -313,6 +321,16 @@ export class AdsService {
 
   endABTest(testId: string): Observable<ABTestDto> {
     return this.api.post$(`/ads/ab-tests/${testId}/end`, {});
+  }
+
+  // Get all A/B tests for current user
+  getMyABTests(): Observable<ABTestDto[]> {
+    return this.api.get$<ABTestDto[]>('/ads/ab-tests/my');
+  }
+
+  // Get A/B test analytics
+  getABTestAnalytics(testId: string): Observable<ABTestResult> {
+    return this.api.get$<ABTestResult>(`/ads/ab-tests/${testId}/analytics`);
   }
   
   remove(id: string): Observable<void> { 

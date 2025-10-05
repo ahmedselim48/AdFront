@@ -246,6 +246,21 @@
       </mat-card-content>
     </mat-card>
 
+    <!-- Competition Overview -->
+    <mat-card class="competition-overview-card">
+      <mat-card-header>
+        <mat-card-title>
+          <lucide-icon name="bar-chart-3" size="20"></lucide-icon>
+          تحليل المنافسة
+        </mat-card-title>
+        <mat-card-subtitle>تتبع أداء إعلاناتك مقارنة بالمنافسين</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <app-competition-overview></app-competition-overview>
+      </mat-card-content>
+    </mat-card>
+
     <!-- Quick Actions -->
     <mat-card class="quick-actions-card">
       <mat-card-header>
@@ -265,9 +280,9 @@
             <span>إعلاناتي</span>
           </button>
           
-          <button mat-raised-button color="warn" class="action-button">
+          <button mat-raised-button color="warn" class="action-button" routerLink="/profile/competition">
             <lucide-icon name="bar-chart-3" size="20"></lucide-icon>
-            <span>التقارير</span>
+            <span>تحليل المنافسة</span>
           </button>
           
           <button mat-raised-button class="action-button">

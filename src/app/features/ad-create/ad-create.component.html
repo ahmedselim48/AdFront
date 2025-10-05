@@ -1,15 +1,80 @@
 <div class="ad-create-container">
+  <!-- Header Section -->
   <div class="ad-create-header">
+    <div class="header-content">
+      <div class="header-icon">
+        <mat-icon>add_circle</mat-icon>
+      </div>
+      <div class="header-text">
     <h1>إنشاء إعلان جديد</h1>
-    <p>أضف تفاصيل إعلانك وشاركه مع العالم</p>
+        <p>أضف إعلانك ووصل إلى عملاء جدد بسهولة</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button mat-button color="primary" (click)="saveAsDraft()" [disabled]="saving">
+        <mat-icon>save</mat-icon>
+        حفظ كمسودة
+      </button>
+    </div>
   </div>
 
-  <form [formGroup]="form" (ngSubmit)="submit()" class="ad-form">
+  <!-- Progress Indicator -->
+  <div class="progress-section">
+    <mat-stepper #stepper linear>
+      <mat-step [stepControl]="basicInfoForm" label="المعلومات الأساسية">
+        <ng-template matStepLabel>
+          <div class="step-label">
+            <mat-icon>info</mat-icon>
+            <span>المعلومات الأساسية</span>
+          </div>
+        </ng-template>
+      </mat-step>
+      <mat-step [stepControl]="detailsForm" label="التفاصيل والصور">
+        <ng-template matStepLabel>
+          <div class="step-label">
+            <mat-icon>image</mat-icon>
+            <span>التفاصيل والصور</span>
+          </div>
+        </ng-template>
+      </mat-step>
+      <mat-step [stepControl]="contactForm" label="معلومات التواصل">
+        <ng-template matStepLabel>
+          <div class="step-label">
+            <mat-icon>contact_phone</mat-icon>
+            <span>معلومات التواصل</span>
+          </div>
+        </ng-template>
+      </mat-step>
+      <mat-step [stepControl]="abTestForm" label="اختبار A/B (اختياري)">
+        <ng-template matStepLabel>
+          <div class="step-label">
+            <mat-icon>science</mat-icon>
+            <span>اختبار A/B</span>
+          </div>
+        </ng-template>
+      </mat-step>
+    </mat-stepper>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error" class="error-message">
+    <mat-icon>error</mat-icon>
+    <span>{{ error }}</span>
+  </div>
+
+  <!-- Ad Form -->
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="ad-form">
     <div class="form-grid">
-      <!-- Basic Information -->
-      <div class="form-section">
+      
+      <!-- Step 1: Basic Information -->
+      <div class="form-section" [class.active]="stepper.selectedIndex === 0">
+        <div class="section-header">
+          <mat-icon>info</mat-icon>
         <h3>المعلومات الأساسية</h3>
+          <span class="section-number">1</span>
+        </div>
         
+        <div class="section-content">
         <!-- Title -->
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>عنوان الإعلان *</mat-label>
@@ -18,6 +83,7 @@
             formControlName="title" 
             placeholder="اكتب عنوان جذاب لإعلانك"
             maxlength="200">
+            <mat-icon matSuffix>title</mat-icon>
           <mat-hint align="end">{{ form.get('title')?.value?.length || 0 }}/200</mat-hint>
           <mat-error *ngIf="form.get('title')?.invalid && form.get('title')?.touched">
             العنوان مطلوب (الحد الأقصى 200 حرف)
@@ -34,6 +100,7 @@
             rows="4"
             maxlength="5000">
           </textarea>
+            <mat-icon matSuffix>description</mat-icon>
           <mat-hint align="end">{{ form.get('description')?.value?.length || 0 }}/5000</mat-hint>
           <mat-error *ngIf="form.get('description')?.invalid && form.get('description')?.touched">
             الوصف مطلوب (الحد الأقصى 5000 حرف)
@@ -48,10 +115,11 @@
               matInput 
               type="number" 
               formControlName="price" 
-              placeholder="0.00"
+                placeholder="0"
               min="0">
+              <mat-icon matSuffix>attach_money</mat-icon>
             <mat-error *ngIf="form.get('price')?.invalid && form.get('price')?.touched">
-              السعر مطلوب ويجب أن يكون أكبر من أو يساوي صفر
+                السعر مطلوب ويجب أن يكون أكبر من 0
             </mat-error>
           </mat-form-field>
 
@@ -60,10 +128,10 @@
             <input 
               matInput 
               formControlName="location" 
-              placeholder="مثال: الرياض، جدة"
-              maxlength="200">
+                placeholder="مثال: الرياض، جدة، الدمام">
+              <mat-icon matSuffix>location_on</mat-icon>
             <mat-error *ngIf="form.get('location')?.invalid && form.get('location')?.touched">
-              الموقع مطلوب (الحد الأقصى 200 حرف)
+                الموقع مطلوب
             </mat-error>
           </mat-form-field>
         </div>
@@ -73,96 +141,52 @@
           <mat-label>الفئة *</mat-label>
           <mat-select formControlName="categoryId">
             <mat-option *ngFor="let category of categories" [value]="category.id">
-              {{ category.name }}
+                <div class="category-option">
+                  <mat-icon>{{ category.icon || 'category' }}</mat-icon>
+                  <span>{{ category.name }}</span>
+                </div>
             </mat-option>
           </mat-select>
+            <mat-icon matSuffix>category</mat-icon>
           <mat-error *ngIf="form.get('categoryId')?.invalid && form.get('categoryId')?.touched">
             الفئة مطلوبة
-          </mat-error>
-        </mat-form-field>
-      </div>
-
-      <!-- Contact Information -->
-      <div class="form-section">
-        <h3>معلومات التواصل</h3>
-        
-        <div class="form-row">
-          <mat-form-field appearance="outline" class="half-width">
-            <mat-label>رقم التواصل *</mat-label>
-            <input 
-              matInput 
-              formControlName="contactNumber" 
-              placeholder="مثال: 0501234567"
-              maxlength="15">
-            <mat-error *ngIf="form.get('contactNumber')?.invalid && form.get('contactNumber')?.touched">
-              رقم التواصل مطلوب (الحد الأدنى 10 أرقام)
-            </mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="half-width">
-            <mat-label>طريقة التواصل *</mat-label>
-            <mat-select formControlName="contactMethod">
-              <mat-option value="Call">اتصال</mat-option>
-              <mat-option value="WhatsApp">واتساب</mat-option>
-            </mat-select>
-            <mat-error *ngIf="form.get('contactMethod')?.invalid && form.get('contactMethod')?.touched">
-              طريقة التواصل مطلوبة
             </mat-error>
           </mat-form-field>
         </div>
       </div>
 
-      <!-- Images Section -->
-      <div class="form-section">
-        <h3>الصور</h3>
-        
-        <!-- File Upload -->
-        <div class="file-upload-area">
-          <input 
-            type="file" 
-            id="fileInput" 
-            (change)="onFileChange($event)" 
-            multiple 
-            accept="image/*"
-            class="file-input">
-          <label for="fileInput" class="file-upload-label">
-            <mat-icon>cloud_upload</mat-icon>
-            <span>اختر الصور (الحد الأقصى 12 صورة)</span>
-            <small>JPG, PNG, WEBP, GIF - الحد الأقصى 10MB لكل صورة</small>
-          </label>
+      <!-- Step 2: Details and Images -->
+      <div class="form-section" [class.active]="stepper.selectedIndex === 1">
+        <div class="section-header">
+          <mat-icon>image</mat-icon>
+          <h3>التفاصيل والصور</h3>
+          <span class="section-number">2</span>
         </div>
 
-        <!-- Image Previews -->
-        <div class="image-previews" *ngIf="previewUrls.length > 0">
-          <div class="image-preview" *ngFor="let url of previewUrls; let i = index">
-            <img [src]="url" alt="Preview">
-            <button 
-              type="button" 
-              class="remove-image-btn" 
-              (click)="removeImage(i)"
-              mat-icon-button>
-              <mat-icon>close</mat-icon>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Keywords Section -->
-      <div class="form-section">
-        <h3>الكلمات المفتاحية</h3>
+        <div class="section-content">
+          <!-- Keywords -->
+          <div class="keywords-section">
+            <h4>
+              <mat-icon>label</mat-icon>
+              الكلمات المفتاحية
+            </h4>
+            <p class="section-description">أضف كلمات مفتاحية تساعد في العثور على إعلانك</p>
         
         <div class="keywords-input">
+              <mat-form-field appearance="outline" class="keyword-input">
+                <mat-label>أضف كلمة مفتاحية</mat-label>
           <input 
-            type="text" 
+                  matInput 
             #keywordInput
-            placeholder="أضف كلمة مفتاحية واضغط Enter"
-            (keydown.enter)="addKeyword(keywordInput.value); keywordInput.value = ''"
-            class="keyword-input">
+                  (keyup.enter)="addKeyword(keywordInput.value); keywordInput.value=''"
+                  placeholder="اكتب كلمة مفتاحية واضغط Enter">
+                <mat-icon matSuffix>add</mat-icon>
+              </mat-form-field>
           <button 
-            type="button" 
-            (click)="addKeyword(keywordInput.value); keywordInput.value = ''"
             mat-raised-button 
-            color="primary">
+                color="primary" 
+                (click)="addKeyword(keywordInput.value); keywordInput.value=''">
+                <mat-icon>add</mat-icon>
             إضافة
           </button>
         </div>
@@ -178,64 +202,328 @@
         </div>
       </div>
 
-      <!-- Publishing Options -->
-      <div class="form-section">
-        <h3>خيارات النشر</h3>
+          <!-- Image Upload -->
+          <div class="images-section">
+            <h4>
+              <mat-icon>photo_library</mat-icon>
+              صور الإعلان
+            </h4>
+            <p class="section-description">أضف صوراً عالية الجودة لإعلانك (الحد الأقصى 10 صور)</p>
+            
+            <div class="file-upload-area">
+              <input 
+                type="file" 
+                #fileInput 
+                multiple 
+                accept="image/*" 
+                (change)="onFileChange($event)"
+                class="file-input">
+              <div class="file-upload-label" (click)="fileInput.click()">
+                <mat-icon>cloud_upload</mat-icon>
+                <span>اسحب الصور هنا أو انقر للاختيار</span>
+                <small>JPG, PNG, GIF (الحد الأقصى 5MB لكل صورة)</small>
+              </div>
+            </div>
+
+            <!-- Image Previews -->
+            <div class="image-previews" *ngIf="previewUrls.length > 0">
+              <div class="image-preview" *ngFor="let url of previewUrls; let i = index">
+                <img [src]="url" alt="Preview {{ i + 1 }}">
+                <button 
+                  mat-icon-button 
+                  class="remove-image-btn" 
+                  (click)="removeImage(i)"
+                  matTooltip="حذف الصورة">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Contact Information -->
+      <div class="form-section" [class.active]="stepper.selectedIndex === 2">
+        <div class="section-header">
+          <mat-icon>contact_phone</mat-icon>
+          <h3>معلومات التواصل</h3>
+          <span class="section-number">3</span>
+        </div>
         
+        <div class="section-content">
+          <div class="contact-info-grid">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>رقم الهاتف *</mat-label>
+              <input 
+                matInput 
+                formControlName="contactNumber" 
+                placeholder="مثال: +966501234567"
+                type="tel">
+              <mat-icon matSuffix>phone</mat-icon>
+              <mat-error *ngIf="form.get('contactNumber')?.invalid && form.get('contactNumber')?.touched">
+                رقم الهاتف مطلوب
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>طريقة التواصل المفضلة</mat-label>
+              <mat-select formControlName="contactMethod">
+                <mat-option value="Call">
+                  <mat-icon>phone</mat-icon>
+                  مكالمة هاتفية
+                </mat-option>
+                <mat-option value="WhatsApp">
+                  <mat-icon>chat</mat-icon>
+                  واتساب
+                </mat-option>
+                <mat-option value="SMS">
+                  <mat-icon>message</mat-icon>
+                  رسالة نصية
+                </mat-option>
+                <mat-option value="Email">
+                  <mat-icon>email</mat-icon>
+                  بريد إلكتروني
+                </mat-option>
+              </mat-select>
+              <mat-icon matSuffix>contact_phone</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <div class="contact-tips">
+            <mat-icon>lightbulb</mat-icon>
+            <div class="tips-content">
+              <h5>نصائح للتواصل الفعال</h5>
+              <ul>
+                <li>تأكد من أن رقم الهاتف صحيح ومتاح</li>
+                <li>اختر طريقة التواصل التي تفضلها</li>
+                <li>رد على الرسائل بسرعة لزيادة فرص البيع</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: A/B Testing Options -->
+      <div class="form-section" [class.active]="stepper.selectedIndex === 3">
+        <div class="section-header">
+          <mat-icon>science</mat-icon>
+          <h3>اختبار A/B (اختياري)</h3>
+          <span class="section-number">4</span>
+        </div>
+        
+        <div class="section-content">
+          <!-- A/B Testing Toggle Card -->
+          <div class="ab-test-toggle-card" [class.expanded]="form.get('enableABTesting')?.value">
+            <div class="toggle-header" (click)="toggleABTesting()">
+              <div class="toggle-content">
+                <div class="toggle-icon">
+                  <mat-icon>compare_arrows</mat-icon>
+                </div>
+                <div class="toggle-text">
+                  <h4>تفعيل اختبار A/B لهذا الإعلان</h4>
+                  <p>مقارنة أداء إعلانين مختلفين لاختيار الأفضل</p>
+                </div>
+              </div>
+              <div class="toggle-controls">
+                <mat-checkbox 
+                  formControlName="enableABTesting"
+                  (click)="$event.stopPropagation()">
+                </mat-checkbox>
+                <mat-icon class="expand-icon" [class.rotated]="form.get('enableABTesting')?.value">
+                  expand_more
+                </mat-icon>
+              </div>
+            </div>
+
+            <!-- Collapsible Content -->
+            <div class="ab-test-content" [class.show]="form.get('enableABTesting')?.value">
+              <div class="content-wrapper">
+                <!-- Test Type Selection -->
+                <div class="test-type-section">
+                  <h5>
+                    <mat-icon>settings</mat-icon>
+                    نوع الاختبار
+                  </h5>
+                  
+                  <div class="test-type-cards">
+                    <div class="test-type-card" 
+                         [class.selected]="form.get('abTestType')?.value === 'create-variant'"
+                         (click)="form.patchValue({abTestType: 'create-variant'})">
+                      <div class="card-icon">
+                        <mat-icon>add_circle</mat-icon>
+                      </div>
+                      <div class="card-content">
+                        <h6>إنشاء نسخة ثانية تلقائياً</h6>
+                        <p>إنشاء نسخة ثانية مع تغييرات طفيفة</p>
+                      </div>
+                      <mat-radio-button 
+                        value="create-variant" 
+                        formControlName="abTestType"
+                        (click)="$event.stopPropagation()">
+                      </mat-radio-button>
+                    </div>
+                    
+                    <div class="test-type-card" 
+                         [class.selected]="form.get('abTestType')?.value === 'manual-selection'"
+                         (click)="form.patchValue({abTestType: 'manual-selection'})">
+                      <div class="card-icon">
+                        <mat-icon>campaign</mat-icon>
+                      </div>
+                      <div class="card-content">
+                        <h6>اختيار إعلان موجود</h6>
+                        <p>مقارنة مع إعلان موجود</p>
+                      </div>
+                      <mat-radio-button 
+                        value="manual-selection" 
+                        formControlName="abTestType"
+                        (click)="$event.stopPropagation()">
+                      </mat-radio-button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Dynamic Options -->
+                <div class="dynamic-options" *ngIf="form.get('enableABTesting')?.value">
+                  <!-- Create Variant Options -->
+                  <div class="variant-section" *ngIf="form.get('abTestType')?.value === 'create-variant'">
         <div class="form-row">
           <mat-form-field appearance="outline" class="half-width">
-            <mat-label>حالة الإعلان</mat-label>
-            <mat-select formControlName="status">
-              <mat-option value="Draft">مسودة</mat-option>
-              <mat-option value="Published">منشور</mat-option>
+                        <mat-label>تغيير في النسخة الثانية</mat-label>
+                        <mat-select formControlName="variantChange">
+                          <mat-option value="title">
+                            <mat-icon>title</mat-icon>
+                            العنوان
+                          </mat-option>
+                          <mat-option value="description">
+                            <mat-icon>description</mat-icon>
+                            الوصف
+                          </mat-option>
+                          <mat-option value="price">
+                            <mat-icon>attach_money</mat-icon>
+                            السعر
+                          </mat-option>
+                          <mat-option value="images">
+                            <mat-icon>image</mat-icon>
+                            الصور
+                          </mat-option>
+                        </mat-select>
+                        <mat-icon matSuffix>edit</mat-icon>
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline" class="half-width" *ngIf="form.get('variantChange')?.value">
+                        <mat-label>النص البديل</mat-label>
+                        <input 
+                          matInput 
+                          formControlName="variantText" 
+                          [placeholder]="getVariantPlaceholder()">
+                        <mat-icon matSuffix>text_fields</mat-icon>
+                      </mat-form-field>
+                    </div>
+                  </div>
+
+                  <!-- Existing Ad Options -->
+                  <div class="existing-ad-section" *ngIf="form.get('abTestType')?.value === 'manual-selection'">
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>اختر الإعلان للمقارنة</mat-label>
+                      <mat-select formControlName="existingAdId">
+                        <mat-option *ngFor="let ad of existingAds" [value]="ad.id">
+                          <div class="ad-option-compact">
+                            <span class="ad-title">{{ ad.title }}</span>
+                            <span class="ad-price">{{ ad.price | currency:'SAR':'symbol':'1.0-0' }}</span>
+                          </div>
+                        </mat-option>
             </mat-select>
+                      <mat-icon matSuffix>campaign</mat-icon>
+                    </mat-form-field>
+                  </div>
+
+                  <!-- Test Details -->
+                  <div class="test-details-section">
+                    <div class="form-row">
+                      <mat-form-field appearance="outline" class="half-width">
+                        <mat-label>وصف الاختبار</mat-label>
+                        <input 
+                          matInput 
+                          formControlName="abTestDescription" 
+                          placeholder="مثال: مقارنة عناوين مختلفة">
+                        <mat-icon matSuffix>description</mat-icon>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="half-width">
-            <mat-label>جدولة النشر (اختياري)</mat-label>
+                        <mat-label>تاريخ انتهاء الاختبار</mat-label>
             <input 
               matInput 
-              type="datetime-local" 
-              formControlName="scheduledAt">
+                          [matDatepicker]="abTestPicker" 
+                          formControlName="abTestEndDate"
+                          placeholder="اختر التاريخ">
+                        <mat-datepicker-toggle matSuffix [for]="abTestPicker"></mat-datepicker-toggle>
+                        <mat-datepicker #abTestPicker></mat-datepicker>
+                        <mat-icon matSuffix>schedule</mat-icon>
           </mat-form-field>
+                    </div>
+                  </div>
+
+                  <!-- Quick Info -->
+                  <div class="quick-info">
+                    <mat-icon>lightbulb</mat-icon>
+                    <div class="info-text">
+                      <strong>كيف يعمل:</strong> سيتم عرض كل إعلان لـ 50% من الزوار وتتبع الأداء لاختيار الأفضل
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Error Message -->
-    <div class="error-message" *ngIf="error">
-      <mat-icon>error</mat-icon>
-      <span>{{ error }}</span>
-    </div>
-
-    <!-- Action Buttons -->
+    <!-- Form Actions -->
     <div class="form-actions">
+      <div class="actions-left">
       <button 
+          mat-button 
         type="button" 
-        (click)="cancel()" 
-        mat-stroked-button 
+          (click)="onCancel()"
         class="cancel-btn">
+          <mat-icon>arrow_back</mat-icon>
         إلغاء
       </button>
+      </div>
       
-      <button 
-        type="button" 
-        (click)="saveAsDraft()" 
-        [disabled]="saving || form.invalid"
-        mat-raised-button 
-        color="accent">
-        <mat-spinner *ngIf="saving" diameter="20"></mat-spinner>
-        <span *ngIf="!saving">حفظ كمسودة</span>
+      <div class="actions-right">
+        <button 
+          mat-button 
+          type="button" 
+          (click)="stepper.previous()"
+          [disabled]="stepper.selectedIndex === 0"
+          class="prev-btn">
+          <mat-icon>chevron_left</mat-icon>
+          السابق
       </button>
       
       <button 
+          mat-button 
+        type="button" 
+          (click)="stepper.next()"
+          [disabled]="stepper.selectedIndex === stepper.steps.length - 1"
+          class="next-btn">
+          التالي
+          <mat-icon>chevron_right</mat-icon>
+      </button>
+      
+      <button 
+          mat-raised-button 
+          color="primary" 
         type="submit" 
-        [disabled]="saving || form.invalid"
-        mat-raised-button 
-        color="primary">
+          [disabled]="form.invalid || saving"
+          class="submit-btn">
         <mat-spinner *ngIf="saving" diameter="20"></mat-spinner>
+          <mat-icon *ngIf="!saving">publish</mat-icon>
+          <span *ngIf="saving">جاري النشر...</span>
         <span *ngIf="!saving">نشر الإعلان</span>
       </button>
+      </div>
     </div>
   </form>
 </div>
