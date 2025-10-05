@@ -48,16 +48,16 @@ export class AdEditComponent implements OnInit, OnDestroy {
 
   private initializeForm() {
     this.form = this.fb.group({
-      title: ['', [Validators.required, Validators.maxLength(200)]],
-      description: ['', [Validators.required, Validators.maxLength(5000)]],
-      price: [null, [Validators.required, Validators.min(0)]],
-      location: ['', [Validators.required, Validators.maxLength(200)]],
+      title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(200)]],
+      description: ['', [Validators.required, Validators.minLength(20), Validators.maxLength(5000)]],
+      price: [null, [Validators.required, Validators.min(0), Validators.max(10000000)]],
+      location: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
       categoryId: [null],
-      keywords: [[]],
+      keywords: [[], this.keywordsValidator.bind(this)],
       status: ['Draft', Validators.required],
       scheduledAt: [''],
       // Contact Information
-      contactNumber: ['', [Validators.required, Validators.minLength(10)]],
+      contactNumber: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(15)]],
       contactMethod: ['Call', Validators.required]
     });
   }
@@ -113,7 +113,7 @@ export class AdEditComponent implements OnInit, OnDestroy {
       scheduledAt: ad.scheduledAtUtc ? new Date(ad.scheduledAtUtc).toISOString().slice(0, 16) : '',
       // Contact Information
       contactNumber: ad.contactNumber || ad.contactInfo?.phoneNumber || ad.contactInfo?.whatsappNumber || '',
-      contactMethod: ad.contactMethod || (ad.contactInfo?.phoneNumber ? 'Call' : 'WhatsApp')
+      contactMethod: ad.contactMethod || (ad.contactInfo?.phoneNumber ? 'Call' : (ad.contactInfo?.whatsappNumber ? 'WhatsApp' : 'Call'))
     });
     
     this.previewUrls = [...(ad.images || [])];
@@ -166,9 +166,9 @@ export class AdEditComponent implements OnInit, OnDestroy {
       categoryId: formValue.categoryId,
       keywords: formValue.keywords || [],
       status: formValue.status,
-      // Contact Information
-      contactNumber: formValue.contactNumber,
-      contactMethod: formValue.contactMethod
+      // Contact Information - Ensure these are always provided
+      contactNumber: formValue.contactNumber || '',
+      contactMethod: formValue.contactMethod || 'Call'
     };
 
     try {
@@ -186,11 +186,30 @@ export class AdEditComponent implements OnInit, OnDestroy {
         updatedAd = result;
       }
       
+      // Auto-publish after successful update
+      try {
+        await this.adsService.publish(updatedAd.id, {
+          finalTitle: this.form.value.title,
+          finalDescription: this.form.value.description,
+          finalKeywords: this.form.value.keywords || [],
+          scheduledAtUtc: null
+        }).toPromise();
+      } catch (e) {
+        console.warn('Publish call failed, but update succeeded', e);
+      }
+
       this.saving = false;
       this.router.navigate(['/ads', updatedAd.id]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating ad:', error);
       this.saving = false;
+      
+      // Show user-friendly error message
+      if (error?.error?.message) {
+        alert(`خطأ في تحديث الإعلان: ${error.error.message}`);
+      } else {
+        alert('حدث خطأ في تحديث الإعلان. يرجى المحاولة مرة أخرى.');
+      }
     }
   }
 
@@ -212,6 +231,27 @@ export class AdEditComponent implements OnInit, OnDestroy {
     if (!keyword.trim()) return;
     
     const keywords = this.form.get('keywords')?.value || [];
+    
+    // Validation: Check if we already have 20 keywords
+    if (keywords.length >= 20) {
+      console.warn('الحد الأقصى للكلمات المفتاحية هو 20 كلمة');
+      return;
+    }
+    
+    // Validation: Check keyword length
+    if (keyword.trim().length > 50) {
+      console.warn('الكلمة المفتاحية لا يمكن أن تتجاوز 50 حرف');
+      return;
+    }
+    
+    // Validation: Check for inappropriate keywords
+    const inappropriateKeywords = ['spam', 'scam', 'fake', 'كذب', 'احتيال'];
+    const lowerKeyword = keyword.trim().toLowerCase();
+    if (inappropriateKeywords.some(inappropriate => lowerKeyword.includes(inappropriate))) {
+      console.warn('الكلمة المفتاحية تحتوي على كلمات غير مسموحة');
+      return;
+    }
+    
     if (!keywords.includes(keyword.trim())) {
       keywords.push(keyword.trim());
       this.form.patchValue({ keywords });
@@ -232,5 +272,31 @@ export class AdEditComponent implements OnInit, OnDestroy {
       style: 'currency',
       currency: 'SAR'
     }).format(price);
+  }
+
+  private keywordsValidator(control: any) {
+    const keywords = control.value;
+    if (!keywords || keywords.length === 0) return null;
+    
+    // Check maximum number of keywords
+    if (keywords.length > 20) {
+      return { maxKeywords: { message: 'الحد الأقصى للكلمات المفتاحية هو 20 كلمة' } };
+    }
+    
+    // Check each keyword length
+    for (const keyword of keywords) {
+      if (keyword.length > 50) {
+        return { keywordLength: { message: 'الكلمة المفتاحية لا يمكن أن تتجاوز 50 حرف' } };
+      }
+      
+      // Check for inappropriate keywords
+      const inappropriateKeywords = ['spam', 'scam', 'fake', 'كذب', 'احتيال'];
+      const lowerKeyword = keyword.toLowerCase();
+      if (inappropriateKeywords.some(inappropriate => lowerKeyword.includes(inappropriate))) {
+        return { inappropriateKeyword: { message: 'الكلمة المفتاحية تحتوي على كلمات غير مسموحة' } };
+      }
+    }
+    
+    return null;
   }
 }

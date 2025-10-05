@@ -29,8 +29,435 @@ import { ChangePasswordRequest } from '../../../../models/auth.models';
     MatIconModule,
     LucideAngularModule
   ],
-  templateUrl: './change-password.component.html',
-  styleUrls: ['./change-password.component.scss']
+  template: `
+    <div class="change-password-container">
+      <div class="change-password-card">
+        <mat-card class="change-password-mat-card">
+          <mat-card-header>
+            <div class="change-password-header">
+              <div class="icon-wrapper">
+                <lucide-icon name="lock" [size]="28" class="change-password-icon"></lucide-icon>
+              </div>
+              <h2 class="change-password-title">تغيير كلمة المرور</h2>
+              <p class="change-password-subtitle">أدخل كلمة المرور الحالية والجديدة</p>
+            </div>
+          </mat-card-header>
+
+          <mat-card-content>
+            <!-- Success State -->
+            <div *ngIf="isSuccess" class="success-state">
+              <div class="success-icon-wrapper">
+                <lucide-icon name="check-circle" [size]="56" class="success-icon"></lucide-icon>
+              </div>
+              <h3 class="success-title">تم تغيير كلمة المرور بنجاح!</h3>
+              <p class="success-message">
+                تم تغيير كلمة المرور بنجاح. يمكنك الآن استخدام كلمة المرور الجديدة لتسجيل الدخول.
+              </p>
+              <div class="success-actions">
+                <button mat-raised-button color="primary" (click)="goToProfile()" class="profile-button">
+                  العودة للملف الشخصي
+                </button>
+                <button mat-stroked-button (click)="changePasswordAgain()" class="change-again-button">
+                  تغيير كلمة مرور أخرى
+                </button>
+              </div>
+            </div>
+
+            <!-- Form State -->
+            <form *ngIf="!isSuccess" [formGroup]="changePasswordForm" (ngSubmit)="onSubmit()" class="change-password-form">
+              <!-- Current Password Field -->
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>كلمة المرور الحالية</mat-label>
+                <input
+                  matInput
+                  [type]="showCurrentPassword ? 'text' : 'password'"
+                  formControlName="currentPassword"
+                  placeholder="أدخل كلمة المرور الحالية"
+                  autocomplete="current-password">
+                <mat-icon matPrefix>
+                  <lucide-icon name="lock" [size]="20"></lucide-icon>
+                </mat-icon>
+                <button
+                  mat-icon-button
+                  matSuffix
+                  type="button"
+                  (click)="toggleCurrentPasswordVisibility()"
+                  [attr.aria-label]="'إظهار كلمة المرور الحالية'">
+                  <mat-icon>
+                    <lucide-icon [name]="showCurrentPassword ? 'eye-off' : 'eye'" [size]="20"></lucide-icon>
+                  </mat-icon>
+                </button>
+                <mat-error *ngIf="changePasswordForm.get('currentPassword')?.hasError('required')">
+                  كلمة المرور الحالية مطلوبة
+                </mat-error>
+              </mat-form-field>
+
+              <!-- New Password Field -->
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>كلمة المرور الجديدة</mat-label>
+                <input
+                  matInput
+                  [type]="showNewPassword ? 'text' : 'password'"
+                  formControlName="newPassword"
+                  placeholder="أدخل كلمة المرور الجديدة"
+                  autocomplete="new-password">
+                <mat-icon matPrefix>
+                  <lucide-icon name="lock" [size]="20"></lucide-icon>
+                </mat-icon>
+                <button
+                  mat-icon-button
+                  matSuffix
+                  type="button"
+                  (click)="toggleNewPasswordVisibility()"
+                  [attr.aria-label]="'إظهار كلمة المرور الجديدة'">
+                  <mat-icon>
+                    <lucide-icon [name]="showNewPassword ? 'eye-off' : 'eye'" [size]="20"></lucide-icon>
+                  </mat-icon>
+                </button>
+                <mat-error *ngIf="changePasswordForm.get('newPassword')?.hasError('required')">
+                  كلمة المرور الجديدة مطلوبة
+                </mat-error>
+                <mat-error *ngIf="changePasswordForm.get('newPassword')?.hasError('minlength')">
+                  كلمة المرور يجب أن تكون 6 أحرف على الأقل
+                </mat-error>
+              </mat-form-field>
+
+              <!-- Confirm Password Field -->
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>تأكيد كلمة المرور الجديدة</mat-label>
+                <input
+                  matInput
+                  [type]="showConfirmPassword ? 'text' : 'password'"
+                  formControlName="confirmPassword"
+                  placeholder="أعد إدخال كلمة المرور الجديدة"
+                  autocomplete="new-password">
+                <mat-icon matPrefix>
+                  <lucide-icon name="lock" [size]="20"></lucide-icon>
+                </mat-icon>
+                <button
+                  mat-icon-button
+                  matSuffix
+                  type="button"
+                  (click)="toggleConfirmPasswordVisibility()"
+                  [attr.aria-label]="'إظهار تأكيد كلمة المرور'">
+                  <mat-icon>
+                    <lucide-icon [name]="showConfirmPassword ? 'eye-off' : 'eye'" [size]="20"></lucide-icon>
+                  </mat-icon>
+                </button>
+                <mat-error *ngIf="changePasswordForm.get('confirmPassword')?.hasError('required')">
+                  تأكيد كلمة المرور مطلوب
+                </mat-error>
+                <mat-error *ngIf="changePasswordForm.get('confirmPassword')?.hasError('mismatch')">
+                  كلمة المرور غير متطابقة
+                </mat-error>
+              </mat-form-field>
+
+              <!-- Error Message -->
+              <div class="error-message" *ngIf="errorMessage">
+                <mat-icon class="error-icon">
+                  <lucide-icon name="alert-circle" [size]="18"></lucide-icon>
+                </mat-icon>
+                <span>{{ errorMessage }}</span>
+              </div>
+
+              <!-- Submit Button -->
+              <button
+                mat-raised-button
+                color="primary"
+                type="submit"
+                class="change-password-button full-width"
+                [disabled]="changePasswordForm.invalid || isLoading">
+                <mat-spinner *ngIf="isLoading" diameter="20" class="change-password-spinner"></mat-spinner>
+                <span *ngIf="!isLoading">تغيير كلمة المرور</span>
+              </button>
+
+              <!-- Back to Profile -->
+              <div class="back-to-profile">
+                <button mat-button type="button" (click)="goToProfile()" class="back-link">
+                  <lucide-icon name="arrow-left" [size]="16" class="me-2"></lucide-icon>
+                  العودة للملف الشخصي
+                </button>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  `,
+  styles: [`
+    .change-password-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f8f9fa;
+      padding: 2rem;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .change-password-card {
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .change-password-mat-card {
+      padding: 2.5rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      background: #ffffff;
+    }
+
+    .change-password-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .icon-wrapper {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+      border-radius: 50%;
+      margin-bottom: 1.25rem;
+    }
+
+    .change-password-icon {
+      color: #1a73e8;
+    }
+
+    .change-password-title {
+      font-size: 1.65rem;
+      font-weight: 500;
+      color: #202124;
+      margin: 0 0 0.5rem 0;
+      letter-spacing: -0.2px;
+    }
+
+    .change-password-subtitle {
+      color: #5f6368;
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 400;
+    }
+
+    .success-state {
+      text-align: center;
+      padding: 1.5rem 0;
+    }
+
+    .success-icon-wrapper {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+      border-radius: 50%;
+      margin-bottom: 1.5rem;
+    }
+
+    .success-icon {
+      color: #34a853;
+    }
+
+    .success-title {
+      font-size: 1.5rem;
+      font-weight: 500;
+      color: #202124;
+      margin: 0 0 1rem 0;
+    }
+
+    .success-message {
+      color: #5f6368;
+      margin: 0 0 2rem 0;
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+
+    .success-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.875rem;
+    }
+
+    .profile-button {
+      height: 44px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      border-radius: 8px;
+      background-color: #1a73e8 !important;
+      text-transform: none;
+      letter-spacing: 0.2px;
+    }
+
+    .profile-button:hover {
+      background-color: #1557b0 !important;
+      box-shadow: 0 2px 4px rgba(26, 115, 232, 0.3);
+    }
+
+    .change-again-button {
+      height: 44px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      border-radius: 8px;
+      color: #1a73e8;
+      border-color: #dadce0;
+      text-transform: none;
+      letter-spacing: 0.2px;
+    }
+
+    .change-again-button:hover {
+      background-color: rgba(26, 115, 232, 0.04);
+      border-color: #1a73e8;
+    }
+
+    .change-password-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .full-width {
+      width: 100%;
+    }
+
+    ::ng-deep .mat-mdc-form-field {
+      font-size: 0.95rem;
+    }
+
+    ::ng-deep .mat-mdc-text-field-wrapper {
+      background-color: #fafafa;
+    }
+
+    ::ng-deep .mat-mdc-form-field-focus-overlay {
+      background-color: transparent;
+    }
+
+    ::ng-deep .mdc-text-field--outlined .mdc-notched-outline__leading,
+    ::ng-deep .mdc-text-field--outlined .mdc-notched-outline__notch,
+    ::ng-deep .mdc-text-field--outlined .mdc-notched-outline__trailing {
+      border-color: #dadce0;
+    }
+
+    ::ng-deep .mdc-text-field--outlined:hover .mdc-notched-outline__leading,
+    ::ng-deep .mdc-text-field--outlined:hover .mdc-notched-outline__notch,
+    ::ng-deep .mdc-text-field--outlined:hover .mdc-notched-outline__trailing {
+      border-color: #5f6368;
+    }
+
+    ::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+    ::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
+    ::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
+      border-color: #1a73e8 !important;
+      border-width: 2px !important;
+    }
+
+    ::ng-deep .mat-mdc-form-field-icon-prefix,
+    ::ng-deep .mat-mdc-form-field-icon-suffix {
+      color: #5f6368;
+    }
+
+    .error-message {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #d93025;
+      background-color: #fce8e6;
+      padding: 0.875rem 1rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      border: 1px solid #f8d7da;
+    }
+
+    .error-icon {
+      color: #d93025;
+      flex-shrink: 0;
+    }
+
+    .change-password-button {
+      height: 48px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      margin-top: 0.5rem;
+      border-radius: 8px;
+      background-color: #1a73e8 !important;
+      text-transform: none;
+      letter-spacing: 0.2px;
+    }
+
+    .change-password-button:hover:not(:disabled) {
+      background-color: #1557b0 !important;
+      box-shadow: 0 2px 4px rgba(26, 115, 232, 0.3);
+    }
+
+    .change-password-button:disabled {
+      background-color: #dadce0 !important;
+      color: #80868b !important;
+    }
+
+    .change-password-spinner {
+      display: inline-block;
+      margin-left: 0.5rem;
+    }
+
+    ::ng-deep .change-password-spinner circle {
+      stroke: #ffffff !important;
+    }
+
+    .back-to-profile {
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .back-link {
+      color: #1a73e8;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9rem;
+      text-transform: none;
+      letter-spacing: 0.1px;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .back-link:hover {
+      background-color: rgba(26, 115, 232, 0.04);
+    }
+
+    .me-2 {
+      margin-left: 0.4rem;
+    }
+
+    @media (max-width: 480px) {
+      .change-password-container {
+        padding: 1rem;
+      }
+
+      .change-password-mat-card {
+        padding: 1.75rem;
+      }
+
+      .change-password-title {
+        font-size: 1.5rem;
+      }
+
+      .icon-wrapper {
+        width: 56px;
+        height: 56px;
+      }
+
+      .success-icon-wrapper {
+        width: 72px;
+        height: 72px;
+      }
+
+      .success-actions {
+        gap: 0.75rem;
+      }
+    }
+  `]
 })
 export class ChangePasswordComponent implements OnInit {
   changePasswordForm: FormGroup;

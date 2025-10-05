@@ -228,7 +228,7 @@ export class ProfileNotificationsComponent implements OnInit, OnDestroy {
 
   applyFilters() {
     const formValue = this.filterForm.value;
-    let filtered = [...this.notifications];
+    let filtered = [...(this.notifications || [])];
 
     // Search term filter
     if (formValue.searchTerm) {
@@ -348,7 +348,7 @@ export class ProfileNotificationsComponent implements OnInit, OnDestroy {
     if (confirm('هل أنت متأكد من حذف جميع الإشعارات؟')) {
       this.isSaving = true;
       
-      const allIds = this.notifications.map(n => n.id);
+      const allIds = (this.notifications || []).map(n => n.id);
       this.notificationService.deleteMultiple(allIds).pipe(takeUntil(this.destroy$)).subscribe({
         next: () => {
           // Local state will be updated automatically through the service
@@ -542,7 +542,7 @@ export class ProfileNotificationsComponent implements OnInit, OnDestroy {
   }
 
   getUnreadCount(): number {
-    return this.notifications.filter(n => !n.isRead).length;
+    return (this.notifications || []).filter(n => !n.isRead).length;
   }
 
   trackByNotificationId(index: number, notification: NotificationDto): string {
@@ -550,7 +550,7 @@ export class ProfileNotificationsComponent implements OnInit, OnDestroy {
   }
 
   getReadNotificationsCount(): number {
-    return this.notifications.filter(n => n.isRead).length;
+    return (this.notifications || []).filter(n => n.isRead).length;
   }
 
   onNotificationClick(notification: NotificationDto) {

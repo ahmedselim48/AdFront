@@ -1,83 +1,84 @@
-<div class="resend-confirmation-container">
-  <div class="resend-confirmation-card">
-    <mat-card class="resend-confirmation-mat-card">
-      <mat-card-header>
-        <div class="resend-confirmation-header">
-          <lucide-icon name="mail" size="32" class="resend-confirmation-icon"></lucide-icon>
-          <h2 class="resend-confirmation-title">إعادة إرسال رابط التأكيد</h2>
-          <p class="resend-confirmation-subtitle">أدخل بريدك الإلكتروني وسنرسل لك رابط تأكيد جديد</p>
+<div class="resend-container">
+  <div class="resend-wrapper">
+    <div class="resend-card">
+      <!-- Header -->
+      <div class="resend-header">
+        <div class="logo">HarajPlus</div>
+        <div class="icon-wrapper">
+          <lucide-icon name="mail" size="32" class="header-icon"></lucide-icon>
         </div>
-      </mat-card-header>
+        <h1 class="title">إعادة إرسال رابط التأكيد</h1>
+        <p class="subtitle">أدخل بريدك الإلكتروني وسنرسل لك رابط تأكيد جديد</p>
+      </div>
 
-      <mat-card-content>
-        <!-- Success State -->
-        <div *ngIf="isSuccess" class="success-state">
+      <!-- Success State -->
+      <div *ngIf="isSuccess" class="success-state">
+        <div class="success-icon-wrapper">
           <lucide-icon name="check-circle" size="48" class="success-icon"></lucide-icon>
-          <h3 class="success-title">تم إرسال الرابط بنجاح!</h3>
-          <p class="success-message">
-            تم إرسال رابط تأكيد البريد الإلكتروني إلى بريدك الإلكتروني.
-            يرجى التحقق من صندوق الوارد أو مجلد الرسائل المزعجة.
-          </p>
-          <div class="success-actions">
-            <button mat-raised-button color="primary" (click)="resendAgain()" class="resend-again-button">
-              إرسال رابط آخر
-            </button>
-            <button mat-stroked-button (click)="goBackToLogin()" class="back-button">
-              <lucide-icon name="arrow-left" size="16" class="me-2"></lucide-icon>
-              العودة لتسجيل الدخول
-            </button>
-          </div>
         </div>
+        <h3 class="success-title">تم إرسال الرابط بنجاح</h3>
+        <p class="success-message">
+          تم إرسال رابط تأكيد البريد الإلكتروني. يرجى التحقق من صندوق الوارد أو مجلد الرسائل المزعجة.
+        </p>
+        <div class="success-actions">
+          <button mat-flat-button color="primary" (click)="resendAgain()" class="action-btn primary-btn">
+            إرسال رابط آخر
+          </button>
+          <button mat-stroked-button (click)="goBackToLogin()" class="action-btn secondary-btn">
+            <lucide-icon name="arrow-left" size="16"></lucide-icon>
+            <span>العودة لتسجيل الدخول</span>
+          </button>
+        </div>
+      </div>
 
-        <!-- Form State -->
-        <form *ngIf="!isSuccess" [formGroup]="resendForm" (ngSubmit)="onSubmit()" class="resend-confirmation-form">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>البريد الإلكتروني</mat-label>
+      <!-- Form State -->
+      <form *ngIf="!isSuccess" [formGroup]="resendForm" (ngSubmit)="onSubmit()" class="resend-form">
+        <div class="form-group">
+          <label class="form-label">البريد الإلكتروني</label>
+          <mat-form-field appearance="outline" class="form-field">
             <input
               matInput
               type="email"
               formControlName="email"
               placeholder="أدخل بريدك الإلكتروني"
               autocomplete="email">
-            <mat-icon matPrefix>
-              <lucide-icon name="mail" size="20"></lucide-icon>
+            <mat-icon matPrefix class="input-icon">
+              <lucide-icon name="mail" size="18"></lucide-icon>
             </mat-icon>
             <mat-error *ngIf="resendForm.get('email')?.hasError('required')">
-              البريد الإلكتروني مطلوب
+              هذا الحقل مطلوب
             </mat-error>
             <mat-error *ngIf="resendForm.get('email')?.hasError('email')">
               يرجى إدخال بريد إلكتروني صحيح
             </mat-error>
           </mat-form-field>
+        </div>
 
-          <!-- Error Message -->
-          <div class="error-message" *ngIf="errorMessage">
-            <mat-icon class="error-icon">
-              <lucide-icon name="alert-circle" size="20"></lucide-icon>
-            </mat-icon>
-            <span>{{ errorMessage }}</span>
-          </div>
+        <!-- Error Alert -->
+        <div class="alert alert-error" *ngIf="errorMessage">
+          <lucide-icon name="alert-circle" size="16" class="alert-icon"></lucide-icon>
+          <span>{{ errorMessage }}</span>
+        </div>
 
-          <!-- Submit Button -->
-          <button
-            mat-raised-button
-            color="primary"
-            type="submit"
-            class="resend-confirmation-button full-width"
-            [disabled]="resendForm.invalid || isLoading">
-            <mat-spinner *ngIf="isLoading" diameter="20" class="resend-confirmation-spinner"></mat-spinner>
-            <span *ngIf="!isLoading">إرسال رابط التأكيد</span>
+        <!-- Submit Button -->
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          class="submit-btn"
+          [disabled]="resendForm.invalid || isLoading">
+          <mat-spinner *ngIf="isLoading" diameter="18" class="btn-spinner"></mat-spinner>
+          <span *ngIf="!isLoading">إرسال رابط التأكيد</span>
+        </button>
+
+        <!-- Back to Login -->
+        <div class="back-link-wrapper">
+          <button mat-button type="button" (click)="goBackToLogin()" class="back-link">
+            <lucide-icon name="arrow-left" size="16"></lucide-icon>
+            <span>العودة لتسجيل الدخول</span>
           </button>
-
-          <!-- Back to Login -->
-          <div class="back-to-login">
-            <button mat-button type="button" (click)="goBackToLogin()" class="back-link">
-              <lucide-icon name="arrow-left" size="16" class="me-2"></lucide-icon>
-              العودة لتسجيل الدخول
-            </button>
-          </div>
-        </form>
-      </mat-card-content>
-    </mat-card>
+        </div>
+      </form>
+    </div>
   </div>
 </div>

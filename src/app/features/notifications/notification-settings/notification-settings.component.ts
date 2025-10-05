@@ -121,9 +121,9 @@ export class NotificationSettingsComponent implements OnInit, OnDestroy {
       pushPerformanceAlerts: [true],
 
       // SMS Preferences (Placeholder - not implemented as per user request)
-      smsNotifications: [false],
-      smsSecurityAlerts: [false],
-      smsPaymentAlerts: [false],
+      smsNotifications: [{value: false, disabled: true}],
+      smsSecurityAlerts: [{value: false, disabled: true}],
+      smsPaymentAlerts: [{value: false, disabled: true}],
 
       // Quiet Hours
       enableQuietHours: [false],
@@ -294,12 +294,12 @@ export class NotificationSettingsComponent implements OnInit, OnDestroy {
    */
   getSectionDescription(section: string): string {
     const descriptions: { [key: string]: string } = {
-      email: 'تحديد أنواع الإشعارات التي تريد استلامها عبر البريد الإلكتروني',
-      push: 'تحديد أنواع الإشعارات التي تريد استلامها كإشعارات فورية في التطبيق',
-      sms: 'تحديد أنواع الإشعارات التي تريد استلامها عبر الرسائل النصية (غير متاح حالياً)',
-      quiet: 'تحديد أوقات عدم الرغبة في استلام الإشعارات',
-      frequency: 'تحديد تكرار استلام الإشعارات',
-      priority: 'تحديد أولويات الإشعارات التي تريد استلامها'
+      email: 'تخصيص أنواع الإشعارات التي تريد استلامها عبر البريد الإلكتروني - يمكنك تفعيل أو إلغاء تفعيل كل نوع حسب احتياجاتك',
+      push: 'تخصيص الإشعارات الفورية التي تظهر في التطبيق - هذه الإشعارات تظهر فوراً عند حدوث الأحداث',
+      sms: 'الإشعارات عبر الرسائل النصية - غير متاحة حالياً ولكن ستكون متاحة قريباً للإشعارات المهمة',
+      quiet: 'تحديد أوقات الهدوء لتجنب الإشعارات المزعجة - يمكنك تحديد ساعات معينة لن تصل فيها إشعارات',
+      frequency: 'تحديد تكرار الإشعارات - اختر ما إذا كنت تريد الإشعارات فوراً أو مجمعة في فترات معينة',
+      priority: 'تخصيص أولويات الإشعارات - اختر أنواع الإشعارات التي تهمك حسب مستوى الأولوية'
     };
     
     return descriptions[section] || '';
@@ -310,37 +310,37 @@ export class NotificationSettingsComponent implements OnInit, OnDestroy {
    */
   getSettingDescription(setting: string): string {
     const descriptions: { [key: string]: string } = {
-      emailNotifications: 'استلام الإشعارات عبر البريد الإلكتروني',
-      emailAdUpdates: 'تحديثات الإعلانات',
-      emailChatMessages: 'رسائل الدردشة الجديدة',
-      emailSystemAlerts: 'تنبيهات النظام',
-      emailSecurityAlerts: 'تنبيهات الأمان',
-      emailPerformanceAlerts: 'تنبيهات الأداء',
-      emailMarketingEmails: 'رسائل التسويق والعروض',
+      emailNotifications: 'تحديد ما إذا كنت تريد استلام الإشعارات عبر البريد الإلكتروني أم لا',
+      emailAdUpdates: 'إشعارات عند تحديث إعلاناتك أو إعلانات المتابعة',
+      emailChatMessages: 'إشعارات عند وصول رسائل جديدة في الدردشة',
+      emailSystemAlerts: 'إشعارات مهمة من النظام وإعلانات عامة',
+      emailSecurityAlerts: 'إشعارات أمنية مهمة مثل تسجيل الدخول من أجهزة جديدة',
+      emailPerformanceAlerts: 'إشعارات حول أداء إعلاناتك وإحصائياتها',
+      emailMarketingEmails: 'رسائل تسويقية وعروض خاصة من المنصة',
       
-      pushNotifications: 'استلام الإشعارات الفورية في التطبيق',
-      pushAdUpdates: 'تحديثات الإعلانات',
-      pushChatMessages: 'رسائل الدردشة الجديدة',
-      pushSystemAlerts: 'تنبيهات النظام',
-      pushSecurityAlerts: 'تنبيهات الأمان',
-      pushPerformanceAlerts: 'تنبيهات الأداء',
+      pushNotifications: 'تحديد ما إذا كنت تريد استلام الإشعارات الفورية في التطبيق',
+      pushAdUpdates: 'إشعارات فورية عند تحديث إعلاناتك أو إعلانات المتابعة',
+      pushChatMessages: 'إشعارات فورية عند وصول رسائل جديدة في الدردشة',
+      pushSystemAlerts: 'إشعارات فورية مهمة من النظام وإعلانات عامة',
+      pushSecurityAlerts: 'إشعارات فورية أمنية مهمة',
+      pushPerformanceAlerts: 'إشعارات فورية حول أداء إعلاناتك وإحصائياتها',
       
-      smsNotifications: 'استلام الإشعارات عبر الرسائل النصية (غير متاح حالياً)',
-      smsSecurityAlerts: 'تنبيهات الأمان العاجلة',
-      smsPaymentAlerts: 'تنبيهات المدفوعات',
+      smsNotifications: 'إشعارات عبر الرسائل النصية (غير متاح حالياً)',
+      smsSecurityAlerts: 'إشعارات أمنية عاجلة عبر الرسائل النصية',
+      smsPaymentAlerts: 'إشعارات المدفوعات عبر الرسائل النصية',
       
-      enableQuietHours: 'تفعيل أوقات الهدوء',
-      quietHoursStart: 'وقت بداية الهدوء',
-      quietHoursEnd: 'وقت نهاية الهدوء',
-      timeZone: 'المنطقة الزمنية',
+      enableQuietHours: 'تفعيل أوقات الهدوء لتجنب الإشعارات في أوقات معينة',
+      quietHoursStart: 'وقت بداية فترة الهدوء (لن تصل إشعارات)',
+      quietHoursEnd: 'وقت نهاية فترة الهدوء (ستعود الإشعارات)',
+      timeZone: 'المنطقة الزمنية المستخدمة لحساب أوقات الهدوء',
       
-      emailFrequency: 'تكرار الإشعارات الإلكترونية',
-      pushFrequency: 'تكرار الإشعارات الفورية',
+      emailFrequency: 'تحديد تكرار الإشعارات الإلكترونية (فوري، يومي، أسبوعي)',
+      pushFrequency: 'تحديد تكرار الإشعارات الفورية في التطبيق',
       
-      receiveLowPriority: 'استلام الإشعارات ذات الأولوية المنخفضة',
-      receiveMediumPriority: 'استلام الإشعارات ذات الأولوية المتوسطة',
-      receiveHighPriority: 'استلام الإشعارات ذات الأولوية العالية',
-      receiveUrgentPriority: 'استلام الإشعارات العاجلة'
+      receiveLowPriority: 'استلام الإشعارات ذات الأولوية المنخفضة (مثل التحديثات العامة)',
+      receiveMediumPriority: 'استلام الإشعارات ذات الأولوية المتوسطة (مثل رسائل الدردشة)',
+      receiveHighPriority: 'استلام الإشعارات ذات الأولوية العالية (مثل تحديثات الإعلانات)',
+      receiveUrgentPriority: 'استلام الإشعارات العاجلة (مثل التنبيهات الأمنية)'
     };
     
     return descriptions[setting] || '';

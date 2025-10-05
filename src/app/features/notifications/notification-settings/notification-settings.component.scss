@@ -1,8 +1,10 @@
 .notification-settings-page {
-  padding: 24px;
-  max-width: 1000px;
+  padding: 32px;
+  max-width: 1200px;
   margin: 0 auto;
   direction: rtl;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  min-height: 100vh;
 }
 
 // Page Header
@@ -10,34 +12,94 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 32px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 40px;
+  padding: 32px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
 
   .header-content {
-    .page-title {
-      font-size: 32px;
-      font-weight: 700;
-      color: #1f2937;
-      margin: 0 0 8px 0;
-    }
+    .title-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
 
-    .page-subtitle {
-      font-size: 16px;
-      color: #6b7280;
-      margin: 0;
+      .icon-wrapper {
+        width: 64px;
+        height: 64px;
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+
+        .page-icon {
+          color: white;
+          font-size: 28px;
+          width: 28px;
+          height: 28px;
+        }
+      }
+
+      .title-text {
+        .page-title {
+          font-size: 36px;
+          font-weight: 800;
+          color: #1e293b;
+          margin: 0 0 8px 0;
+          background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        .page-subtitle {
+          font-size: 18px;
+          color: #64748b;
+          margin: 0;
+          line-height: 1.5;
+        }
+      }
     }
   }
 
   .save-actions {
     display: flex;
-    gap: 12px;
+    gap: 16px;
     align-items: center;
 
-    button {
+    .reset-btn {
       display: flex;
       align-items: center;
       gap: 8px;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        background-color: #f1f5f9;
+        transform: translateY(-2px);
+      }
+    }
+
+    .save-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+      transition: all 0.3s ease;
+      
+      &:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.5);
+      }
     }
   }
 }
@@ -61,11 +123,35 @@
 .settings-form {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 32px;
 }
 
 // Settings Section
 .settings-section {
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  background: white;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+  }
+
+  &.email-section {
+    border-left: 4px solid #3b82f6;
+  }
+
+  &.push-section {
+    border-left: 4px solid #10b981;
+  }
+
+  &.sms-section {
+    border-left: 4px solid #f59e0b;
+  }
+
   &.disabled-section {
     opacity: 0.6;
     pointer-events: none;
@@ -433,6 +519,134 @@
 
     .bottom-save-actions {
       border-top-color: #374151;
+    }
+  }
+}
+
+// Enhanced Setting Items
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-radius: 16px;
+  background: #f8fafc;
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+  border: 1px solid #e2e8f0;
+
+  &:hover {
+    background: #f1f5f9;
+    transform: translateX(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &.main-toggle {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+    margin: -24px -24px 24px -24px;
+    padding: 24px;
+    border-radius: 16px;
+    border: none;
+
+    &:hover {
+      background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+    }
+
+    .setting-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: white;
+    }
+
+    .setting-description {
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .setting-badge {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+  }
+
+  .setting-info {
+    flex: 1;
+    margin-left: 20px;
+
+    .setting-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+
+      .setting-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1e293b;
+        margin: 0;
+      }
+
+      .setting-badge {
+        background: #e0e7ff;
+        color: #3730a3;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        border: 1px solid #c7d2fe;
+      }
+
+      .setting-type-icon {
+        color: #64748b;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    .setting-description {
+      font-size: 14px;
+      color: #64748b;
+      margin: 0;
+      line-height: 1.5;
+    }
+  }
+
+  .toggle-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 80px;
+
+    .toggle-status {
+      .status-text {
+        font-size: 12px;
+        font-weight: 600;
+        padding: 4px 8px;
+        border-radius: 12px;
+        background: #f1f5f9;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+        display: inline-block;
+        min-width: 50px;
+        text-align: center;
+
+        &.active {
+          background: #dcfce7;
+          color: #166534;
+          border-color: #bbf7d0;
+        }
+      }
     }
   }
 }

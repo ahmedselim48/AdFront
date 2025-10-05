@@ -8,7 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
-import { LucideAngularModule, Mail, ArrowLeft, CheckCircle } from 'lucide-angular';
+import { LucideAngularModule, Mail, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-angular';
 import { ToastrService } from 'ngx-toastr';
 
 import { AuthService } from '../../../../core/auth/auth.service';

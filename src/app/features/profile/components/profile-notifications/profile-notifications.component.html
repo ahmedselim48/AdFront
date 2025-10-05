@@ -25,9 +25,9 @@
     </div>
 
     <!-- Stats Summary -->
-    <div class="stats-summary" *ngIf="notifications.length > 0">
+    <div class="stats-summary" *ngIf="notifications && notifications.length > 0">
       <div class="stat-item">
-        <span class="stat-value">{{ notifications.length }}</span>
+        <span class="stat-value">{{ (notifications && notifications.length) || 0 }}</span>
         <span class="stat-label">إجمالي الإشعارات</span>
       </div>
       <div class="stat-item">
@@ -43,7 +43,7 @@
     <!-- Filters Section -->
     <mat-card class="filters-card">
       <mat-card-content>
-        <form [formGroup]="filterForm" class="filters-form">
+        <form [formGroup]="filterForm" class="filters-form" *ngIf="filterForm">
           <div class="filters-row">
             <mat-form-field appearance="outline" class="search-field">
               <mat-label>البحث في الإشعارات</mat-label>

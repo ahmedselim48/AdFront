@@ -65,9 +65,21 @@ export class NavbarNotificationsComponent implements OnInit, OnDestroy {
     ])
     .pipe(takeUntil(this.destroy$))
     .subscribe(([notifications, unreadCount, isConnected]) => {
+      console.log('Navbar notifications updated:', { notifications: notifications.length, unreadCount, isConnected });
       this.notifications = notifications.slice(0, 5); // Show latest 5
       this.unreadCount = unreadCount;
       this.isConnected = isConnected;
+    });
+
+    // Load initial notifications
+    this.notificationService.getLatest(5).subscribe({
+      next: (notifications) => {
+        console.log('Loaded initial notifications for navbar:', notifications.length);
+        this.notifications = notifications;
+      },
+      error: (error) => {
+        console.error('Error loading initial notifications:', error);
+      }
     });
   }
 

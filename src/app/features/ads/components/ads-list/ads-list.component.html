@@ -80,7 +80,7 @@
 
   <!-- Ads Grid -->
   <div *ngIf="!loading" class="ads-grid">
-    <div *ngIf="ads.length === 0" class="no-ads">
+    <div *ngIf="!ads || ads.length === 0" class="no-ads">
       <div class="no-ads-content">
         <i class="icon-search"></i>
         <h3>لا توجد إعلانات</h3>
@@ -201,7 +201,7 @@
   <!-- Results Summary -->
   <div *ngIf="!loading && paginatedResponse" class="results-summary">
     <p>
-      عرض {{ ads.length }} من أصل {{ paginatedResponse.totalCount }} إعلان
+      عرض {{ (ads && ads.length) || 0 }} من أصل {{ paginatedResponse.totalCount }} إعلان
       (الصفحة {{ currentPage }} من {{ totalPages }})
     </p>
   </div>

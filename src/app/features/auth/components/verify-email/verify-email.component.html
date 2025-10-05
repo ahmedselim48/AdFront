@@ -3,37 +3,25 @@
     <mat-card class="verify-email-mat-card">
       <mat-card-header>
         <div class="verify-email-header">
-          <!-- Success State -->
-          <lucide-icon 
-            *ngIf="status === 'success'" 
-            name="check-circle" 
-            size="48" 
-            class="success-icon">
-          </lucide-icon>
+          <!-- Success State Icon -->
+          <div *ngIf="status === 'success'" class="success-icon-wrapper">
+            <lucide-icon name="check-circle" [size]="56" class="success-icon"></lucide-icon>
+          </div>
           
-          <!-- Error State -->
-          <lucide-icon 
-            *ngIf="status === 'error'" 
-            name="x-circle" 
-            size="48" 
-            class="error-icon">
-          </lucide-icon>
+          <!-- Error State Icon -->
+          <div *ngIf="status === 'error'" class="error-icon-wrapper">
+            <lucide-icon name="x-circle" [size]="56" class="error-icon"></lucide-icon>
+          </div>
           
-          <!-- Verifying State -->
-          <lucide-icon 
-            *ngIf="status === 'verifying'" 
-            name="mail" 
-            size="48" 
-            class="verifying-icon">
-          </lucide-icon>
+          <!-- Verifying State Icon -->
+          <div *ngIf="status === 'verifying'" class="verifying-icon-wrapper">
+            <lucide-icon name="mail" [size]="56" class="verifying-icon"></lucide-icon>
+          </div>
           
-          <!-- Idle State -->
-          <lucide-icon 
-            *ngIf="status === 'idle'" 
-            name="mail" 
-            size="48" 
-            class="idle-icon">
-          </lucide-icon>
+          <!-- Idle State Icon -->
+          <div *ngIf="status === 'idle'" class="idle-icon-wrapper">
+            <lucide-icon name="mail" [size]="56" class="idle-icon"></lucide-icon>
+          </div>
           
           <h2 class="verify-email-title">
             <span *ngIf="status === 'idle'">تأكيد البريد الإلكتروني</span>
@@ -51,14 +39,13 @@
       <mat-card-content>
         <!-- Idle State -->
         <div *ngIf="status === 'idle'" class="idle-state">
-          <h3 class="idle-title">تحقق من بريدك الإلكتروني</h3>
           <p class="idle-message">{{ message }}</p>
           <div class="idle-actions">
             <button mat-raised-button color="primary" (click)="resendConfirmation()" class="resend-button">
               إعادة إرسال رابط التأكيد
             </button>
             <button mat-stroked-button (click)="goToLogin()" class="back-button">
-              <lucide-icon name="arrow-left" size="16" class="me-2"></lucide-icon>
+              <lucide-icon name="arrow-left" [size]="16" class="me-2"></lucide-icon>
               العودة لتسجيل الدخول
             </button>
           </div>
@@ -72,7 +59,6 @@
 
         <!-- Success State -->
         <div *ngIf="status === 'success'" class="success-state">
-          <h3 class="success-title">تم تأكيد البريد الإلكتروني بنجاح!</h3>
           <p class="success-message">{{ message }}</p>
           <div class="success-actions">
             <button mat-raised-button color="primary" (click)="goToLogin()" class="login-button">
@@ -83,14 +69,13 @@
 
         <!-- Error State -->
         <div *ngIf="status === 'error'" class="error-state">
-          <h3 class="error-title">فشل في تأكيد البريد الإلكتروني</h3>
           <p class="error-message">{{ message }}</p>
           <div class="error-actions">
             <button mat-raised-button color="primary" (click)="resendConfirmation()" class="resend-button">
               إعادة إرسال رابط التأكيد
             </button>
             <button mat-stroked-button (click)="goToLogin()" class="back-button">
-              <lucide-icon name="arrow-left" size="16" class="me-2"></lucide-icon>
+              <lucide-icon name="arrow-left" [size]="16" class="me-2"></lucide-icon>
               العودة لتسجيل الدخول
             </button>
           </div>

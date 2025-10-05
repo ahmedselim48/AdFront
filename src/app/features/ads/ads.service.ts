@@ -226,9 +226,9 @@ export class AdsService {
       });
     }
     
-    // Contact Information
-    if (ad.contactNumber) formData.append('ContactNumber', ad.contactNumber);
-    if (ad.contactMethod) formData.append('ContactMethod', ad.contactMethod);
+    // Contact Information - Always send these fields
+    formData.append('ContactNumber', ad.contactNumber || '');
+    formData.append('ContactMethod', ad.contactMethod || 'Call');
 
     return this.api.put$(`/ads/${id}`, formData);
   }
@@ -249,9 +249,9 @@ export class AdsService {
       });
     }
     
-    // Contact Information
-    if (ad.contactNumber) formData.append('ContactNumber', ad.contactNumber);
-    if (ad.contactMethod) formData.append('ContactMethod', ad.contactMethod);
+    // Contact Information - Always send these fields
+    formData.append('ContactNumber', ad.contactNumber || '');
+    formData.append('ContactMethod', ad.contactMethod || 'Call');
     
     // Add valid new images only
     validFiles.forEach((file, index) => {

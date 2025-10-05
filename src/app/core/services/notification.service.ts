@@ -16,6 +16,7 @@ import {
   NotificationActionDto,
   RealTimeNotificationDto
 } from '../../models/notification.model';
+import { GeneralResponse } from '../../models/general-response';
 
 @Injectable({
   providedIn: 'root'
@@ -342,8 +343,14 @@ export class NotificationService {
       .set('page', filters.page?.toString() || '1')
       .set('pageSize', filters.pageSize?.toString() || '20');
 
-    return this.http.post<NotificationListResponseDto>(`${this.apiUrl}/filtered`, filters, { params })
+    console.log('Getting notifications with filters:', filters);
+    console.log('API URL:', `${this.apiUrl}`);
+    console.log('Request params:', params.toString());
+
+    return this.http.get<GeneralResponse<NotificationListResponseDto>>(`${this.apiUrl}`, { params })
       .pipe(
+        tap(response => console.log('Notifications API response:', response)),
+        map(response => response.data || { notifications: [], totalCount: 0, page: 1, pageSize: 20, totalPages: 0, hasNextPage: false, hasPreviousPage: false }),
         catchError(this.handleError)
       );
   }
@@ -364,9 +371,9 @@ export class NotificationService {
    * Get notification statistics
    */
   getStats(): Observable<NotificationStatsDto> {
-    return this.http.get<{ data: NotificationStatsDto }>(`${this.apiUrl}/stats`)
+    return this.http.get<GeneralResponse<NotificationStatsDto>>(`${this.apiUrl}/stats`)
       .pipe(
-        map(response => response.data),
+        map(response => response.data || { total: 0, unread: 0, read: 0, byType: {}, byPriority: {}, byCategory: {} }),
         catchError(this.handleError)
       );
   }

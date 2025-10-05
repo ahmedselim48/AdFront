@@ -2,14 +2,22 @@
   <!-- Page Header -->
   <div class="page-header">
     <div class="header-content">
-      <h1 class="page-title">إعدادات الإشعارات</h1>
-      <p class="page-subtitle">تخصيص كيفية استلام الإشعارات وتوقيتاتها</p>
+      <div class="title-section">
+        <div class="icon-wrapper">
+          <mat-icon class="page-icon">settings</mat-icon>
+        </div>
+        <div class="title-text">
+          <h1 class="page-title">إعدادات الإشعارات</h1>
+          <p class="page-subtitle">تخصيص كيفية استلام الإشعارات وتوقيتاتها حسب احتياجاتك</p>
+        </div>
+      </div>
     </div>
     
     <!-- Save Actions -->
     <div class="save-actions" *ngIf="hasChanges()">
       <button 
         mat-button 
+        class="reset-btn"
         (click)="resetSettings()"
         [disabled]="isSaving">
         <mat-icon>refresh</mat-icon>
@@ -19,6 +27,7 @@
       <button 
         mat-raised-button 
         color="primary"
+        class="save-btn"
         (click)="saveSettings()"
         [disabled]="isSaving || settingsForm.invalid">
         <mat-icon *ngIf="!isSaving">save</mat-icon>
@@ -38,13 +47,17 @@
   <form [formGroup]="settingsForm" *ngIf="!isLoading" class="settings-form">
     
     <!-- Email Notifications Section -->
-    <mat-card class="settings-section">
+    <mat-card class="settings-section email-section">
       <mat-card-header>
-        <mat-card-title>
-          <mat-icon class="section-icon">email</mat-icon>
-          الإشعارات الإلكترونية
-        </mat-card-title>
-        <mat-card-subtitle>{{ getSectionDescription('email') }}</mat-card-subtitle>
+        <div class="section-header">
+          <div class="section-icon-wrapper">
+            <mat-icon class="section-icon">email</mat-icon>
+          </div>
+          <div class="section-title-wrapper">
+            <mat-card-title class="section-title">الإشعارات الإلكترونية</mat-card-title>
+            <mat-card-subtitle class="section-subtitle">{{ getSectionDescription('email') }}</mat-card-subtitle>
+          </div>
+        </div>
       </mat-card-header>
       
       <mat-card-content>
@@ -52,87 +65,127 @@
           <!-- Main Email Toggle -->
           <div class="setting-item main-toggle">
             <div class="setting-info">
-              <h4 class="setting-title">الإشعارات الإلكترونية</h4>
+              <div class="setting-header">
+                <h4 class="setting-title">الإشعارات الإلكترونية</h4>
+                <div class="setting-badge">رئيسي</div>
+              </div>
               <p class="setting-description">{{ getSettingDescription('emailNotifications') }}</p>
             </div>
-            <mat-slide-toggle 
-              formControlName="emailNotifications"
-              color="primary">
-            </mat-slide-toggle>
+            <div class="toggle-wrapper">
+              <mat-slide-toggle 
+                formControlName="emailNotifications"
+                color="primary"
+                class="main-toggle-switch">
+              </mat-slide-toggle>
+              <div class="toggle-status">
+                <span class="status-text" [class.active]="settingsForm.get('emailNotifications')?.value">
+                  {{ settingsForm.get('emailNotifications')?.value ? 'مفعل' : 'معطل' }}
+                </span>
+              </div>
+            </div>
           </div>
 
           <!-- Email Sub-settings -->
           <div class="sub-settings" [class.disabled]="!settingsForm.get('emailNotifications')?.value">
             <div class="setting-item">
               <div class="setting-info">
-                <h4 class="setting-title">تحديثات الإعلانات</h4>
+                <div class="setting-header">
+                  <h4 class="setting-title">تحديثات الإعلانات</h4>
+                  <mat-icon class="setting-type-icon">campaign</mat-icon>
+                </div>
                 <p class="setting-description">{{ getSettingDescription('emailAdUpdates') }}</p>
               </div>
-              <mat-slide-toggle 
-                formControlName="emailAdUpdates"
-                color="primary"
-                [disabled]="isSettingDisabled('emailAdUpdates')">
-              </mat-slide-toggle>
+              <div class="toggle-wrapper">
+                <mat-slide-toggle 
+                  formControlName="emailAdUpdates"
+                  color="primary">
+                </mat-slide-toggle>
+                <div class="toggle-status">
+                  <span class="status-text" [class.active]="settingsForm.get('emailAdUpdates')?.value">
+                    {{ settingsForm.get('emailAdUpdates')?.value ? 'مفعل' : 'معطل' }}
+                  </span>
+                </div>
+              </div>
             </div>
 
             <div class="setting-item">
               <div class="setting-info">
-                <h4 class="setting-title">رسائل الدردشة</h4>
+                <div class="setting-header">
+                  <h4 class="setting-title">رسائل الدردشة</h4>
+                  <mat-icon class="setting-type-icon">chat</mat-icon>
+                </div>
                 <p class="setting-description">{{ getSettingDescription('emailChatMessages') }}</p>
               </div>
-              <mat-slide-toggle 
-                formControlName="emailChatMessages"
-                color="primary"
-                [disabled]="isSettingDisabled('emailChatMessages')">
-              </mat-slide-toggle>
+              <div class="toggle-wrapper">
+                <mat-slide-toggle 
+                  formControlName="emailChatMessages"
+                  color="primary">
+                </mat-slide-toggle>
+              </div>
             </div>
 
             <div class="setting-item">
               <div class="setting-info">
-                <h4 class="setting-title">تنبيهات النظام</h4>
+                <div class="setting-header">
+                  <h4 class="setting-title">تنبيهات النظام</h4>
+                  <mat-icon class="setting-type-icon">system_update</mat-icon>
+                </div>
                 <p class="setting-description">{{ getSettingDescription('emailSystemAlerts') }}</p>
               </div>
-              <mat-slide-toggle 
-                formControlName="emailSystemAlerts"
-                color="primary"
-                [disabled]="isSettingDisabled('emailSystemAlerts')">
-              </mat-slide-toggle>
+              <div class="toggle-wrapper">
+                <mat-slide-toggle 
+                  formControlName="emailSystemAlerts"
+                  color="primary">
+                </mat-slide-toggle>
+              </div>
             </div>
 
             <div class="setting-item">
               <div class="setting-info">
-                <h4 class="setting-title">تنبيهات الأمان</h4>
+                <div class="setting-header">
+                  <h4 class="setting-title">تنبيهات الأمان</h4>
+                  <mat-icon class="setting-type-icon">security</mat-icon>
+                </div>
                 <p class="setting-description">{{ getSettingDescription('emailSecurityAlerts') }}</p>
               </div>
-              <mat-slide-toggle 
-                formControlName="emailSecurityAlerts"
-                color="primary"
-                [disabled]="isSettingDisabled('emailSecurityAlerts')">
-              </mat-slide-toggle>
+              <div class="toggle-wrapper">
+                <mat-slide-toggle 
+                  formControlName="emailSecurityAlerts"
+                  color="primary">
+                </mat-slide-toggle>
+              </div>
             </div>
 
             <div class="setting-item">
               <div class="setting-info">
-                <h4 class="setting-title">تنبيهات الأداء</h4>
+                <div class="setting-header">
+                  <h4 class="setting-title">تنبيهات الأداء</h4>
+                  <mat-icon class="setting-type-icon">trending_up</mat-icon>
+                </div>
                 <p class="setting-description">{{ getSettingDescription('emailPerformanceAlerts') }}</p>
               </div>
-              <mat-slide-toggle 
-                formControlName="emailPerformanceAlerts"
-                color="primary"
-                [disabled]="isSettingDisabled('emailPerformanceAlerts')">
-              </mat-slide-toggle>
+              <div class="toggle-wrapper">
+                <mat-slide-toggle 
+                  formControlName="emailPerformanceAlerts"
+                  color="primary">
+                </mat-slide-toggle>
+              </div>
             </div>
 
             <div class="setting-item">
               <div class="setting-info">
-                <h4 class="setting-title">رسائل التسويق</h4>
+                <div class="setting-header">
+                  <h4 class="setting-title">رسائل التسويق</h4>
+                  <mat-icon class="setting-type-icon">marketing</mat-icon>
+                </div>
                 <p class="setting-description">{{ getSettingDescription('emailMarketingEmails') }}</p>
               </div>
-              <mat-slide-toggle 
-                formControlName="emailMarketingEmails"
-                color="primary"
-                [disabled]="isSettingDisabled('emailMarketingEmails')">
-              </mat-slide-toggle>
+              <div class="toggle-wrapper">
+                <mat-slide-toggle 
+                  formControlName="emailMarketingEmails"
+                  color="primary">
+                </mat-slide-toggle>
+              </div>
             </div>
           </div>
         </div>
@@ -140,13 +193,17 @@
     </mat-card>
 
     <!-- Push Notifications Section -->
-    <mat-card class="settings-section">
+    <mat-card class="settings-section push-section">
       <mat-card-header>
-        <mat-card-title>
-          <mat-icon class="section-icon">notifications</mat-icon>
-          الإشعارات الفورية
-        </mat-card-title>
-        <mat-card-subtitle>{{ getSectionDescription('push') }}</mat-card-subtitle>
+        <div class="section-header">
+          <div class="section-icon-wrapper">
+            <mat-icon class="section-icon">notifications</mat-icon>
+          </div>
+          <div class="section-title-wrapper">
+            <mat-card-title class="section-title">الإشعارات الفورية</mat-card-title>
+            <mat-card-subtitle class="section-subtitle">{{ getSectionDescription('push') }}</mat-card-subtitle>
+          </div>
+        </div>
       </mat-card-header>
       
       <mat-card-content>
@@ -173,7 +230,7 @@
               <mat-slide-toggle 
                 formControlName="pushAdUpdates"
                 color="primary"
-                [disabled]="isSettingDisabled('pushAdUpdates')">
+                >
               </mat-slide-toggle>
             </div>
 
@@ -185,7 +242,7 @@
               <mat-slide-toggle 
                 formControlName="pushChatMessages"
                 color="primary"
-                [disabled]="isSettingDisabled('pushChatMessages')">
+                >
               </mat-slide-toggle>
             </div>
 
@@ -197,7 +254,7 @@
               <mat-slide-toggle 
                 formControlName="pushSystemAlerts"
                 color="primary"
-                [disabled]="isSettingDisabled('pushSystemAlerts')">
+                >
               </mat-slide-toggle>
             </div>
 
@@ -209,7 +266,7 @@
               <mat-slide-toggle 
                 formControlName="pushSecurityAlerts"
                 color="primary"
-                [disabled]="isSettingDisabled('pushSecurityAlerts')">
+                >
               </mat-slide-toggle>
             </div>
 
@@ -221,7 +278,7 @@
               <mat-slide-toggle 
                 formControlName="pushPerformanceAlerts"
                 color="primary"
-                [disabled]="isSettingDisabled('pushPerformanceAlerts')">
+                >
               </mat-slide-toggle>
             </div>
           </div>
@@ -249,8 +306,7 @@
             </div>
             <mat-slide-toggle 
               formControlName="smsNotifications"
-              color="primary"
-              [disabled]="true">
+              color="primary">
             </mat-slide-toggle>
           </div>
 
@@ -262,8 +318,7 @@
               </div>
               <mat-slide-toggle 
                 formControlName="smsSecurityAlerts"
-                color="primary"
-                [disabled]="true">
+                color="primary">
               </mat-slide-toggle>
             </div>
 
@@ -274,8 +329,7 @@
               </div>
               <mat-slide-toggle 
                 formControlName="smsPaymentAlerts"
-                color="primary"
-                [disabled]="true">
+                color="primary">
               </mat-slide-toggle>
             </div>
           </div>
@@ -313,7 +367,7 @@
                 <p class="setting-description">{{ getSettingDescription('quietHoursStart') }}</p>
               </div>
               <mat-form-field appearance="outline">
-                <mat-select formControlName="quietHoursStart" [disabled]="isSettingDisabled('quietHoursStart')">
+                <mat-select formControlName="quietHoursStart">
                   <mat-option *ngFor="let time of timeOptions" [value]="time">
                     {{ time }}
                   </mat-option>
@@ -327,7 +381,7 @@
                 <p class="setting-description">{{ getSettingDescription('quietHoursEnd') }}</p>
               </div>
               <mat-form-field appearance="outline">
-                <mat-select formControlName="quietHoursEnd" [disabled]="isSettingDisabled('quietHoursEnd')">
+                <mat-select formControlName="quietHoursEnd">
                   <mat-option *ngFor="let time of timeOptions" [value]="time">
                     {{ time }}
                   </mat-option>

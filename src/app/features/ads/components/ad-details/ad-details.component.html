@@ -162,12 +162,12 @@
   </div>
 
   <!-- Contact Information -->
-  <div class="contact-section" *ngIf="ad.contactNumber && !isOwner">
+  <div class="contact-section" *ngIf="(ad.contactNumber || ad.contactInfo?.phoneNumber || ad.contactInfo?.whatsappNumber)">
     <h3>معلومات التواصل</h3>
     <div class="contact-info">
       <div class="contact-details">
-        <span class="contact-number">{{ formatPhoneNumber(ad.contactNumber) }}</span>
-        <span class="contact-method">{{ getContactMethodLabel(ad.contactMethod) }}</span>
+        <span class="contact-number">{{ formatPhoneNumber((ad.contactNumber ?? ad.contactInfo?.phoneNumber ?? ad.contactInfo?.whatsappNumber) || '') }}</span>
+        <span class="contact-method">{{ getContactMethodLabel(ad.contactMethod || (ad.contactInfo?.phoneNumber ? 'Call' : (ad.contactInfo?.whatsappNumber ? 'WhatsApp' : undefined))) }}</span>
       </div>
       <div class="contact-buttons">
         <button 
@@ -195,9 +195,7 @@
       <i class="icon-heart"></i> 
       {{ isLiked ? 'إلغاء الإعجاب' : 'إعجاب' }} ({{ ad.likesCount }})
     </button>
-    <button class="btn btn-secondary btn-large">
-      <i class="icon-share"></i> مشاركة
-    </button>
+      <!-- Share button removed per request -->
     <button class="btn btn-outline btn-large" (click)="contactSeller()" *ngIf="!isOwner">
       <i class="icon-message"></i> محادثة
     </button>

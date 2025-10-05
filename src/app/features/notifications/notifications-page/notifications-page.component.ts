@@ -234,9 +234,12 @@ export class NotificationsPageComponent implements OnInit, OnDestroy {
 
     this.notificationService.getAll(filters).subscribe({
       next: (response: NotificationListResponseDto) => {
-        this.notifications = response.notifications;
-        this.dataSource.data = response.notifications;
-        this.totalCount = response.totalCount;
+        console.log('Notifications response:', response);
+        this.notifications = response.notifications || [];
+        this.dataSource.data = response.notifications || [];
+        this.totalCount = response.totalCount || 0;
+        console.log('Loaded notifications:', this.notifications);
+        console.log('Total count:', this.totalCount);
         this.isLoading = false;
         this.isFiltering = false;
         this.clearSelection();
@@ -259,6 +262,7 @@ export class NotificationsPageComponent implements OnInit, OnDestroy {
   loadStats(): void {
     this.notificationService.getStats().subscribe({
       next: (stats) => {
+        console.log('Stats response:', stats);
         this.stats = stats;
       },
       error: (error) => {
@@ -355,7 +359,8 @@ export class NotificationsPageComponent implements OnInit, OnDestroy {
    * Update select all state
    */
   private updateSelectAllState(): void {
-    this.selectAll = this.selectedNotifications.size === this.notifications.length && 
+    this.selectAll = this.notifications && 
+                     this.selectedNotifications.size === this.notifications.length && 
                      this.notifications.length > 0;
   }
 
@@ -563,11 +568,72 @@ export class NotificationsPageComponent implements OnInit, OnDestroy {
    * Check if all notifications are read
    */
   areAllNotificationsRead(): boolean {
-    return this.notifications.length > 0 && this.notifications.every(n => n.isRead);
+    return (this.notifications && this.notifications.length > 0) && this.notifications.every(n => n.isRead);
+  }
+
+  /**
+   * Get priority text in Arabic
+   */
+  getPriorityText(priority: NotificationPriority): string {
+    switch (priority) {
+      case 'Urgent': return 'عاجل';
+      case 'High': return 'عالي';
+      case 'Medium': return 'متوسط';
+      case 'Low': return 'منخفض';
+      default: return 'عادي';
+    }
+  }
+
+  /**
+   * Get category class
+   */
+  getCategoryClass(category: string): string {
+    switch (category) {
+      case 'Ad': return 'category-ad';
+      case 'Chat': return 'category-chat';
+      case 'System': return 'category-system';
+      case 'Security': return 'category-security';
+      case 'Payment': return 'category-payment';
+      case 'Performance': return 'category-performance';
+      case 'Competition': return 'category-competition';
+      case 'Analysis': return 'category-analysis';
+      default: return 'category-default';
+    }
+  }
+
+  /**
+   * Get category text in Arabic
+   */
+  getCategoryText(category: string): string {
+    switch (category) {
+      case 'Ad': return 'إعلان';
+      case 'Chat': return 'دردشة';
+      case 'System': return 'نظام';
+      case 'Security': return 'أمان';
+      case 'Payment': return 'دفع';
+      case 'Performance': return 'أداء';
+      case 'Competition': return 'منافسة';
+      case 'Analysis': return 'تحليل';
+      default: return 'عام';
+    }
+  }
+
+  /**
+   * Get action icon
+   */
+  getActionIcon(actionType: string): string {
+    switch (actionType) {
+      case 'View': return 'visibility';
+      case 'Edit': return 'edit';
+      case 'Delete': return 'delete';
+      case 'Reply': return 'reply';
+      case 'Accept': return 'check';
+      case 'Decline': return 'close';
+      default: return 'arrow_forward';
+    }
   }
 }
 
-// Simple confirmation dialog component
 @Component({
   selector: 'app-confirm-dialog',
   standalone: true,
