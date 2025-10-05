@@ -26,8 +26,7 @@ import { AuthService } from '../../../../core/auth/auth.service';
 import { FileService } from '../../../../core/services/file.service';
 import { ImageValidationService } from '../../../../core/services/image-validation.service';
 import { CategoryService } from '../../../../core/services/category.service';
-import { AdDto, CreateAdWithFilesCommand, CreateAdCommand, AdGenerationResponse, AdItem } from '../../../../models/ads.models';
-import { CreateAdDto } from '../../../../models/profile.models';
+import { AdDto, CreateAdWithFilesCommand, CreateAdCommand, AdGenerationResponse, AdItem, CreateAdDto } from '../../../../models/ads.models';
 import { CategoryDto } from '../../../../models/categories.models';
 // import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
 

@@ -93,11 +93,7 @@ export const routes: Routes = [
   { path: 'payment/success', loadComponent: () => import('./features/payment/payment-success/payment-success.component').then(m => m.PaymentSuccessComponent) },
   { path: 'payment/cancel', loadComponent: () => import('./features/payment/payment-cancel/payment-cancel.component').then(m => m.PaymentCancelComponent) },
   
-<<<<<<< Updated upstream
-  // Dashboard removed
-=======
   // Dashboard & Analytics - Available without auth for testing
->>>>>>> Stashed changes
   // { path: 'smart-replies', component: SmartRepliesComponent }, // disabled
   { path: 'competition', component: CompetitionComponent },
   // Reports removed
