@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -20,8 +20,11 @@ import { ChatService } from '../../core/services/chat.service';
 import { NotificationService } from '../../shared/services/notification.service';
 import { PublicProfileService } from '../../core/services/public-profile.service';
 import { DirectChatService } from '../../core/services/direct-chat.service';
+import { StatisticsService } from '../../core/services/statistics.service';
+import { CompetitionService } from '../../core/services/competition.service';
+import { AuthService } from '../../core/auth/auth.service';
 import { ToastrService } from 'ngx-toastr';
-import { BehaviorSubject, debounceTime, distinctUntilChanged } from 'rxjs';
+import { BehaviorSubject, debounceTime, distinctUntilChanged, Subject, takeUntil } from 'rxjs';
 
 
 @Component({
@@ -47,12 +50,37 @@ import { BehaviorSubject, debounceTime, distinctUntilChanged } from 'rxjs';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
-
 export class HomeComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  private statisticsService = inject(StatisticsService);
+  private competitionService = inject(CompetitionService);
+  private authService = inject(AuthService);
+  private cdr = inject(ChangeDetectorRef);
+  
+  // User authentication state
+  isLoggedIn = false;
+  
   ads: AdItem[] = [];
   loading = true;
   error = '';
   skeletons = Array.from({ length: 6 });
+  
+  // Dynamic Statistics - Initialize with temporary static data
+  platformStats = {
+    totalUsers: 12500,
+    totalAds: 3400,
+    totalSmartReplies: 15600,
+    totalCompetitionAnalyses: 890,
+    totalViews: 2400000,
+    salesIncrease: 250,
+    userRating: 4.8
+  };
+  
+  heroStats = {
+    smartAds: 3400,
+    smartReplies: 15600,
+    salesIncrease: 250
+  };
   
   // Pagination properties
   currentPage = 1;
@@ -114,12 +142,13 @@ export class HomeComponent implements OnInit, OnDestroy {
   showProfileMenu = false;
   unreadMessages = 0;
   unreadNotifications = 0;
-  searchQuery = '';
   
   // Language selector
   language = 'AR'; // AR or EN
   
-  // Slider removed – restoring original component state
+  // Dashboard interaction states
+  isDashboardHovered = false;
+  isCounting = false;
   
   constructor(
     private adsService: AdsService,
@@ -176,7 +205,17 @@ export class HomeComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Initialize component
     console.log('HomeComponent initialized');
+    console.log('Initial platform stats:', this.platformStats);
+    console.log('Initial hero stats:', this.heroStats);
+    
+    // Check authentication state
+    this.checkAuthState();
+    
+    // Force update UI with default values
+    this.cdr.detectChanges();
+    
     this.loadAds();
+    this.loadPlatformStatistics();
     this.setupSearchSubscription();
     // Load additional data after mounting
     setTimeout(() => {
@@ -188,7 +227,130 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // slider removed
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private checkAuthState(): void {
+    this.isLoggedIn = !!this.authService.isLoggedIn();
+    console.log('User authentication state:', this.isLoggedIn);
+    
+    // Subscribe to auth state changes
+    this.authService.currentUser$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(user => {
+        this.isLoggedIn = !!user;
+        console.log('Auth state changed:', this.isLoggedIn);
+        this.cdr.detectChanges();
+      });
+  }
+
+  private loadPlatformStatistics(): void {
+    console.log('Loading platform statistics from API...');
+    
+    // Load basic platform statistics from API
+    this.statisticsService.getPublicStatistics()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          console.log('Statistics API response:', response);
+          if (response.success && response.data) {
+            this.platformStats.totalUsers = response.data.totalUsers || 0;
+            this.platformStats.totalAds = response.data.totalAds || 0;
+            this.platformStats.totalViews = (response.data as any).totalViews || 0;
+            // this.platformStats.totalEarnings = response.data.totalEarnings || 0;
+            
+            // Update hero stats
+            this.heroStats.smartAds = this.platformStats.totalAds;
+            this.heroStats.salesIncrease = this.calculateSalesIncrease();
+            
+            console.log('Platform stats loaded from API:', this.platformStats);
+            console.log('Hero stats updated:', this.heroStats);
+            
+            // Trigger change detection
+            this.cdr.detectChanges();
+          } else {
+            console.log('No data received from statistics API');
+            this.cdr.detectChanges();
+          }
+        },
+        error: (error) => {
+          console.error('Error loading statistics from API:', error);
+          this.cdr.detectChanges();
+        }
+      });
+
+    // Load smart replies count from API
+    this.loadSmartRepliesCount();
+    
+    // Load competition analyses count from API
+    this.loadCompetitionAnalysesCount();
+  }
+
+  private loadSmartRepliesCount(): void {
+    console.log('Loading smart replies count from API...');
+    
+    // Load smart replies count from API
+    this.chatService.getTemplates()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (templates) => {
+          console.log('Smart replies API response:', templates);
+          this.platformStats.totalSmartReplies = templates.length;
+          this.heroStats.smartReplies = this.platformStats.totalSmartReplies;
+          console.log('Smart replies count loaded from API:', this.platformStats.totalSmartReplies);
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('Error loading smart replies from API:', error);
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
+  private loadCompetitionAnalysesCount(): void {
+    console.log('Loading competition analyses count from API...');
+    
+    // Load competition analyses count from API
+    this.competitionService.getUserAnalyses(1, 1000)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response: any) => {
+          console.log('Competition analyses API response:', response);
+          if (response.success && response.data) {
+            this.platformStats.totalCompetitionAnalyses = response.data.length || 0;
+          } else {
+            this.platformStats.totalCompetitionAnalyses = 0;
+          }
+          console.log('Competition analyses count loaded from API:', this.platformStats.totalCompetitionAnalyses);
+          this.cdr.detectChanges();
+        },
+        error: (error: any) => {
+          console.error('Error loading competition analyses from API:', error);
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
+
+  formatNumber(num: number): string {
+    if (!num || num === 0) return '0';
+    
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + 'M';
+    } else if (num >= 1000) {
+      return (num / 1000).toFixed(0) + 'K';
+    }
+    return num.toString();
+  }
+
+  private calculateSalesIncrease(): number {
+    // Calculate sales increase based on platform data
+    // This is a simple calculation - you can make it more sophisticated
+    if (this.platformStats.totalAds > 0) {
+      return Math.min(300, Math.floor(this.platformStats.totalAds / 100));
+    }
+    return 0;
   }
 
   private initializeFilterForm(): void {
@@ -225,20 +387,27 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.activeTab = tab;
   }
 
-  // Search functionality
-  onSearch(): void {
-    if (this.searchQuery.trim()) {
-      this.router.navigate(['/ads'], { 
-        queryParams: { search: this.searchQuery.trim() }
-      });
-    }
+  // Dashboard interaction methods
+  onDashboardHover(): void {
+    this.isDashboardHovered = true;
+    this.isCounting = true;
+    
+    // Reset counting animation after delay
+    setTimeout(() => {
+      this.isCounting = false;
+    }, 2000);
   }
 
-  onSearchInput(event: KeyboardEvent): void {
-    if (event.key === 'Enter') {
-      this.onSearch();
-    }
+  onDashboardLeave(): void {
+    this.isDashboardHovered = false;
   }
+
+  onStatClick(statType: string): void {
+    console.log(`Clicked on ${statType} stat`);
+    // Add any specific logic for stat clicks
+    // For example, navigate to detailed analytics
+  }
+
 
   applyFilters(): void {
     this.currentPage = 1;
@@ -301,58 +470,12 @@ export class HomeComponent implements OnInit, OnDestroy {
         }
         
         this.loading = false;
-        console.log('Ads loaded:', adsList);
-        
-        // Fallback data if no ads
-        if (adsList.length === 0 && this.currentPage === 1) {
-          this.ads = [
-            {
-              id: '1',
-              title: 'iPhone 14 Pro Max',
-              description: 'Mint condition, 256GB, Space Black',
-              location: 'Riyadh',
-              price: 4200,
-              status: 'Published',
-              createdAt: new Date(),
-            viewsCount: 0,
-            views: 0,
-            clicksCount: 0,
-            likesCount: 0,
-            likes: 0,
-              commentsCount: 0,
-              userId: 'user-1',
-              userName: 'User',
-              images: ['/assets/iphone.jpg'],
-              keywords: ['iPhone', 'mobile'],
-              isAIGenerated: false
-            },
-            {
-              id: '2',
-              title: 'Toyota Camry 2018',
-              description: 'Excellent condition, full option',
-              location: 'Jeddah',
-              price: 52000,
-              status: 'Published',
-              createdAt: new Date(),
-            viewsCount: 0,
-            views: 0,
-            clicksCount: 0,
-            likesCount: 0,
-            likes: 0,
-              commentsCount: 0,
-              userId: 'user-2',
-              userName: 'User',
-              images: ['/assets/car.jpg'],
-              keywords: ['Toyota', 'car'],
-              isAIGenerated: false
-            }
-          ];
-        }
+        console.log('Ads loaded from API:', adsList);
       },
       error: (err: any) => {
         this.loading = false;
-        this.error = 'فشل في تحميل الإعلانات';
-        console.error('Error loading ads:', err);
+        this.error = 'فشل في تحميل الإعلانات من الخادم';
+        console.error('Error loading ads from API:', err);
       }
     });
   }

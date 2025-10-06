@@ -232,56 +232,7 @@
           </mat-card-actions>
         </mat-card>
 
-        <!-- Premium Plan -->
-        <mat-card class="plan-card">
-          <mat-card-header>
-            <div class="plan-header">
-              <div class="plan-icon premium">
-                <lucide-icon name="crown" size="24"></lucide-icon>
-              </div>
-              <div class="plan-title">
-                <h3>بريميوم</h3>
-                <p>خطة متقدمة</p>
-              </div>
-            </div>
-            <div class="plan-price">
-              <span class="price">200 ر.س</span>
-              <span class="period">شهرياً</span>
-            </div>
-          </mat-card-header>
-          
-          <mat-card-content>
-            <div class="plan-features-list">
-              <div class="feature-item">
-                <lucide-icon name="check-circle" size="14"></lucide-icon>
-                <span>جميع مميزات Pro</span>
-              </div>
-              <div class="feature-item">
-                <lucide-icon name="check-circle" size="14"></lucide-icon>
-                <span>إشعارات متقدمة</span>
-              </div>
-              <div class="feature-item">
-                <lucide-icon name="check-circle" size="14"></lucide-icon>
-                <span>دعم مخصص</span>
-              </div>
-              <div class="feature-item">
-                <lucide-icon name="check-circle" size="14"></lucide-icon>
-                <span>ميزات حصرية</span>
-              </div>
-            </div>
-          </mat-card-content>
-          
-          <mat-card-actions>
-            <button mat-raised-button 
-                    color="accent" 
-                    (click)="onUpgradeSubscription()"
-                    [disabled]="isProcessing">
-              <lucide-icon name="credit-card" size="16"></lucide-icon>
-              <span>اشتراك الآن - 200 ر.س</span>
-              <mat-spinner *ngIf="isProcessing" diameter="20"></mat-spinner>
-            </button>
-          </mat-card-actions>
-        </mat-card>
+        <!-- Premium Plan (removed as requested) -->
       </div>
     </div>
 

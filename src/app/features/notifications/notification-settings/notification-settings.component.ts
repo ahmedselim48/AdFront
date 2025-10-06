@@ -14,7 +14,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
-// import { MatChipListboxModule } from '@angular/material/chips'; // Not available in this version
 import { LucideAngularModule } from 'lucide-angular';
 import { NotificationService } from '../../../core/services/notification.service';
 import { NotificationSettingsDto } from '../../../models/notification.model';
@@ -37,7 +36,6 @@ import { NotificationSettingsDto } from '../../../models/notification.model';
     MatDividerModule,
     MatTooltipModule,
     MatChipsModule,
-    // MatChipListboxModule, // Not available in this version
     LucideAngularModule
   ],
   templateUrl: './notification-settings.component.html',
@@ -48,6 +46,7 @@ export class NotificationSettingsComponent implements OnInit, OnDestroy {
   isLoading = false;
   isSaving = false;
   originalSettings: NotificationSettingsDto | null = null;
+  showSummaryDialog = false;
   
   private destroy$ = new Subject<void>();
 
@@ -376,5 +375,35 @@ export class NotificationSettingsComponent implements OnInit, OnDestroy {
   private timeToMinutes(time: string): number {
     const [hours, minutes] = time.split(':').map(Number);
     return hours * 60 + minutes;
+  }
+
+  /**
+   * Show summary dialog
+   */
+  showSummary(): void {
+    this.showSummaryDialog = true;
+  }
+
+  /**
+   * Close summary dialog
+   */
+  closeSummary(): void {
+    this.showSummaryDialog = false;
+  }
+
+  /**
+   * Get time zone label
+   */
+  getTimeZoneLabel(value: string): string {
+    const timeZone = this.timeZoneOptions.find(tz => tz.value === value);
+    return timeZone ? timeZone.label : 'غير محدد';
+  }
+
+  /**
+   * Get frequency label
+   */
+  getFrequencyLabel(value: string): string {
+    const frequency = this.frequencyOptions.find(freq => freq.value === value);
+    return frequency ? frequency.label : 'غير محدد';
   }
 }

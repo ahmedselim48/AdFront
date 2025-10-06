@@ -56,7 +56,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     { label: 'الملف الشخصي', icon: 'user', route: 'profile-settings', badge: null },
     { label: 'لوحة التحكم', icon: 'home', route: 'dashboard', badge: null },
     { label: 'الإعلانات', icon: 'eye', route: 'ads', badge: null },
-    { label: 'اختبارات A/B', icon: 'test-tube', route: 'ab-testing', badge: null },
+    { label: 'اختبارات A/B', icon: 'activity', route: 'ab-testing', badge: null },
     { label: 'تحليل المنافسة', icon: 'bar-chart-3', route: 'competition', badge: null },
     { label: 'الرسائل', icon: 'message-circle', route: 'messages', badge: null },
     { label: 'الإشعارات', icon: 'bell', route: 'notifications', badge: null },

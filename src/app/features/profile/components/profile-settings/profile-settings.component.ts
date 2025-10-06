@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -8,9 +9,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
-import { LucideAngularModule, Save, Camera, User, Mail, Phone, MapPin, Calendar } from 'lucide-angular';
+import { LucideAngularModule } from 'lucide-angular';
 import { Subject, takeUntil } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
+import { AuthService } from '../../../../core/auth/auth.service';
+import { ChangePasswordRequest } from '../../../../models/auth.models';
 
 import { ProfileService } from '../../../../core/services/profile.service';
 import { ProfileDto, ProfileUpdateDto } from '../../../../models/profile.models';
@@ -22,6 +25,7 @@ import { ImageUrlHelper } from '../../../../core/utils/image-url.helper';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    RouterModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
@@ -41,15 +45,28 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
   isSaving = false;
   selectedImage: File | null = null;
   imagePreview: string | null = null;
+  // Change password state
+  changePasswordForm!: FormGroup;
+  isChangingPassword = false;
+  showCurrentPassword = false;
+  showNewPassword = false;
+  showConfirmPassword = false;
 
   private destroy$ = new Subject<void>();
   private profileService = inject(ProfileService);
   private toastr = inject(ToastrService);
   private snackBar = inject(MatSnackBar);
   private fb = inject(FormBuilder);
+  private auth = inject(AuthService);
 
   ngOnInit() {
     this.initializeForm();
+    // Initialize change password form after FormBuilder is ready
+    this.changePasswordForm = this.fb.group({
+      currentPassword: ['', [Validators.required]],
+      newPassword: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['', [Validators.required]]
+    }, { validators: this.passwordMatchValidator });
     this.loadProfile();
   }
 
@@ -112,6 +129,18 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
   onImageSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        this.toastr.warning('يرجى اختيار صورة صالحة', 'تنبيه');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        this.toastr.warning('حجم الصورة يجب أن يكون أقل من 5 ميجابايت', 'تنبيه');
+        return;
+      }
+      
       this.selectedImage = file;
       
       // Create preview
@@ -143,6 +172,7 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
           if (response.success && response.data) {
             this.currentUser = response.data;
             this.toastr.success('تم حفظ الملف الشخصي بنجاح', 'تم');
+            this.profileForm.markAsPristine();
           } else {
             this.toastr.error('فشل في حفظ الملف الشخصي', 'خطأ');
           }
@@ -156,6 +186,7 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
       });
     } else {
       this.toastr.warning('يرجى ملء جميع الحقول المطلوبة', 'تحذير');
+      this.markFormGroupTouched(this.profileForm);
     }
   }
 
@@ -211,6 +242,42 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
       .slice(0, 2);
   }
 
+  // Change password helpers
+  private passwordMatchValidator(form: FormGroup) {
+    const newPassword = form.get('newPassword');
+    const confirmPassword = form.get('confirmPassword');
+    if (newPassword && confirmPassword && newPassword.value !== confirmPassword.value) {
+      confirmPassword.setErrors({ mismatch: true });
+      return { mismatch: true } as any;
+    }
+    return null;
+  }
+
+  onChangePassword() {
+    if (this.changePasswordForm.invalid) {
+      this.markFormGroupTouched(this.changePasswordForm);
+      this.toastr.warning('يرجى تعبئة حقول كلمة المرور بشكل صحيح', 'تنبيه');
+      return;
+    }
+    this.isChangingPassword = true;
+    const req: ChangePasswordRequest = {
+      currentPassword: this.changePasswordForm.value.currentPassword,
+      newPassword: this.changePasswordForm.value.newPassword
+    };
+    this.auth.changePassword(req).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.isChangingPassword = false;
+        this.toastr.success('تم تغيير كلمة المرور بنجاح', 'تم');
+        this.changePasswordForm.reset();
+      },
+      error: (error) => {
+        this.isChangingPassword = false;
+        const msg = error?.error?.message || 'حدث خطأ أثناء تغيير كلمة المرور';
+        this.toastr.error(msg, 'خطأ');
+      }
+    });
+  }
+
   formatDate(date: string): string {
     return new Date(date).toLocaleDateString('ar-SA', {
       year: 'numeric',
@@ -221,5 +288,16 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
 
   getProfileImageUrl(): string {
     return ImageUrlHelper.getProfileImageUrl(this.currentUser?.profileImageUrl);
+  }
+
+  private markFormGroupTouched(formGroup: FormGroup) {
+    Object.keys(formGroup.controls).forEach(key => {
+      const control = formGroup.get(key);
+      control?.markAsTouched();
+
+      if (control instanceof FormGroup) {
+        this.markFormGroupTouched(control);
+      }
+    });
   }
 }

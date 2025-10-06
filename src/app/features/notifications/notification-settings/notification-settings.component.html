@@ -4,7 +4,7 @@
     <div class="header-content">
       <div class="title-section">
         <div class="icon-wrapper">
-          <mat-icon class="page-icon">settings</mat-icon>
+          <lucide-icon name="settings" size="28"></lucide-icon>
         </div>
         <div class="title-text">
           <h1 class="page-title">إعدادات الإشعارات</h1>
@@ -14,13 +14,23 @@
     </div>
     
     <!-- Save Actions -->
-    <div class="save-actions" *ngIf="hasChanges()">
+    <div class="save-actions">
+      <button 
+        mat-button 
+        class="summary-btn"
+        (click)="showSummary()"
+        [disabled]="isSaving">
+        <lucide-icon name="file-text" size="18"></lucide-icon>
+        <span>عرض الملخص</span>
+      </button>
+      
       <button 
         mat-button 
         class="reset-btn"
         (click)="resetSettings()"
-        [disabled]="isSaving">
-        <mat-icon>refresh</mat-icon>
+        [disabled]="isSaving"
+        *ngIf="hasChanges()">
+        <lucide-icon name="refresh-cw" size="18"></lucide-icon>
         <span>إعادة تعيين</span>
       </button>
       
@@ -29,8 +39,9 @@
         color="primary"
         class="save-btn"
         (click)="saveSettings()"
-        [disabled]="isSaving || settingsForm.invalid">
-        <mat-icon *ngIf="!isSaving">save</mat-icon>
+        [disabled]="isSaving || settingsForm.invalid"
+        *ngIf="hasChanges()">
+        <lucide-icon name="save" size="18" *ngIf="!isSaving"></lucide-icon>
         <mat-spinner *ngIf="isSaving" diameter="16"></mat-spinner>
         <span>حفظ الإعدادات</span>
       </button>
@@ -51,7 +62,7 @@
       <mat-card-header>
         <div class="section-header">
           <div class="section-icon-wrapper">
-            <mat-icon class="section-icon">email</mat-icon>
+            <lucide-icon name="mail" size="24"></lucide-icon>
           </div>
           <div class="section-title-wrapper">
             <mat-card-title class="section-title">الإشعارات الإلكترونية</mat-card-title>
@@ -91,7 +102,7 @@
               <div class="setting-info">
                 <div class="setting-header">
                   <h4 class="setting-title">تحديثات الإعلانات</h4>
-                  <mat-icon class="setting-type-icon">campaign</mat-icon>
+                  <lucide-icon name="trending-up" size="18" class="setting-type-icon"></lucide-icon>
                 </div>
                 <p class="setting-description">{{ getSettingDescription('emailAdUpdates') }}</p>
               </div>
@@ -112,7 +123,7 @@
               <div class="setting-info">
                 <div class="setting-header">
                   <h4 class="setting-title">رسائل الدردشة</h4>
-                  <mat-icon class="setting-type-icon">chat</mat-icon>
+                  <lucide-icon name="message-circle" size="18" class="setting-type-icon"></lucide-icon>
                 </div>
                 <p class="setting-description">{{ getSettingDescription('emailChatMessages') }}</p>
               </div>
@@ -128,7 +139,7 @@
               <div class="setting-info">
                 <div class="setting-header">
                   <h4 class="setting-title">تنبيهات النظام</h4>
-                  <mat-icon class="setting-type-icon">system_update</mat-icon>
+                  <lucide-icon name="settings" size="18" class="setting-type-icon"></lucide-icon>
                 </div>
                 <p class="setting-description">{{ getSettingDescription('emailSystemAlerts') }}</p>
               </div>
@@ -144,7 +155,7 @@
               <div class="setting-info">
                 <div class="setting-header">
                   <h4 class="setting-title">تنبيهات الأمان</h4>
-                  <mat-icon class="setting-type-icon">security</mat-icon>
+                  <lucide-icon name="shield" size="18" class="setting-type-icon"></lucide-icon>
                 </div>
                 <p class="setting-description">{{ getSettingDescription('emailSecurityAlerts') }}</p>
               </div>
@@ -160,7 +171,7 @@
               <div class="setting-info">
                 <div class="setting-header">
                   <h4 class="setting-title">تنبيهات الأداء</h4>
-                  <mat-icon class="setting-type-icon">trending_up</mat-icon>
+                  <lucide-icon name="trending-up" size="18" class="setting-type-icon"></lucide-icon>
                 </div>
                 <p class="setting-description">{{ getSettingDescription('emailPerformanceAlerts') }}</p>
               </div>
@@ -176,7 +187,7 @@
               <div class="setting-info">
                 <div class="setting-header">
                   <h4 class="setting-title">رسائل التسويق</h4>
-                  <mat-icon class="setting-type-icon">marketing</mat-icon>
+                  <lucide-icon name="megaphone" size="18" class="setting-type-icon"></lucide-icon>
                 </div>
                 <p class="setting-description">{{ getSettingDescription('emailMarketingEmails') }}</p>
               </div>
@@ -197,7 +208,7 @@
       <mat-card-header>
         <div class="section-header">
           <div class="section-icon-wrapper">
-            <mat-icon class="section-icon">notifications</mat-icon>
+            <lucide-icon name="bell" size="24"></lucide-icon>
           </div>
           <div class="section-title-wrapper">
             <mat-card-title class="section-title">الإشعارات الفورية</mat-card-title>
@@ -229,8 +240,7 @@
               </div>
               <mat-slide-toggle 
                 formControlName="pushAdUpdates"
-                color="primary"
-                >
+                color="primary">
               </mat-slide-toggle>
             </div>
 
@@ -241,8 +251,7 @@
               </div>
               <mat-slide-toggle 
                 formControlName="pushChatMessages"
-                color="primary"
-                >
+                color="primary">
               </mat-slide-toggle>
             </div>
 
@@ -253,8 +262,7 @@
               </div>
               <mat-slide-toggle 
                 formControlName="pushSystemAlerts"
-                color="primary"
-                >
+                color="primary">
               </mat-slide-toggle>
             </div>
 
@@ -265,8 +273,7 @@
               </div>
               <mat-slide-toggle 
                 formControlName="pushSecurityAlerts"
-                color="primary"
-                >
+                color="primary">
               </mat-slide-toggle>
             </div>
 
@@ -277,8 +284,7 @@
               </div>
               <mat-slide-toggle 
                 formControlName="pushPerformanceAlerts"
-                color="primary"
-                >
+                color="primary">
               </mat-slide-toggle>
             </div>
           </div>
@@ -289,12 +295,18 @@
     <!-- SMS Notifications Section (Placeholder) -->
     <mat-card class="settings-section disabled-section">
       <mat-card-header>
-        <mat-card-title>
-          <mat-icon class="section-icon">sms</mat-icon>
-          الإشعارات النصية
-          <mat-chip class="coming-soon-chip">قريباً</mat-chip>
-        </mat-card-title>
-        <mat-card-subtitle>{{ getSectionDescription('sms') }}</mat-card-subtitle>
+        <div class="section-header">
+          <div class="section-icon-wrapper">
+            <lucide-icon name="message-square" size="24"></lucide-icon>
+          </div>
+          <div class="section-title-wrapper">
+            <mat-card-title class="section-title">
+              الإشعارات النصية
+              <mat-chip class="coming-soon-chip">قريباً</mat-chip>
+            </mat-card-title>
+            <mat-card-subtitle class="section-subtitle">{{ getSectionDescription('sms') }}</mat-card-subtitle>
+          </div>
+        </div>
       </mat-card-header>
       
       <mat-card-content>
@@ -340,11 +352,15 @@
     <!-- Quiet Hours Section -->
     <mat-card class="settings-section">
       <mat-card-header>
-        <mat-card-title>
-          <mat-icon class="section-icon">schedule</mat-icon>
-          أوقات الهدوء
-        </mat-card-title>
-        <mat-card-subtitle>{{ getSectionDescription('quiet') }}</mat-card-subtitle>
+        <div class="section-header">
+          <div class="section-icon-wrapper">
+            <lucide-icon name="clock" size="24"></lucide-icon>
+          </div>
+          <div class="section-title-wrapper">
+            <mat-card-title class="section-title">أوقات الهدوء</mat-card-title>
+            <mat-card-subtitle class="section-subtitle">{{ getSectionDescription('quiet') }}</mat-card-subtitle>
+          </div>
+        </div>
       </mat-card-header>
       
       <mat-card-content>
@@ -416,11 +432,15 @@
     <!-- Frequency Settings Section -->
     <mat-card class="settings-section">
       <mat-card-header>
-        <mat-card-title>
-          <mat-icon class="section-icon">schedule</mat-icon>
-          تكرار الإشعارات
-        </mat-card-title>
-        <mat-card-subtitle>{{ getSectionDescription('frequency') }}</mat-card-subtitle>
+        <div class="section-header">
+          <div class="section-icon-wrapper">
+            <lucide-icon name="refresh-cw" size="24"></lucide-icon>
+          </div>
+          <div class="section-title-wrapper">
+            <mat-card-title class="section-title">تكرار الإشعارات</mat-card-title>
+            <mat-card-subtitle class="section-subtitle">{{ getSectionDescription('frequency') }}</mat-card-subtitle>
+          </div>
+        </div>
       </mat-card-header>
       
       <mat-card-content>
@@ -459,11 +479,15 @@
     <!-- Priority Settings Section -->
     <mat-card class="settings-section">
       <mat-card-header>
-        <mat-card-title>
-          <mat-icon class="section-icon">priority_high</mat-icon>
-          أولويات الإشعارات
-        </mat-card-title>
-        <mat-card-subtitle>{{ getSectionDescription('priority') }}</mat-card-subtitle>
+        <div class="section-header">
+          <div class="section-icon-wrapper">
+            <lucide-icon name="alert-circle" size="24"></lucide-icon>
+          </div>
+          <div class="section-title-wrapper">
+            <mat-card-title class="section-title">أولويات الإشعارات</mat-card-title>
+            <mat-card-subtitle class="section-subtitle">{{ getSectionDescription('priority') }}</mat-card-subtitle>
+          </div>
+        </div>
       </mat-card-header>
       
       <mat-card-content>
@@ -523,10 +547,212 @@
         (click)="saveSettings()"
         [disabled]="isSaving || settingsForm.invalid"
         class="save-button">
-        <mat-icon *ngIf="!isSaving">save</mat-icon>
+        <lucide-icon name="save" size="18" *ngIf="!isSaving"></lucide-icon>
         <mat-spinner *ngIf="isSaving" diameter="16"></mat-spinner>
         <span>حفظ جميع الإعدادات</span>
       </button>
     </div>
   </form>
+</div>
+
+<!-- Summary Dialog -->
+<div *ngIf="showSummaryDialog" class="summary-dialog">
+  <div class="summary-overlay" (click)="closeSummary()">
+    <div class="summary-content" (click)="$event.stopPropagation()">
+      <div class="summary-header">
+        <h2>ملخص إعدادات الإشعارات</h2>
+        <button mat-icon-button (click)="closeSummary()" class="close-btn">
+          <lucide-icon name="x" size="20"></lucide-icon>
+        </button>
+      </div>
+      
+      <div class="summary-body">
+        <!-- Email Settings Summary -->
+        <div class="summary-section">
+          <h3>
+            <lucide-icon name="mail" size="20"></lucide-icon>
+            الإشعارات الإلكترونية
+          </h3>
+          <div class="summary-item">
+            <span class="summary-label">الحالة:</span>
+            <span class="summary-value" [class.active]="settingsForm.get('emailNotifications')?.value">
+              {{ settingsForm.get('emailNotifications')?.value ? 'مفعلة' : 'معطلة' }}
+            </span>
+          </div>
+          <div *ngIf="settingsForm.get('emailNotifications')?.value" class="summary-sub-items">
+            <div class="summary-item">
+              <span class="summary-label">تحديثات الإعلانات:</span>
+              <span class="summary-value" [class.active]="settingsForm.get('emailAdUpdates')?.value">
+                {{ settingsForm.get('emailAdUpdates')?.value ? 'مفعل' : 'معطل' }}
+              </span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">رسائل الدردشة:</span>
+              <span class="summary-value" [class.active]="settingsForm.get('emailChatMessages')?.value">
+                {{ settingsForm.get('emailChatMessages')?.value ? 'مفعل' : 'معطل' }}
+              </span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">تنبيهات النظام:</span>
+              <span class="summary-value" [class.active]="settingsForm.get('emailSystemAlerts')?.value">
+                {{ settingsForm.get('emailSystemAlerts')?.value ? 'مفعل' : 'معطل' }}
+              </span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">تنبيهات الأمان:</span>
+              <span class="summary-value" [class.active]="settingsForm.get('emailSecurityAlerts')?.value">
+                {{ settingsForm.get('emailSecurityAlerts')?.value ? 'مفعل' : 'معطل' }}
+              </span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">تنبيهات الأداء:</span>
+              <span class="summary-value" [class.active]="settingsForm.get('emailPerformanceAlerts')?.value">
+                {{ settingsForm.get('emailPerformanceAlerts')?.value ? 'مفعل' : 'معطل' }}
+              </span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">رسائل التسويق:</span>
+              <span class="summary-value" [class.active]="settingsForm.get('emailMarketingEmails')?.value">
+                {{ settingsForm.get('emailMarketingEmails')?.value ? 'مفعل' : 'معطل' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Push Settings Summary -->
+        <div class="summary-section">
+          <h3>
+            <lucide-icon name="bell" size="20"></lucide-icon>
+            الإشعارات الفورية
+          </h3>
+          <div class="summary-item">
+            <span class="summary-label">الحالة:</span>
+            <span class="summary-value" [class.active]="settingsForm.get('pushNotifications')?.value">
+              {{ settingsForm.get('pushNotifications')?.value ? 'مفعلة' : 'معطلة' }}
+            </span>
+          </div>
+          <div *ngIf="settingsForm.get('pushNotifications')?.value" class="summary-sub-items">
+            <div class="summary-item">
+              <span class="summary-label">تحديثات الإعلانات:</span>
+              <span class="summary-value" [class.active]="settingsForm.get('pushAdUpdates')?.value">
+                {{ settingsForm.get('pushAdUpdates')?.value ? 'مفعل' : 'معطل' }}
+              </span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">رسائل الدردشة:</span>
+              <span class="summary-value" [class.active]="settingsForm.get('pushChatMessages')?.value">
+                {{ settingsForm.get('pushChatMessages')?.value ? 'مفعل' : 'معطل' }}
+              </span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">تنبيهات النظام:</span>
+              <span class="summary-value" [class.active]="settingsForm.get('pushSystemAlerts')?.value">
+                {{ settingsForm.get('pushSystemAlerts')?.value ? 'مفعل' : 'معطل' }}
+              </span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">تنبيهات الأمان:</span>
+              <span class="summary-value" [class.active]="settingsForm.get('pushSecurityAlerts')?.value">
+                {{ settingsForm.get('pushSecurityAlerts')?.value ? 'مفعل' : 'معطل' }}
+              </span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">تنبيهات الأداء:</span>
+              <span class="summary-value" [class.active]="settingsForm.get('pushPerformanceAlerts')?.value">
+                {{ settingsForm.get('pushPerformanceAlerts')?.value ? 'مفعل' : 'معطل' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quiet Hours Summary -->
+        <div class="summary-section">
+          <h3>
+            <lucide-icon name="clock" size="20"></lucide-icon>
+            أوقات الهدوء
+          </h3>
+          <div class="summary-item">
+            <span class="summary-label">الحالة:</span>
+            <span class="summary-value" [class.active]="settingsForm.get('enableQuietHours')?.value">
+              {{ settingsForm.get('enableQuietHours')?.value ? 'مفعلة' : 'معطلة' }}
+            </span>
+          </div>
+          <div *ngIf="settingsForm.get('enableQuietHours')?.value" class="summary-sub-items">
+            <div class="summary-item">
+              <span class="summary-label">وقت البداية:</span>
+              <span class="summary-value">{{ settingsForm.get('quietHoursStart')?.value || 'غير محدد' }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">وقت النهاية:</span>
+              <span class="summary-value">{{ settingsForm.get('quietHoursEnd')?.value || 'غير محدد' }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">المنطقة الزمنية:</span>
+              <span class="summary-value">{{ getTimeZoneLabel(settingsForm.get('timeZone')?.value) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Frequency Summary -->
+        <div class="summary-section">
+          <h3>
+            <lucide-icon name="refresh-cw" size="20"></lucide-icon>
+            تكرار الإشعارات
+          </h3>
+          <div class="summary-item">
+            <span class="summary-label">تكرار الإشعارات الإلكترونية:</span>
+            <span class="summary-value">{{ getFrequencyLabel(settingsForm.get('emailFrequency')?.value) }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">تكرار الإشعارات الفورية:</span>
+            <span class="summary-value">{{ getFrequencyLabel(settingsForm.get('pushFrequency')?.value) }}</span>
+          </div>
+        </div>
+
+        <!-- Priority Summary -->
+        <div class="summary-section">
+          <h3>
+            <lucide-icon name="alert-circle" size="20"></lucide-icon>
+            أولويات الإشعارات
+          </h3>
+          <div class="summary-item">
+            <span class="summary-label">الأولوية المنخفضة:</span>
+            <span class="summary-value" [class.active]="settingsForm.get('receiveLowPriority')?.value">
+              {{ settingsForm.get('receiveLowPriority')?.value ? 'مفعلة' : 'معطلة' }}
+            </span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">الأولوية المتوسطة:</span>
+            <span class="summary-value" [class.active]="settingsForm.get('receiveMediumPriority')?.value">
+              {{ settingsForm.get('receiveMediumPriority')?.value ? 'مفعلة' : 'معطلة' }}
+            </span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">الأولوية العالية:</span>
+            <span class="summary-value" [class.active]="settingsForm.get('receiveHighPriority')?.value">
+              {{ settingsForm.get('receiveHighPriority')?.value ? 'مفعلة' : 'معطلة' }}
+            </span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">الأولوية العاجلة:</span>
+            <span class="summary-value" [class.active]="settingsForm.get('receiveUrgentPriority')?.value">
+              {{ settingsForm.get('receiveUrgentPriority')?.value ? 'مفعلة' : 'معطلة' }}
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="summary-footer">
+        <button mat-button (click)="closeSummary()" class="close-summary-btn">
+          إغلاق
+        </button>
+        <button mat-raised-button color="primary" (click)="saveSettings(); closeSummary()" 
+                [disabled]="isSaving || settingsForm.invalid" class="save-from-summary-btn">
+          <lucide-icon name="save" size="18" *ngIf="!isSaving"></lucide-icon>
+          <mat-spinner *ngIf="isSaving" diameter="16"></mat-spinner>
+          حفظ الإعدادات
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

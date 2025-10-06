@@ -1,6 +1,6 @@
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { DirectChatService } from '../../core/services/direct-chat.service';
@@ -38,9 +38,10 @@ export class DirectChatMessagesComponent implements OnInit, OnDestroy {
   @ViewChild('scrollContainer') scrollContainer?: ElementRef<HTMLDivElement>;
   
   constructor(
-    private route: ActivatedRoute, 
-    private directChat: DirectChatService, 
-    private fb: FormBuilder
+    private route: ActivatedRoute,
+    private directChat: DirectChatService,
+    private fb: FormBuilder,
+    private router: Router
   ){
     this.id = this.route.snapshot.paramMap.get('id') ?? '';
     this.form = this.fb.group({ content: ['', Validators.required] });
@@ -78,6 +79,11 @@ export class DirectChatMessagesComponent implements OnInit, OnDestroy {
       error: (err) => {
         console.error('Error loading messages:', err);
         this.loading = false;
+        // If conversation doesn't exist or inaccessible, navigate back to list
+        const status = err?.status;
+        if (status === 404 || status === 400 || status === 403) {
+          this.router.navigate(['/direct-chat']);
+        }
       }
     });
   }

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -28,7 +28,7 @@ import { CompetitionService, CompetitionAnalysisDto } from '../../../../core/ser
   template: `
     <div class="competition-overview">
       <!-- Header -->
-      <div class="overview-header">
+      <div class="overview-header" *ngIf="!embedded">
         <div class="header-info">
           <h2 class="overview-title">
             <lucide-icon name="bar-chart-3" size="20"></lucide-icon>
@@ -137,6 +137,7 @@ import { CompetitionService, CompetitionAnalysisDto } from '../../../../core/ser
   styleUrls: ['./competition-overview.component.scss']
 })
 export class CompetitionOverviewComponent implements OnInit, OnDestroy {
+  @Input() embedded = false;
   totalAnalyses = 0;
   averagePosition = 0;
   activeAnalyses = 0;

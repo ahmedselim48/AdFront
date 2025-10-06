@@ -7,6 +7,7 @@ import { HomeComponent } from './features/home/home.component';
 import { LoginComponent } from './features/auth/components/login/login.component';
 import { RegisterComponent } from './features/auth/components/register/register.component';
 import { ResetPasswordComponent } from './features/auth/components/reset-password/reset-password.component';
+import { ResetPasswordRedirectComponent } from './features/auth/components/reset-password-redirect/reset-password-redirect.component';
 import { VerifyEmailComponent as ConfirmEmailComponent } from './features/auth/components/verify-email/verify-email.component';
 import { ForgotPasswordComponent } from './features/auth/components/forgot-password/forgot-password.component';
 import { VerifyEmailComponent } from './features/auth/components/verify-email/verify-email.component';
@@ -16,7 +17,6 @@ import { AdsListComponent } from './features/ads-list/ads-list.component';
 import { SmartRepliesComponent } from './features/smart-replies/smart-replies.component';
 import { CompetitionComponent } from './features/competition/competition.component';
 import { NotificationsComponent } from './features/notifications/notifications.component';
-import { NotificationsPageComponent } from './features/notifications/notifications-page/notifications-page.component';
 import { NotificationSettingsComponent } from './features/notifications/notification-settings/notification-settings.component';
 import { ChatListComponent } from './features/chat/chat-list.component';
 import { TemplatesComponent } from './features/chat/templates.component';
@@ -74,6 +74,8 @@ export const routes: Routes = [
     { path: 'resend-confirmation', component: ResendConfirmationComponent },
     { path: 'change-password', component: ChangePasswordComponent }
   ]},
+  // Bridge route to support top-level reset-password links
+  { path: 'reset-password', component: ResetPasswordRedirectComponent },
   
   // Ads & Content Routes - Available without auth for testing
   { path: 'ads', redirectTo: 'ads/list', pathMatch: 'full' },
@@ -98,7 +100,7 @@ export const routes: Routes = [
   { path: 'competition', component: CompetitionComponent },
   // Reports removed
   { path: 'notifications', component: NotificationsComponent },
-  { path: 'notifications-page', component: NotificationsPageComponent },
+  { path: 'notifications-page', component: NotificationsComponent },
   { path: 'notification-settings', component: NotificationSettingsComponent },
   
   // Chat & Communication - Available without auth for testing

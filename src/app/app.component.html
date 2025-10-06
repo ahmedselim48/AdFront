@@ -13,9 +13,12 @@
     <!-- Search Bar -->
     <div class="search-section">
       <div class="search-box">
-        <input type="text" placeholder="ابحث في الإعلانات..." class="search-input" [(ngModel)]="searchQuery" (keyup.enter)="onSearch()">
+        <input type="search" placeholder="ابحث في الإعلانات..." class="search-input" [(ngModel)]="searchQuery" (keyup.enter)="onSearch()" autocomplete="off" aria-label="بحث">
         <button type="button" class="search-btn" (click)="onSearch()">
           <lucide-icon name="search" size="18"></lucide-icon>
+        </button>
+        <button *ngIf="searchQuery" type="button" class="clear-btn" (click)="onClearSearch()" aria-label="مسح البحث">
+          ×
         </button>
       </div>
     </div>
@@ -48,11 +51,11 @@
 
       <!-- User Menu -->
       <div class="user-menu" *ngIf="storage?.accessToken">
-        <div class="user-greeting-container">
+        <div class="user-greeting-container" (click)="toggleUserMenu()">
           <div class="user-greeting-badge" [title]="greeting">
             <span class="greeting-text">{{ isAdmin ? 'Welcome admin' : (currentUser?.userName || currentUser?.fullName || currentUser?.email) }}</span>
           </div>
-          <div class="user-avatar" (click)="toggleUserMenu()">
+          <div class="user-avatar">
             <div class="avatar-circle">
               <ng-container *ngIf="!isAdmin && avatarUrl && !imageLoadFailed; else avatarInitial">
                 <img [src]="avatarUrl" alt="profile" (error)="imageLoadFailed = true" />

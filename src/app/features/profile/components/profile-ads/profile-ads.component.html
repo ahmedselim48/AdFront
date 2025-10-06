@@ -150,7 +150,7 @@
       <mat-card *ngFor="let ad of getPaginatedAds(); trackBy: trackByAdId" class="ad-card">
         <div class="ad-image">
           <img [src]="getAdImage(ad)" [alt]="ad.title" class="ad-thumbnail">
-          <div class="ad-status">
+          <div class="ad-status" *ngIf="getStatusLabel(ad.status)">
             <mat-chip [color]="getStatusColor(ad.status)" selected>
               {{ getStatusLabel(ad.status) }}
             </mat-chip>

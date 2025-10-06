@@ -283,11 +283,13 @@ import { RegisterRequest } from '../../../../models/auth.models';
       justify-content: center;
       background-color: #f8f9fa;
       padding: 2rem 1.5rem;
+      direction: rtl;
     }
 
     .register-wrapper {
       width: 100%;
       max-width: 600px;
+      overflow: hidden;
     }
 
     .register-card {
@@ -295,6 +297,7 @@ import { RegisterRequest } from '../../../../models/auth.models';
       border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
       padding: 2.5rem;
+      overflow: hidden;
     }
 
     /* Header */
@@ -353,7 +356,7 @@ import { RegisterRequest } from '../../../../models/auth.models';
 
     .form-row {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       gap: 1.25rem;
       margin-bottom: 0.25rem;
     }
@@ -361,6 +364,7 @@ import { RegisterRequest } from '../../../../models/auth.models';
     .form-group {
       display: flex;
       flex-direction: column;
+      min-width: 0; /* allow grid item to shrink and wrap */
     }
 
     .form-group.full-width {
@@ -384,6 +388,7 @@ import { RegisterRequest } from '../../../../models/auth.models';
 
     .form-field {
       width: 100%;
+      max-width: 100%;
     }
 
     /* Material Field Customization */
@@ -446,6 +451,8 @@ import { RegisterRequest } from '../../../../models/auth.models';
       font-size: 0.75rem;
       color: #d93025;
       margin-top: 4px;
+      white-space: normal;
+      word-break: break-word;
     }
 
     :host ::ng-deep .form-field .mat-mdc-form-field-hint {
@@ -512,16 +519,21 @@ import { RegisterRequest } from '../../../../models/auth.models';
       padding: 0.875rem 1rem;
       border-radius: 6px;
       font-size: 0.875rem;
+      word-break: break-word;
+      direction: rtl;
+      text-align: right;
     }
 
     .alert-error {
       background-color: #fce8e6;
       color: #d93025;
       border: 1px solid #f4c7c3;
+      border-right-width: 3px; /* accent in RTL */
     }
 
     .alert-icon {
       flex-shrink: 0;
+      margin-left: 0.5rem; /* spacing between icon (right) and text (left) in RTL */
     }
 
     /* Submit Button */

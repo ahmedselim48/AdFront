@@ -63,6 +63,11 @@ export class StatisticsService {
     return this.http.get<GeneralResponse<AdminStatisticsDto>>(`${this.baseUrl}/statistics`);
   }
 
+  // Get public statistics (for home page)
+  getPublicStatistics(): Observable<GeneralResponse<any>> {
+    return this.http.get<GeneralResponse<any>>(`${this.baseUrl}/public/statistics`);
+  }
+
   // Get dashboard statistics
   getDashboardStats(): Observable<GeneralResponse<DashboardStatsDto>> {
     return this.http.get<GeneralResponse<DashboardStatsDto>>(`${this.baseUrl}/dashboard/stats`);

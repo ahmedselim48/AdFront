@@ -38,6 +38,8 @@ export class AppComponent {
     this.auth.initializeAuth();
     this.loadCurrentUser();
     this.pollUnread();
+    // Handle outside click to close dropdown
+    document.addEventListener('click', this.handleOutsideClick, true);
   }
   get isAdmin(): boolean {
     const roles: string[] | undefined = this.currentUser?.roles;
@@ -96,6 +98,20 @@ export class AppComponent {
   onSearch(){
     if (this.searchQuery.trim()) {
       this.router.navigate(['/ads'], { queryParams: { search: this.searchQuery } });
+    }
+  }
+
+  onClearSearch(){
+    this.searchQuery = '';
+  }
+
+  // Close dropdown on outside click
+
+  private handleOutsideClick = (ev: Event) => {
+    const target = ev.target as HTMLElement;
+    const menu = document.querySelector('.user-menu');
+    if (this.showUserMenu && menu && target && !menu.contains(target)) {
+      this.closeUserMenu();
     }
   }
 

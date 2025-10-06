@@ -2,53 +2,284 @@
 <section class="hero">
   <div class="container hero-inner">
     <div class="hero-copy">
-      <h1 class="headline">مرحباً بك في حراج بلس</h1>
-      <p class="sub">منصة الإعلانات الذكية التي تتصل بك الأفضل - اكتشف، تبيع، وأطلق نمو عملك</p>
+              <h1 class="headline">حراج بلس: ضاعف مبيعات متجرك عبر الإعلانات الذكية 🚀</h1>
+              <p class="sub">ودّع الإدارة اليدوية. جدولة آلية، ردود فورية بالذكاء الاصطناعي، وتحليل شامل للمنافسة.</p>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-number">+{{ formatNumber(heroStats.smartAds) }}</span>
+          <span class="stat-label">إعلان ذكي</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">+{{ formatNumber(heroStats.smartReplies) }}</span>
+          <span class="stat-label">رد ذكي</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">+{{ heroStats.salesIncrease }}%</span>
+          <span class="stat-label">زيادة مبيعات</span>
+        </div>
+      </div>
       <div class="actions">
-        <a routerLink="/ads/create" class="button primary">
-          <lucide-icon name="plus" size="16"></lucide-icon>
-          إضافة إعلان جديد
-        </a>
-        <a routerLink="/ads" class="button secondary">
-          <lucide-icon name="search" size="16"></lucide-icon>
+                <a *ngIf="!isLoggedIn" routerLink="/auth/register" class="button primary">
+                  <span class="icon-circle"><lucide-icon name="play" size="16"></lucide-icon></span>
+                  ابدأ تجربتك المجانية
+                </a>
+                <a *ngIf="isLoggedIn" routerLink="/ads" class="button primary">
+                  <span class="icon-circle"><lucide-icon name="grid" size="16"></lucide-icon></span>
           تصفح الإعلانات
+        </a>
+                <a *ngIf="!isLoggedIn" routerLink="/auth/login" class="button secondary">
+                  <span class="icon-circle"><lucide-icon name="log-in" size="16"></lucide-icon></span>
+                  تسجيل الدخول
+                </a>
+                <a *ngIf="isLoggedIn" routerLink="/ads/create" class="button secondary">
+                  <span class="icon-circle"><lucide-icon name="plus" size="16"></lucide-icon></span>
+                  إنشاء إعلان جديد
         </a>
       </div>
     </div>
     <div class="hero-visual" aria-hidden="true">
-      <div class="orb"></div>
-      <div class="glass-card card">
-        <div class="line skeleton" style="height:10px;border-radius:6px"></div>
-        <div class="line skeleton" style="height:10px;border-radius:6px;width:70%"></div>
-        <div class="block skeleton" style="height:72px;border-radius:10px;margin-top:10px"></div>
-      </div>
+              <!-- Enhanced Interactive Dashboard -->
+              <div class="dashboard-image-container" (mouseenter)="onDashboardHover()" (mouseleave)="onDashboardLeave()">
+                <div class="dashboard-image">
+                  <!-- Animated Background Elements -->
+                  <div class="bg-animations">
+                    <div class="floating-dot dot-1"></div>
+                    <div class="floating-dot dot-2"></div>
+                    <div class="floating-dot dot-3"></div>
+                    <div class="pulse-ring"></div>
+                  </div>
+                  
+                  <div class="image-overlay">
+                    <div class="overlay-stats" [class.animated]="isDashboardHovered">
+                      <div class="stat-item" [class.hovered]="isDashboardHovered" (click)="onStatClick('sales')">
+                        <div class="stat-icon">
+                          <lucide-icon name="trending-up" size="20"></lucide-icon>
+                          <div class="icon-glow"></div>
+                        </div>
+                        <div class="stat-content">
+                          <div class="stat-value" [class.counting]="isCounting">
+                            +{{ heroStats.salesIncrease || 250 }}%
+                          </div>
+                          <div class="stat-label">زيادة المبيعات</div>
+                          <div class="stat-trend positive">
+                            <lucide-icon name="arrow-up" size="12"></lucide-icon>
+                            <span>+12.5%</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="stat-item" [class.hovered]="isDashboardHovered" (click)="onStatClick('views')">
+                        <div class="stat-icon">
+                          <lucide-icon name="eye" size="20"></lucide-icon>
+                          <div class="icon-glow"></div>
+                        </div>
+                        <div class="stat-content">
+                          <div class="stat-value" [class.counting]="isCounting">
+                            {{ formatNumber(platformStats.totalViews) || '2.4M' }}
+                          </div>
+                          <div class="stat-label">مشاهدة</div>
+                          <div class="stat-trend positive">
+                            <lucide-icon name="arrow-up" size="12"></lucide-icon>
+                            <span>+8.2%</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="stat-item" [class.hovered]="isDashboardHovered" (click)="onStatClick('ai')">
+                        <div class="stat-icon">
+                          <lucide-icon name="zap" size="20"></lucide-icon>
+                          <div class="icon-glow"></div>
+                        </div>
+                        <div class="stat-content">
+                          <div class="stat-value" [class.counting]="isCounting">
+                            {{ formatNumber(heroStats.smartReplies) || '15.6K' }}
+                          </div>
+                          <div class="stat-label">رد ذكي</div>
+                          <div class="stat-trend positive">
+                            <lucide-icon name="arrow-up" size="12"></lucide-icon>
+                            <span>+15.3%</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Enhanced Floating Indicators -->
+                  <div class="floating-indicators">
+                    <div class="indicator success" [class.pulse]="isDashboardHovered">
+                      <div class="indicator-icon">
+                        <lucide-icon name="check-circle" size="16"></lucide-icon>
+                        <div class="status-dot"></div>
+                      </div>
+                      <span>نشط الآن</span>
+                    </div>
+                    
+                    <div class="indicator ai" [class.pulse]="isDashboardHovered">
+                      <div class="indicator-icon">
+                        <lucide-icon name="zap" size="16"></lucide-icon>
+                        <div class="ai-pulse"></div>
+                      </div>
+                      <span>AI يعمل</span>
+                    </div>
+                    
+                    <div class="indicator growth" [class.pulse]="isDashboardHovered">
+                      <div class="indicator-icon">
+                        <lucide-icon name="trending-up" size="16"></lucide-icon>
+                        <div class="growth-arrow"></div>
+                      </div>
+                      <span>نمو مستمر</span>
+                    </div>
+                  </div>
+                  
+                  <!-- Interactive Elements -->
+                  <div class="interactive-elements">
+                    <div class="data-flow-line line-1"></div>
+                    <div class="data-flow-line line-2"></div>
+                    <div class="data-flow-line line-3"></div>
+                  </div>
+                </div>
+              </div>
+      
+              <!-- Floating Elements -->
+              <div class="floating-elements">
+                <div class="floating-card floating-1 success">
+                  <lucide-icon name="trending-up" size="16"></lucide-icon>
+                  <span>مبيعات +{{ heroStats.salesIncrease }}%</span>
+                </div>
+                <div class="floating-card floating-2 ai">
+                  <lucide-icon name="zap" size="16"></lucide-icon>
+                  <span>رد فوري 24/7</span>
+                </div>
+                <div class="floating-card floating-3 automation">
+                  <lucide-icon name="clock" size="16"></lucide-icon>
+                  <span>جدولة آلية</span>
+                </div>
+                <div class="floating-card floating-4 analytics">
+                  <lucide-icon name="bar-chart-3" size="16"></lucide-icon>
+                  <span>تحليل ذكي</span>
+                </div>
+              </div>
     </div>
   </div>
 </section>
 
-<!-- Promo removed: reverting to original layout with no slider -->
 
-<!-- Search Bar -->
-<section class="search-section">
+<!-- Features Section -->
+<section class="features-section">
   <div class="container">
-    <div class="search-container">
-      <div class="search-box">
-        <lucide-icon name="search" size="20" class="search-icon"></lucide-icon>
-        <input 
-          type="text" 
-          placeholder="ابحث عن إعلانات..." 
-          [(ngModel)]="searchQuery"
-          (keyup.enter)="onSearch()"
-          class="search-input"
-        >
-        <button class="search-btn" (click)="onSearch()">
-          <lucide-icon name="search" size="16"></lucide-icon>
-          بحث
-        </button>
+    <div class="section-header">
+      <h2>لماذا تختار حراج بلس؟</h2>
+      <p>منصة شاملة تجمع بين الذكاء الاصطناعي والتجربة المتميزة</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <lucide-icon name="zap" size="32"></lucide-icon>
+        </div>
+        <h3>ذكاء اصطناعي متقدم</h3>
+        <p>إنشاء إعلانات تلقائياً، توليد عناوين جذابة، وتحليل المنافسة باستخدام أحدث تقنيات الذكاء الاصطناعي</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <lucide-icon name="message-square" size="32"></lucide-icon>
+        </div>
+        <h3>ردود ذكية تلقائية</h3>
+        <p>رد فوري ومهني على العملاء مع دعم الروابط وأزرار التواصل (واتساب - اتصال)</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <lucide-icon name="bar-chart-3" size="32"></lucide-icon>
+        </div>
+        <h3>تحليل المنافسة الشامل</h3>
+        <p>رصد وتحليل جميع الإعلانات المشابهة مع حفظ البيانات وتوليد تقارير مقارنة ذكية</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <lucide-icon name="activity" size="32"></lucide-icon>
+        </div>
+        <h3>A/B Testing متقدم</h3>
+        <p>اختبار تلقائي للعناوين والأوصاف لتحسين أداء الإعلانات وزيادة معدل التحويل</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <lucide-icon name="trending-up" size="32"></lucide-icon>
+        </div>
+        <h3>تحليلات الأداء المتقدمة</h3>
+        <p>مؤشرات شاملة (مشاهدات، رسائل، تحويلات، معدل النقر) مع تقارير PDF وCSV</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <lucide-icon name="bell" size="32"></lucide-icon>
+        </div>
+        <h3>إشعارات ذكية</h3>
+        <p>تنبيهات فورية عند انخفاض الأداء أو ارتفاع المنافسة مع اقتراحات تحسين تلقائية</p>
       </div>
     </div>
   </div>
 </section>
+
+<!-- How It Works Section -->
+<section class="workflow-section">
+  <div class="container">
+    <div class="section-header">
+      <h2>كيف يعمل حراج بلس؟</h2>
+      <p>خطوات بسيطة لبدء رحلتك في عالم الإعلانات الذكية</p>
+    </div>
+    <div class="workflow-steps">
+      <div class="workflow-step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h3>إنشاء حساب</h3>
+          <p>سجل حسابك مجاناً في دقائق قليلة وابدأ رحلتك معنا</p>
+        </div>
+        <div class="step-icon">
+          <lucide-icon name="users" size="24"></lucide-icon>
+        </div>
+      </div>
+      <div class="workflow-step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h3>إنشاء إعلان ذكي</h3>
+          <p>الذكاء الاصطناعي ينشئ لك إعلاناً جذاباً مع عناوين وأوصاف محسنة تلقائياً</p>
+        </div>
+        <div class="step-icon">
+          <lucide-icon name="zap" size="24"></lucide-icon>
+        </div>
+      </div>
+      <div class="workflow-step">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h3>تحليل المنافسة التلقائي</h3>
+          <p>النظام يرصد ويحلل جميع الإعلانات المشابهة ويحفظ البيانات لتحسين الأداء</p>
+        </div>
+        <div class="step-icon">
+          <lucide-icon name="search" size="24"></lucide-icon>
+        </div>
+      </div>
+      <div class="workflow-step">
+        <div class="step-number">4</div>
+        <div class="step-content">
+          <h3>ردود ذكية تلقائية</h3>
+          <p>الذكاء الاصطناعي يرد على العملاء تلقائياً بأسلوب مهني مع روابط التواصل</p>
+        </div>
+        <div class="step-icon">
+          <lucide-icon name="message-circle" size="24"></lucide-icon>
+        </div>
+      </div>
+      <div class="workflow-step">
+        <div class="step-number">5</div>
+        <div class="step-content">
+          <h3>مراقبة وتحسين مستمر</h3>
+          <p>تقارير مفصلة، A/B Testing، وإشعارات ذكية لتحسين الأداء باستمرار</p>
+        </div>
+        <div class="step-icon">
+          <lucide-icon name="trending-up" size="24"></lucide-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- Featured Content Section -->
 <section class="home-wrap container">
   <div class="section-header">
@@ -172,7 +403,7 @@
     <mat-card class="ad-card" *ngFor="let ad of ads" [routerLink]="['/ads', ad.id]">
       <div class="ad-image" *ngIf="ad.images && ad.images.length > 0">
         <img [src]="ad.images[0] || '/assets/images/placeholder-ad.svg'" [alt]="ad.title" loading="lazy">
-        <div class="ad-badge" [class]="'status-' + ad.status">
+        <div class="ad-badge" *ngIf="getStatusText(ad.status)">
           {{ getStatusText(ad.status) }}
         </div>
         <div class="ad-overlay">
@@ -192,15 +423,15 @@
         
         <div class="ad-meta">
           <div class="ad-location">
-            <lucide-icon name="map-pin" size="14"></lucide-icon>
+            <span class="icon-circle"><lucide-icon name="map-pin" size="14"></lucide-icon></span>
             {{ ad.location }}
           </div>
           <div class="ad-user" (click)="$event.stopPropagation(); onUserClick(ad.userId)" style="cursor: pointer;">
-            <lucide-icon name="user" size="14"></lucide-icon>
+            <span class="icon-circle"><lucide-icon name="user" size="14"></lucide-icon></span>
             {{ ad.userName }}
           </div>
           <div class="ad-date">
-            <lucide-icon name="calendar" size="14"></lucide-icon>
+            <span class="icon-circle"><lucide-icon name="calendar" size="14"></lucide-icon></span>
             {{ ad.createdAt | date:'short':'ar-SA' }}
           </div>
         </div>
@@ -251,7 +482,7 @@
             <span>{{ ad.commentsCount || 0 }}</span>
           </div>
           <div class="stat-item" *ngIf="ad.isAIGenerated">
-            <lucide-icon name="sparkles" size="14"></lucide-icon>
+            <lucide-icon name="star" size="14"></lucide-icon>
             <span>ذكي</span>
           </div>
         </div>
@@ -300,3 +531,223 @@
     <button (click)="retryLoading()" class="button secondary">إعادة المحاولة</button>
   </div>
 </section>
+
+<!-- Testimonials & Stats Section -->
+<section class="testimonials-section">
+  <div class="container">
+    <div class="section-header">
+      <h2>ماذا يقول عملاؤنا؟</h2>
+      <p>انضم إلى آلاف المستخدمين الراضين عن خدماتنا</p>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="testimonial-content">
+          <div class="message-square-icon">
+            <lucide-icon name="message-square" size="24"></lucide-icon>
+          </div>
+          <p>"حراج بلس غيرت طريقة بيعي بالكامل! الذكاء الاصطناعي ينشئ إعلاناتي تلقائياً والردود الذكية توفر علي ساعات العمل يومياً. زادت مبيعاتي 300%"</p>
+        </div>
+        <div class="testimonial-author">
+          <div class="author-avatar">
+            <lucide-icon name="user" size="20"></lucide-icon>
+          </div>
+          <div class="author-info">
+            <h4>أحمد محمد</h4>
+            <span>تاجر سيارات</span>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-content">
+          <div class="message-square-icon">
+            <lucide-icon name="message-square" size="24"></lucide-icon>
+          </div>
+          <p>"تحليل المنافسة التلقائي مذهل! أعرف الآن أسعار السوق وأحسن إعلاناتي بناءً على البيانات الحقيقية. التقارير مفصلة ومفيدة جداً"</p>
+        </div>
+        <div class="testimonial-author">
+          <div class="author-avatar">
+            <lucide-icon name="user" size="20"></lucide-icon>
+          </div>
+          <div class="author-info">
+            <h4>فاطمة العتيبي</h4>
+            <span>مستثمرة عقارية</span>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-content">
+          <div class="message-square-icon">
+            <lucide-icon name="message-square" size="24"></lucide-icon>
+          </div>
+          <p>"A/B Testing التلقائي واعداد التقارير PDF يوفر علي وقت كبير. النظام يتعلم من أداء إعلاناتي ويحسنها تلقائياً. رائع!"</p>
+        </div>
+        <div class="testimonial-author">
+          <div class="author-avatar">
+            <lucide-icon name="user" size="20"></lucide-icon>
+          </div>
+          <div class="author-info">
+            <h4>خالد السعد</h4>
+            <span>مطور تطبيقات</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <lucide-icon name="users" size="32"></lucide-icon>
+        </div>
+        <div class="stat-number">+{{ formatNumber(platformStats.totalUsers) }}</div>
+        <div class="stat-label">مستخدم نشط</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <lucide-icon name="zap" size="32"></lucide-icon>
+        </div>
+        <div class="stat-number">+{{ formatNumber(platformStats.totalAds) }}</div>
+        <div class="stat-label">إعلان ذكي منشور</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <lucide-icon name="message-circle" size="32"></lucide-icon>
+        </div>
+        <div class="stat-number">+{{ formatNumber(platformStats.totalSmartReplies) }}</div>
+        <div class="stat-label">رد ذكي تلقائي</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <lucide-icon name="bar-chart-3" size="32"></lucide-icon>
+        </div>
+        <div class="stat-number">+{{ formatNumber(platformStats.totalCompetitionAnalyses) }}</div>
+        <div class="stat-label">تحليل منافسة يومي</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <lucide-icon name="trending-up" size="32"></lucide-icon>
+        </div>
+        <div class="stat-number">+{{ platformStats.salesIncrease }}%</div>
+        <div class="stat-label">زيادة في المبيعات</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">
+          <lucide-icon name="star" size="32"></lucide-icon>
+        </div>
+        <div class="stat-number">{{ platformStats.userRating }}</div>
+        <div class="stat-label">تقييم المستخدمين</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-content">
+      <h2>ابدأ رحلتك مع الذكاء الاصطناعي اليوم</h2>
+      <p>انضم إلى آلاف المستخدمين الذين يستخدمون الذكاء الاصطناعي لتحسين أداء إعلاناتهم وزيادة مبيعاتهم</p>
+      <div class="cta-actions">
+        <a routerLink="/auth/register" class="button primary large">
+          <lucide-icon name="zap" size="20"></lucide-icon>
+          ابدأ مجاناً مع الذكاء الاصطناعي
+        </a>
+        <a routerLink="/ads/create" class="button secondary large">
+          <lucide-icon name="star" size="20"></lucide-icon>
+          إنشاء إعلان ذكي الآن
+        </a>
+      </div>
+      <div class="cta-features">
+        <div class="cta-feature">
+          <lucide-icon name="check-circle" size="16"></lucide-icon>
+          <span>ذكاء اصطناعي متقدم</span>
+        </div>
+        <div class="cta-feature">
+          <lucide-icon name="check-circle" size="16"></lucide-icon>
+          <span>ردود تلقائية ذكية</span>
+        </div>
+        <div class="cta-feature">
+          <lucide-icon name="check-circle" size="16"></lucide-icon>
+          <span>تحليل منافسة شامل</span>
+        </div>
+        <div class="cta-feature">
+          <lucide-icon name="check-circle" size="16"></lucide-icon>
+          <span>تقارير PDF وCSV</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer Section -->
+<footer class="footer-section">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-main">
+        <div class="footer-brand">
+          <h3>حراج بلس</h3>
+          <p>منصة الإعلانات الذكية الأولى في المملكة العربية السعودية</p>
+          <div class="social-links">
+            <a href="#" class="social-link">
+              <lucide-icon name="link" size="20"></lucide-icon>
+            </a>
+            <a href="#" class="social-link">
+              <lucide-icon name="link" size="20"></lucide-icon>
+            </a>
+            <a href="#" class="social-link">
+              <lucide-icon name="link" size="20"></lucide-icon>
+            </a>
+            <a href="#" class="social-link">
+              <lucide-icon name="link" size="20"></lucide-icon>
+            </a>
+          </div>
+        </div>
+        <div class="footer-links">
+          <div class="footer-column">
+            <h4>المنصة</h4>
+            <ul>
+              <li><a routerLink="/ads">تصفح الإعلانات</a></li>
+              <li><a routerLink="/ads/create">إضافة إعلان</a></li>
+              <li><a routerLink="/categories">الفئات</a></li>
+              <li><a routerLink="/competition">تحليل المنافسة</a></li>
+            </ul>
+          </div>
+          <div class="footer-column">
+            <h4>الدعم</h4>
+            <ul>
+              <li><a href="#">مركز المساعدة</a></li>
+              <li><a href="#">اتصل بنا</a></li>
+              <li><a href="#">الأسئلة الشائعة</a></li>
+              <li><a href="#">الدعم الفني</a></li>
+            </ul>
+          </div>
+          <div class="footer-column">
+            <h4>الشركة</h4>
+            <ul>
+              <li><a href="#">من نحن</a></li>
+              <li><a href="#">الوظائف</a></li>
+              <li><a href="#">الأخبار</a></li>
+              <li><a href="#">الشراكات</a></li>
+            </ul>
+          </div>
+          <div class="footer-column">
+            <h4>القانونية</h4>
+            <ul>
+              <li><a href="#">شروط الاستخدام</a></li>
+              <li><a href="#">سياسة الخصوصية</a></li>
+              <li><a href="#">سياسة ملفات تعريف الارتباط</a></li>
+              <li><a href="#">إخلاء المسؤولية</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="footer-bottom-content">
+          <p>&copy; 2024 حراج بلس. جميع الحقوق محفوظة.</p>
+          <div class="footer-bottom-links">
+            <a href="#">اللغة العربية</a>
+            <a href="#">English</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>

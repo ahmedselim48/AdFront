@@ -1,32 +1,243 @@
-<div class="notifications">
-  <div class="notifications-container">
-    <mat-card class="notifications-card">
-      <mat-card-header>
-        <mat-card-title>الإشعارات</mat-card-title>
-        <mat-card-subtitle>جميع إشعاراتك في مكان واحد</mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="notifications-content">
-          <div class="empty-state">
-            <lucide-icon name="bell" size="64" class="empty-icon"></lucide-icon>
-            <h3>لا توجد إشعارات</h3>
-            <p>ستظهر إشعاراتك هنا عند توفرها</p>
-          </div>
+<div class="notifications-page">
+  <!-- Header Section -->
+  <div class="notifications-header">
+    <div class="header-content">
+      <div class="header-title">
+        <h1>الإشعارات</h1>
+        <p>إدارة جميع إشعاراتك في مكان واحد</p>
+      </div>
+      
+      <div class="header-actions">
+        <button mat-icon-button (click)="refreshNotifications()" matTooltip="تحديث">
+          <lucide-icon name="refresh-cw" size="20"></lucide-icon>
+        </button>
+        
+        <button mat-raised-button color="primary" routerLink="/profile/notification-settings">
+          <lucide-icon name="settings" size="18"></lucide-icon>
+          إعدادات الإشعارات
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-section" *ngIf="stats">
+    <mat-card class="stat-card">
+      <div class="stat-content">
+        <div class="stat-icon total">
+          <lucide-icon name="bell" size="24"></lucide-icon>
         </div>
-      </mat-card-content>
+        <div class="stat-info">
+          <div class="stat-number">{{ stats.total || 0 }}</div>
+          <div class="stat-label">إجمالي الإشعارات</div>
+        </div>
+      </div>
     </mat-card>
 
-    <!-- Quick Actions -->
-    <div class="quick-actions">
-      <button mat-raised-button color="primary" routerLink="/notifications-page">
-        <lucide-icon name="list" size="18" class="me-2"></lucide-icon>
-        عرض جميع الإشعارات
+    <mat-card class="stat-card">
+      <div class="stat-content">
+        <div class="stat-icon unread">
+          <lucide-icon name="mail" size="24"></lucide-icon>
+        </div>
+        <div class="stat-info">
+          <div class="stat-number">{{ stats.unread || 0 }}</div>
+          <div class="stat-label">غير مقروءة</div>
+        </div>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <div class="stat-content">
+        <div class="stat-icon urgent">
+          <lucide-icon name="alert-circle" size="24"></lucide-icon>
+        </div>
+        <div class="stat-info">
+          <div class="stat-number">{{ (stats.byPriority['Urgent'] || 0) + (stats.byPriority['High'] || 0) }}</div>
+          <div class="stat-label">عاجلة</div>
+        </div>
+      </div>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <div class="stat-content">
+        <div class="stat-icon read">
+          <lucide-icon name="check-circle" size="24"></lucide-icon>
+        </div>
+        <div class="stat-info">
+          <div class="stat-number">{{ stats.read || 0 }}</div>
+          <div class="stat-label">مقروءة</div>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- Filters and Actions -->
+  <div class="filters-section">
+    <div class="filters-row">
+      <!-- Filter Chips -->
+      <div class="filter-chips">
+        <mat-chip-listbox>
+          <mat-chip 
+            [class.selected]="selectedFilter === 'all'"
+            (click)="onFilterChange('all')">
+            جميع الإشعارات
+          </mat-chip>
+          <mat-chip 
+            [class.selected]="selectedFilter === 'unread'"
+            (click)="onFilterChange('unread')">
+            <span [matBadge]="unreadCount" [matBadgeHidden]="unreadCount === 0">
+              غير مقروءة
+            </span>
+          </mat-chip>
+          <mat-chip 
+            [class.selected]="selectedFilter === 'read'"
+            (click)="onFilterChange('read')">
+            مقروءة
+          </mat-chip>
+          <mat-chip 
+            [class.selected]="selectedFilter === 'urgent'"
+            (click)="onFilterChange('urgent')">
+            عاجلة
+          </mat-chip>
+        </mat-chip-listbox>
+      </div>
+
+      <!-- Bulk Actions -->
+      <div class="bulk-actions" *ngIf="isSelectMode">
+        <span class="selected-count">{{ selectedNotifications.size }} محدد</span>
+        <button mat-button (click)="clearSelection()">
+          <lucide-icon name="x" size="16"></lucide-icon>
+          إلغاء التحديد
+        </button>
+        <button mat-button color="warn" (click)="deleteSelected()">
+          <lucide-icon name="trash-2" size="16"></lucide-icon>
+          حذف المحدد
+        </button>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions" *ngIf="!isSelectMode">
+        <button mat-button (click)="selectAll()">
+          <lucide-icon name="check" size="16"></lucide-icon>
+          تحديد الكل
+        </button>
+        <button mat-button (click)="markAllAsRead()" [disabled]="unreadCount === 0">
+          <lucide-icon name="check-circle" size="16"></lucide-icon>
+          قراءة الكل
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notifications List -->
+  <div class="notifications-container">
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="isLoading">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>جاري تحميل الإشعارات...</p>
+    </div>
+
+    <!-- Error State -->
+    <div class="error-state" *ngIf="error && !isLoading">
+      <lucide-icon name="alert-circle" size="48" class="error-icon"></lucide-icon>
+      <h3>خطأ في التحميل</h3>
+      <p>{{ error }}</p>
+      <button mat-raised-button color="primary" (click)="refreshNotifications()">
+        <lucide-icon name="refresh-cw" size="16"></lucide-icon>
+        إعادة المحاولة
       </button>
-      
-      <button mat-button routerLink="/profile/notification-settings">
-        <lucide-icon name="settings" size="18" class="me-2"></lucide-icon>
-        إعدادات الإشعارات
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!isLoading && !error && getFilteredNotifications().length === 0">
+      <lucide-icon name="bell" size="64" class="empty-icon"></lucide-icon>
+      <h3>لا توجد إشعارات</h3>
+      <p>ستظهر إشعاراتك هنا عند توفرها</p>
+      <button mat-raised-button color="primary" (click)="refreshNotifications()">
+        <lucide-icon name="refresh-cw" size="16"></lucide-icon>
+        تحديث
       </button>
+    </div>
+
+    <!-- Notifications List -->
+    <div class="notifications-list" *ngIf="!isLoading && !error && getFilteredNotifications().length > 0">
+      <mat-card 
+        *ngFor="let notification of getFilteredNotifications(); trackBy: trackByNotificationId"
+        class="notification-card"
+        [class.unread]="!notification.isRead"
+        [class.selected]="selectedNotifications.has(notification.id)"
+        [class.urgent]="notification.priority === 'Urgent'"
+        [class.high-priority]="notification.priority === 'High'"
+        (click)="onNotificationClick(notification)">
+        
+        <!-- Selection Checkbox -->
+        <div class="notification-checkbox" (click)="$event.stopPropagation()">
+          <mat-checkbox 
+            [checked]="selectedNotifications.has(notification.id)"
+            (change)="toggleSelection(notification.id)">
+          </mat-checkbox>
+        </div>
+
+        <!-- Notification Content -->
+        <div class="notification-content">
+          <!-- Header -->
+          <div class="notification-header">
+            <div class="notification-title">
+              <lucide-icon 
+                [name]="getPriorityIcon(notification.priority)" 
+                size="16"
+                [class]="'priority-' + getPriorityColor(notification.priority)">
+              </lucide-icon>
+              <h4>{{ notification.title }}</h4>
+              <mat-chip 
+                [class]="'priority-chip ' + getPriorityColor(notification.priority)"
+                *ngIf="notification.priority !== 'Medium'">
+                {{ notification.priority }}
+              </mat-chip>
+            </div>
+            
+            <div class="notification-meta">
+              <span class="notification-time">{{ formatDate(notification.createdAt) }}</span>
+              <div class="notification-actions" (click)="$event.stopPropagation()">
+                <button 
+                  mat-icon-button 
+                  *ngIf="!notification.isRead"
+                  (click)="markAsRead(notification)"
+                  matTooltip="تحديد كمقروء">
+                  <lucide-icon name="check" size="16"></lucide-icon>
+                </button>
+                <button 
+                  mat-icon-button 
+                  (click)="deleteNotification(notification)"
+                  matTooltip="حذف">
+                  <lucide-icon name="trash-2" size="16"></lucide-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Message -->
+          <div class="notification-message">
+            <p>{{ notification.message }}</p>
+          </div>
+
+          <!-- Footer -->
+          <div class="notification-footer" *ngIf="notification.actionText || notification.category">
+            <div class="notification-category" *ngIf="notification.category">
+              <lucide-icon [name]="getCategoryIcon(notification.category)" size="14"></lucide-icon>
+              <span>{{ notification.category }}</span>
+            </div>
+            
+            <div class="notification-action" *ngIf="notification.actionText">
+              <lucide-icon name="arrow-left" size="14"></lucide-icon>
+              <span>{{ notification.actionText }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Unread Indicator -->
+        <div class="unread-indicator" *ngIf="!notification.isRead"></div>
+      </mat-card>
     </div>
   </div>
 </div>

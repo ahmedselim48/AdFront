@@ -87,15 +87,15 @@ export class ChatService {
     if (intent) params.set('intent', intent);
     if (isActive !== undefined) params.set('isActive', String(isActive));
 
-    return this.api.get$<TemplateDto[]>(`${this.baseUrl}/smartreplies/templates?${params.toString()}`);
+    return this.api.get$<TemplateDto[]>(`${this.baseUrl.replace('/api', '')}/smartreplies/templates?${params.toString()}`);
   }
 
   createTemplate(request: CreateTemplateCommand): Observable<TemplateDto> {
-    return this.api.post$<TemplateDto>(`${this.baseUrl}/smartreplies/templates`, request);
+    return this.api.post$<TemplateDto>(`${this.baseUrl.replace('/api', '')}/smartreplies/templates`, request);
   }
 
   submitFeedback(request: SubmitFeedbackCommand): Observable<boolean> {
-    return this.api.post$<boolean>(`${this.baseUrl}/smartreplies/feedback`, request);
+    return this.api.post$<boolean>(`${this.baseUrl.replace('/api', '')}/smartreplies/feedback`, request);
   }
 
   getRepliesAnalytics(
@@ -110,7 +110,7 @@ export class ChatService {
     if (fromDate) params.set('fromDate', fromDate.toISOString());
     if (toDate) params.set('toDate', toDate.toISOString());
 
-    return this.api.get$<ReplyAnalyticsDto>(`${this.baseUrl}/smartreplies/analytics/replies?${params.toString()}`);
+    return this.api.get$<ReplyAnalyticsDto>(`${this.baseUrl.replace('/api', '')}/smartreplies/analytics/replies?${params.toString()}`);
   }
 
   // Direct Chat

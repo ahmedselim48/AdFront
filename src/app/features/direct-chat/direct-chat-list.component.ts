@@ -52,7 +52,9 @@ export class DirectChatListComponent implements OnInit, OnDestroy {
     this.sub = this.directChat.listDirectConversations().subscribe({
       next: (cs: DirectConversationDto[]) => {
         const me = this.auth.currentUser?.id;
-        this.conversations = (cs || []).map(c => {
+        // Hide empty conversations that have no messages and no unread
+        const meaningful = (cs || []).filter(c => (c.lastMessage && String(c.lastMessage).trim()) || c.lastMessageTime || (c.unreadCount && c.unreadCount > 0));
+        this.conversations = meaningful.map(c => {
           const amUser1 = me && c.user1Id === me;
           const otherName = amUser1 ? c.user2Name : c.user1Name;
           const otherImageUrl = amUser1 ? c.user2ImageUrl : c.user1ImageUrl;
