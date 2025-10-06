@@ -42,6 +42,7 @@ export class PublicProfileComponent implements OnInit {
   isContacting = false;
   userId: string | null = null;
   isOwnProfile = false;
+  private currentUserId: string | null = null;
 
   private publicProfileService = inject(PublicProfileService);
   private directChatService = inject(DirectChatService);
@@ -53,8 +54,14 @@ export class PublicProfileComponent implements OnInit {
 
   ngOnInit() {
     this.userId = this.route.snapshot.paramMap.get('id');
+    // react to auth changes to properly detect ownership
+    this.authService.currentUser$.subscribe(user => {
+      this.currentUserId = user?.id ?? null;
+      this.updateOwnershipCheck();
+    });
+
     if (this.userId) {
-      this.checkIfOwnProfile();
+      this.updateOwnershipCheck();
       this.loadProfile();
       this.loadUserAds();
     } else {
@@ -63,11 +70,11 @@ export class PublicProfileComponent implements OnInit {
     }
   }
 
-  checkIfOwnProfile() {
-    const currentUser = this.authService.currentUser;
-    if (currentUser && this.userId) {
-      this.isOwnProfile = currentUser.id === this.userId;
-    }
+  private updateOwnershipCheck() {
+    const routeId = this.userId;
+    const authId = this.currentUserId;
+    const profileId = this.profile?.id;
+    this.isOwnProfile = Boolean(authId && (authId === routeId || authId === profileId));
   }
 
   loadProfile() {
@@ -78,6 +85,7 @@ export class PublicProfileComponent implements OnInit {
       next: (response) => {
         if (response.success && response.data) {
           this.profile = response.data;
+          this.updateOwnershipCheck();
         } else {
           this.toastr.error('المستخدم غير موجود', 'خطأ');
           this.router.navigate(['/']);
@@ -151,8 +159,11 @@ export class PublicProfileComponent implements OnInit {
     }
   }
 
-  formatDate(date: string): string {
-    return new Date(date).toLocaleDateString('ar-SA', {
+  formatDate(date: string | Date | null | undefined): string {
+    if (!date) return '';
+    const d = typeof date === 'string' ? new Date(date) : date;
+    if (!(d instanceof Date) || isNaN(d.getTime())) return '';
+    return d.toLocaleDateString('ar-SA', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -178,6 +189,20 @@ export class PublicProfileComponent implements OnInit {
     return '/assets/images/placeholder-ad.svg';
   }
 
+  getDisplayName(): string {
+    const first = this.profile?.firstName?.trim();
+    const last = this.profile?.lastName?.trim();
+    const full = (this.profile as any)?.fullName?.trim();
+    const name = [first, last].filter(Boolean).join(' ').trim();
+    return name || full || '';
+  }
+
+  getUsername(): string {
+    const username = this.profile?.userName?.trim();
+    if (username) return `@${username}`;
+    return '';
+  }
+
   onGoHome() {
     this.router.navigate(['/']);
   }
@@ -188,6 +213,40 @@ export class PublicProfileComponent implements OnInit {
 
   onViewAd(ad: AdDto) {
     this.router.navigate(['/ads', ad.id]);
+  }
+
+  // ===== Social helpers =====
+  private extractUsername(url: string): string {
+    try {
+      const u = new URL(url);
+      const parts = u.pathname.split('/').filter(Boolean);
+      return parts[0] || u.hostname;
+    } catch {
+      return url;
+    }
+  }
+
+  getFacebookName(url?: string): string {
+    if (!url) return '';
+    return this.extractUsername(url);
+  }
+
+  getInstagramName(url?: string): string {
+    if (!url) return '';
+    return this.extractUsername(url);
+  }
+
+  getHostname(url?: string): string {
+    if (!url) return '';
+    try { return new URL(url).hostname.replace('www.', ''); } catch { return url; }
+  }
+
+  getFacebookAvatar(url?: string): string {
+    return 'assets/images/facebook-icon.svg';
+  }
+
+  getInstagramAvatar(url?: string): string {
+    return 'assets/images/instagram-icon.svg';
   }
 
   onEditProfile() {

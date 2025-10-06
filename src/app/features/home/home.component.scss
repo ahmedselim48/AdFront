@@ -5,6 +5,49 @@
   margin-bottom: 2rem;
 }
 
+/* Promo banner/slider styles removed – reverted to original */
+
+.nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.45);
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.nav.prev { right: 12px; }
+.nav.next { left: 12px; }
+
+.indicators {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+  border: none;
+  cursor: pointer;
+}
+
+.dot.active {
+  background: #ffffff;
+}
+
 .search-container {
   max-width: 800px;
   margin: 0 auto;

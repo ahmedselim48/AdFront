@@ -9,6 +9,8 @@ import { AdItem, CommentDto, AdPerformanceDto } from '../../../../models/ads.mod
 import { AuthService } from '../../../../core/auth/auth.service';
 import { DirectChatService } from '../../../../core/services/direct-chat.service';
 import { ContactHelperService } from '../../../../core/services/contact-helper.service';
+import { PublicProfileService, PublicProfileDto } from '../../../../core/services/public-profile.service';
+import { ImageUrlHelper } from '../../../../core/utils/image-url.helper';
 
 @Component({
   selector: 'app-ad-details',
@@ -28,6 +30,7 @@ export class AdDetailsComponent implements OnInit, OnDestroy {
   isOwner = false;
   showAnalytics = false;
   isLiked = false;
+  seller: PublicProfileDto | null = null;
   
   private destroy$ = new Subject<void>();
   private route = inject(ActivatedRoute);
@@ -37,6 +40,7 @@ export class AdDetailsComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private directChatService = inject(DirectChatService);
   private contactHelper = inject(ContactHelperService);
+  private publicProfileService = inject(PublicProfileService);
 
   ngOnInit() {
     this.initializeCommentForm();
@@ -69,6 +73,20 @@ export class AdDetailsComponent implements OnInit, OnDestroy {
         this.ad = ad;
         this.isOwner = this.authService.getCurrentUser()?.id === ad.userId;
         this.showAnalytics = this.isOwner; // Show analytics only for owners
+        if (ad.userId) {
+          this.publicProfileService.getPublicProfile(ad.userId).pipe(takeUntil(this.destroy$)).subscribe({
+            next: (res) => {
+              if (res.success && res.data) {
+                this.seller = res.data;
+                console.log('Seller profile loaded:', this.seller);
+                console.log('Seller profile image:', this.seller?.profileImageUrl);
+              }
+            },
+            error: (error) => {
+              console.error('Error loading seller profile:', error);
+            }
+          });
+        }
         this.loadComments();
         this.loadPerformance();
         this.recordView();
@@ -216,6 +234,12 @@ export class AdDetailsComponent implements OnInit, OnDestroy {
     return (this.ad.clicksCount || 0) / this.ad.viewsCount * 100;
   }
 
+  // Contact methods
+  openWhatsApp(whatsappNumber: string) {
+    const cleanNumber = whatsappNumber.replace(/\D/g, '');
+    window.open(`https://wa.me/${cleanNumber}`, '_blank');
+  }
+
   editAd() {
     if (!this.ad) return;
     this.router.navigate(['/ads', this.ad.id, 'edit']);
@@ -267,10 +291,8 @@ export class AdDetailsComponent implements OnInit, OnDestroy {
   }
 
   formatPrice(price: number): string {
-    return new Intl.NumberFormat('ar-SA', {
-      style: 'currency',
-      currency: 'SAR'
-    }).format(price);
+    if (price === 0) return 'مجاناً';
+    return new Intl.NumberFormat('ar-SA').format(price) + ' ريال';
   }
 
   formatDate(date: Date | string | null | undefined): string {
@@ -309,14 +331,6 @@ export class AdDetailsComponent implements OnInit, OnDestroy {
     }
   }
 
-  openWhatsApp(): void {
-    if (!this.ad?.contactNumber) {
-      console.error('Contact number not available');
-      return;
-    }
-    
-    this.contactHelper.openContact('WhatsApp', this.ad.contactNumber, this.ad.title);
-  }
 
   makeCall(): void {
     if (!this.ad?.contactNumber) {
@@ -325,5 +339,51 @@ export class AdDetailsComponent implements OnInit, OnDestroy {
     }
     
     this.contactHelper.openContact('Call', this.ad.contactNumber);
+  }
+
+  selectImage(index: number) {
+    if (this.ad && this.ad.images && this.ad.images.length > index) {
+      // Swap the main image with the selected thumbnail
+      const temp = this.ad.images[0];
+      this.ad.images[0] = this.ad.images[index];
+      this.ad.images[index] = temp;
+    }
+  }
+
+  shareAd() {
+    if (this.ad && navigator.share) {
+      navigator.share({
+        title: this.ad.title,
+        text: this.ad.description,
+        url: window.location.href
+      });
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(window.location.href);
+      // You can add a toast notification here
+      console.log('Link copied to clipboard');
+    }
+  }
+
+  getUserImage(): string {
+    console.log('Getting user image...');
+    console.log('ad.userImageUrl:', this.ad?.userImageUrl);
+    console.log('seller.profileImageUrl:', this.seller?.profileImageUrl);
+    
+    // First try to get image from ad data
+    if (this.ad?.userImageUrl && this.ad.userImageUrl.trim() !== '') {
+      console.log('Using ad.userImageUrl:', this.ad.userImageUrl);
+      return ImageUrlHelper.getProfileImageUrl(this.ad.userImageUrl);
+    }
+    
+    // Then try to get from seller profile
+    if (this.seller?.profileImageUrl && this.seller.profileImageUrl.trim() !== '') {
+      console.log('Using seller.profileImageUrl:', this.seller.profileImageUrl);
+      return ImageUrlHelper.getProfileImageUrl(this.seller.profileImageUrl);
+    }
+    
+    // Fallback to default avatar
+    console.log('Using default avatar');
+    return ImageUrlHelper.getProfileImageUrl(null);
   }
 }

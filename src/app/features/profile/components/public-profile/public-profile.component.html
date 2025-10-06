@@ -9,42 +9,69 @@
   <div *ngIf="!isLoading && profile" class="profile-content">
     <!-- Profile Header -->
     <mat-card class="profile-header">
+      <div class="header-background"></div>
       <div class="header-content">
         <div class="profile-image">
-          <img [src]="getProfileImageUrl(profile.profileImageUrl)" 
-               [alt]="profile.userName" 
-               class="avatar">
+          <div class="avatar-container">
+            <img [src]="getProfileImageUrl(profile.profileImageUrl)" 
+                 [alt]="profile.userName" 
+                 class="avatar">
+            <div class="avatar-ring"></div>
+          </div>
           <div class="verification-badge" *ngIf="profile.isVerified">
-            <lucide-icon name="check-circle" size="20"></lucide-icon>
+            <lucide-icon name="check-circle" size="18"></lucide-icon>
           </div>
         </div>
         
         <div class="profile-info">
-          <h1 class="profile-name">{{ profile.firstName }} {{ profile.lastName }}</h1>
-          <p class="profile-username">{{ '@' + profile.userName }}</p>
+          <div class="name-section">
+            <h1 class="profile-name">{{ getDisplayName() }}</h1>
+            <p class="profile-username" *ngIf="profile?.userName">{{ getUsername() }}</p>
+            <div class="profile-badges">
+              <span class="member-badge" *ngIf="profile.joinDate">
+                <lucide-icon name="calendar" size="14"></lucide-icon>
+                عضو منذ {{ formatDate(profile.joinDate) }}
+              </span>
+            </div>
+          </div>
           
           <div class="profile-stats">
             <div class="stat-item">
-              <span class="stat-value">{{ profile.totalAds }}</span>
-              <span class="stat-label">إعلان</span>
+              <div class="stat-icon">
+                <lucide-icon name="file-text" size="20"></lucide-icon>
+              </div>
+              <div class="stat-content">
+                <span class="stat-value">{{ profile.totalAds }}</span>
+                <span class="stat-label">إعلان</span>
+              </div>
             </div>
             <div class="stat-item">
-              <span class="stat-value">{{ profile.totalViews }}</span>
-              <span class="stat-label">مشاهدة</span>
+              <div class="stat-icon">
+                <lucide-icon name="eye" size="20"></lucide-icon>
+              </div>
+              <div class="stat-content">
+                <span class="stat-value">{{ profile.totalViews }}</span>
+                <span class="stat-label">مشاهدة</span>
+              </div>
             </div>
             <div class="stat-item">
-              <span class="stat-value">{{ profile.rating | number:'1.1-1' }}</span>
-              <span class="stat-label">تقييم</span>
+              <div class="stat-icon">
+                <lucide-icon name="star" size="20"></lucide-icon>
+              </div>
+              <div class="stat-content">
+                <span class="stat-value">{{ profile.rating | number:'1.1-1' }}</span>
+                <span class="stat-label">تقييم</span>
+              </div>
             </div>
           </div>
         </div>
         
         <div class="profile-actions" *ngIf="!isOwnProfile">
           <button mat-raised-button 
-                  color="primary" 
+                  class="contact-btn"
                   (click)="onContactUser()"
                   [disabled]="isContacting">
-            <lucide-icon name="message-circle" size="16"></lucide-icon>
+            <lucide-icon name="message-circle" size="18"></lucide-icon>
             <span>تواصل</span>
           </button>
         </div>
@@ -52,9 +79,9 @@
         <!-- Own Profile Actions -->
         <div class="profile-actions" *ngIf="isOwnProfile">
           <button mat-raised-button 
-                  color="accent" 
+                  class="edit-btn"
                   (click)="onEditProfile()">
-            <lucide-icon name="edit" size="16"></lucide-icon>
+            <lucide-icon name="edit" size="18"></lucide-icon>
             <span>تعديل الملف الشخصي</span>
           </button>
         </div>
@@ -74,49 +101,117 @@
       <!-- Contact Information -->
       <mat-card class="contact-card">
         <mat-card-content>
-          <h3>معلومات التواصل</h3>
-          <div class="contact-info">
-            <div class="contact-item" *ngIf="profile.phoneNumber">
-              <lucide-icon name="phone" size="16"></lucide-icon>
-              <span>{{ profile.phoneNumber }}</span>
-              <button mat-icon-button 
-                      *ngIf="!isOwnProfile"
-                      (click)="onCallPhone(profile.phoneNumber!)"
-                      matTooltip="اتصال">
-                <lucide-icon name="phone" size="16"></lucide-icon>
-              </button>
+          <div class="contact-header">
+            <h3>معلومات التواصل</h3>
+            <div class="contact-icon">
+              <lucide-icon name="phone" size="20"></lucide-icon>
             </div>
-            
-            <div class="contact-item" *ngIf="profile.whatsappNumber">
-              <lucide-icon name="message-circle" size="16"></lucide-icon>
-              <span>{{ profile.whatsappNumber }}</span>
-              <button mat-icon-button 
-                      *ngIf="!isOwnProfile"
-                      (click)="onOpenWhatsApp(profile.whatsappNumber!)"
-                      matTooltip="واتساب">
-                <lucide-icon name="message-circle" size="16"></lucide-icon>
-              </button>
+          </div>
+          <div class="contact-sections">
+            <!-- Contact Info Section -->
+            <div class="contact-info-section">
+              <h4 class="section-title">أرقام الهاتف</h4>
+              <div class="contact-info">
+                <!-- Phone Card -->
+                <div class="contact-card-item" *ngIf="profile.phoneNumber">
+                  <div class="card-icon phone">
+                    <lucide-icon name="phone" size="20"></lucide-icon>
+                  </div>
+                  <div class="card-title">
+                    <h4>هاتف</h4>
+                  </div>
+                  <button mat-icon-button 
+                          *ngIf="!isOwnProfile"
+                          class="card-action"
+                          (click)="onCallPhone(profile.phoneNumber!)"
+                          matTooltip="اتصال">
+                    <lucide-icon name="phone" size="18"></lucide-icon>
+                  </button>
+                </div>
+                
+                <!-- WhatsApp Card -->
+                <div class="contact-card-item" *ngIf="profile.whatsappNumber">
+                  <div class="card-icon whatsapp">
+                    <lucide-icon name="message-circle" size="20"></lucide-icon>
+                  </div>
+                  <div class="card-title">
+                    <h4>واتساب</h4>
+                  </div>
+                  <button mat-icon-button 
+                          *ngIf="!isOwnProfile"
+                          class="card-action"
+                          (click)="onOpenWhatsApp(profile.whatsappNumber!)"
+                          matTooltip="واتساب">
+                    <lucide-icon name="message-circle" size="18"></lucide-icon>
+                  </button>
+                </div>
+                
+                <!-- Email Card -->
+                <div class="contact-card-item" *ngIf="profile.email">
+                  <div class="card-icon email">
+                    <lucide-icon name="mail" size="20"></lucide-icon>
+                  </div>
+                  <div class="card-title">
+                    <h4>إيميل</h4>
+                  </div>
+                  <button mat-icon-button 
+                          *ngIf="!isOwnProfile"
+                          class="card-action"
+                          (click)="onSendEmail(profile.email!)"
+                          matTooltip="إرسال إيميل">
+                    <lucide-icon name="mail" size="18"></lucide-icon>
+                  </button>
+                </div>
+                
+                <!-- Location Card -->
+                <div class="contact-card-item" *ngIf="profile.location">
+                  <div class="card-icon location">
+                    <lucide-icon name="map-pin" size="20"></lucide-icon>
+                  </div>
+                  <div class="card-title">
+                    <h4>الموقع</h4>
+                  </div>
+                </div>
+              </div>
             </div>
-            
-            <div class="contact-item" *ngIf="profile.email">
-              <lucide-icon name="mail" size="16"></lucide-icon>
-              <span>{{ profile.email }}</span>
-              <button mat-icon-button 
-                      *ngIf="!isOwnProfile"
-                      (click)="onSendEmail(profile.email!)"
-                      matTooltip="إرسال إيميل">
-                <lucide-icon name="mail" size="16"></lucide-icon>
-              </button>
-            </div>
-            
-            <div class="contact-item" *ngIf="profile.location">
-              <lucide-icon name="map-pin" size="16"></lucide-icon>
-              <span>{{ profile.location }}</span>
-            </div>
-            
-            <div class="contact-item">
-              <lucide-icon name="calendar" size="16"></lucide-icon>
-              <span>عضو منذ {{ formatDate(profile.joinDate) }}</span>
+
+            <!-- Social Media Section -->
+            <div class="social-section" *ngIf="profile.facebookUrl || profile.instagramUrl || profile.websiteUrl">
+              <h4 class="section-title">روابط التواصل الاجتماعي</h4>
+              <div class="social-cards">
+                <!-- Facebook Card -->
+                <a class="social-card facebook" *ngIf="profile.facebookUrl" [href]="profile.facebookUrl" target="_blank" rel="noopener">
+                  <div class="social-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="currentColor"/>
+                    </svg>
+                  </div>
+                  <span class="social-label">فيسبوك</span>
+                </a>
+
+                <!-- Instagram Card -->
+                <a class="social-card instagram" *ngIf="profile.instagramUrl" [href]="profile.instagramUrl" target="_blank" rel="noopener">
+                  <div class="social-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" stroke-width="2"/>
+                      <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/>
+                      <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor"/>
+                    </svg>
+                  </div>
+                  <span class="social-label">انستجرام</span>
+                </a>
+
+                <!-- Website Card -->
+                <a class="social-card website" *ngIf="profile.websiteUrl" [href]="profile.websiteUrl" target="_blank" rel="noopener">
+                  <div class="social-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="12" cy="12" r="10" fill="currentColor"/>
+                      <path d="M8 12h8M12 8v8" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+                  <span class="social-label">الموقع الشخصي</span>
+                </a>
+              </div>
             </div>
           </div>
         </mat-card-content>
@@ -126,18 +221,32 @@
       <mat-card class="ads-card">
         <mat-card-content>
           <div class="ads-header">
-            <h3>إعلانات {{ profile.firstName }}</h3>
-            <span class="ads-count">{{ userAds.length }} إعلان</span>
+            <div class="ads-title-section">
+              <div class="ads-icon">
+                <lucide-icon name="file-text" size="24"></lucide-icon>
+              </div>
+              <div class="ads-title-content">
+                <h3>إعلانات {{ profile.firstName }}</h3>
+                <span class="ads-count">{{ userAds.length }} إعلان</span>
+              </div>
+            </div>
           </div>
           
           <div class="ads-grid" *ngIf="userAds.length > 0; else noAdsTemplate">
             <div class="ad-item" *ngFor="let ad of userAds" (click)="onViewAd(ad)" style="cursor: pointer;">
               <div class="ad-image">
                 <img [src]="getAdImage(ad)" [alt]="ad.title" class="ad-thumbnail">
-                <div class="ad-status">
-                  <mat-chip [color]="ad.status === 'Published' ? 'primary' : 'accent'" selected>
-                    {{ ad.status === 'Published' ? 'منشور' : ad.status }}
-                  </mat-chip>
+                <div class="ad-overlay">
+                  <div class="ad-status">
+                    <span class="status-badge" [class.published]="ad.status === 'Published'">
+                      {{ ad.status === 'Published' ? 'منشور' : ad.status }}
+                    </span>
+                  </div>
+                  <div class="ad-actions">
+                    <button class="view-btn" (click)="onViewAd(ad); $event.stopPropagation()">
+                      <lucide-icon name="eye" size="16"></lucide-icon>
+                    </button>
+                  </div>
                 </div>
               </div>
               
@@ -146,19 +255,28 @@
                 <p class="ad-description">{{ ad.description | slice:0:80 }}{{ (ad.description?.length || 0) > 80 ? '...' : '' }}</p>
                 
                 <div class="ad-meta">
-                  <span class="ad-price">{{ formatPrice(ad.price) }}</span>
-                  <span class="ad-location" *ngIf="ad.location">{{ ad.location }}</span>
+                  <div class="price-section">
+                    <span class="ad-price">{{ formatPrice(ad.price) }}</span>
+                  </div>
+                  <div class="location-section" *ngIf="ad.location">
+                    <lucide-icon name="map-pin" size="14"></lucide-icon>
+                    <span class="ad-location">{{ ad.location }}</span>
+                  </div>
                 </div>
                 
                 <div class="ad-stats">
-                  <span class="stat">
-                    <lucide-icon name="eye" size="12"></lucide-icon>
-                    {{ ad.views || 0 }}
-                  </span>
-                  <span class="stat">
-                    <lucide-icon name="heart" size="12"></lucide-icon>
-                    {{ ad.likes || 0 }}
-                  </span>
+                  <div class="stat-item">
+                    <lucide-icon name="eye" size="14"></lucide-icon>
+                    <span>{{ ad.views || 0 }}</span>
+                  </div>
+                  <div class="stat-item">
+                    <lucide-icon name="heart" size="14"></lucide-icon>
+                    <span>{{ ad.likes || 0 }}</span>
+                  </div>
+                  <div class="stat-item">
+                    <lucide-icon name="message-circle" size="14"></lucide-icon>
+                    <span>{{ ad.commentsCount || 0 }}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -166,8 +284,11 @@
           
           <ng-template #noAdsTemplate>
             <div class="no-ads">
-              <lucide-icon name="eye" size="48" class="no-ads-icon"></lucide-icon>
-              <p>لا توجد إعلانات منشورة</p>
+              <div class="no-ads-icon">
+                <lucide-icon name="file-text" size="48"></lucide-icon>
+              </div>
+              <h4>لا توجد إعلانات منشورة</h4>
+              <p>لم ينشر {{ profile.firstName }} أي إعلانات بعد</p>
             </div>
           </ng-template>
         </mat-card-content>

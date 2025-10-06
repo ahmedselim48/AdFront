@@ -1,6 +1,7 @@
 // ===== ADVERTISEMENTS MODELS =====
 
-export type AdStatus = 'Draft' | 'Pending' | 'Published' | 'Rejected' | 'Archived';
+
+export type AdStatus = 'Draft' | 'Pending' | 'Active' | 'Published' | 'Rejected' | 'Archived' | 'Scheduled';
 
 export interface AdDto {
   id: string;
@@ -113,16 +114,19 @@ export interface UpdateAdManagementCommand {
 }
 
 export interface AdSearchRequest {
-  query?: string;
+  searchTerm?: string;
   categoryId?: number;
   minPrice?: number;
   maxPrice?: number;
   location?: string;
   status?: AdStatus;
+  userId?: string;
+  createdFrom?: Date;
+  createdTo?: Date;
+  sortBy?: string;
+  sortDirection?: string;
   page?: number;
   pageSize?: number;
-  sortBy?: 'price' | 'date' | 'views' | 'likes';
-  sortOrder?: 'asc' | 'desc';
 }
 
 export interface PaginatedAdsResponse {

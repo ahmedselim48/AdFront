@@ -18,6 +18,8 @@ import { AuthService } from '../../../../core/auth/auth.service';
 })
 export class AdsListComponent implements OnInit, OnDestroy {
   ads: AdItem[] = [];
+  allAds: AdItem[] = []; // Store all ads for client-side filtering
+  filteredAds: AdItem[] = []; // Store filtered ads
   categories: any[] = [];
   paginatedResponse: PaginatedAdsResponse | null = null;
   loading = false;
@@ -67,8 +69,10 @@ export class AdsListComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.initializeSearchForm();
     this.loadCategories();
-    this.loadAds();
     this.setupSearchSubscription();
+    
+    // Load ads initially (will trigger search with empty filters)
+    this.search();
   }
 
   ngOnDestroy() {
@@ -80,12 +84,7 @@ export class AdsListComponent implements OnInit, OnDestroy {
     this.searchForm = this.fb.group({
       query: [''],
       categoryId: [null],
-      minPrice: [null],
-      maxPrice: [null],
-      location: [''],
-      status: [null],
-      sortBy: ['date'],
-      sortOrder: ['desc']
+      dateFilter: ['']
     });
   }
 
@@ -96,9 +95,22 @@ export class AdsListComponent implements OnInit, OnDestroy {
         distinctUntilChanged(),
         takeUntil(this.destroy$)
       )
-      .subscribe(() => {
+      .subscribe((formValue) => {
+        // Always search, even with empty filters (will show all ads)
         this.search();
       });
+  }
+
+  private loadAllAds() {
+    this.searchRequest = {
+      status: 'Active', // Use Active instead of Published
+      page: 1,
+      pageSize: this.pageSize
+    };
+    this.currentPage = 1;
+    
+    // Try search first, fallback to direct load if it fails
+    this.performSearch();
   }
 
   loadAds() {
@@ -108,13 +120,16 @@ export class AdsListComponent implements OnInit, OnDestroy {
       next: (response) => {
         console.log('Ads loaded successfully:', response);
         this.paginatedResponse = response;
-        this.ads = response.data;
-        this.totalPages = response.totalPages;
+        this.ads = response.data || [];
+        this.totalPages = response.totalPages || 0;
         this.loading = false;
         console.log('Ads array:', this.ads);
+        console.log(`Found ${this.ads.length} ads`);
       },
       error: (error) => {
         console.error('Error loading ads:', error);
+        this.ads = [];
+        this.totalPages = 0;
         this.loading = false;
       }
     });
@@ -135,49 +150,284 @@ export class AdsListComponent implements OnInit, OnDestroy {
   }
 
   search() {
-    this.searchRequest = this.searchForm.value;
+    const formValue = this.searchForm.value;
+    
+    // Use the same approach as admin panel
+    this.loading = true;
     this.currentPage = 1;
-    this.performSearch();
+    
+    // Build search parameters similar to admin panel
+    const searchTerm = formValue.query || undefined;
+    const categoryId = formValue.categoryId || undefined;
+    const dateFilter = formValue.dateFilter;
+    
+    console.log('Search parameters:', { searchTerm, categoryId, dateFilter });
+    
+    // If we don't have all ads yet, load them first
+    if (this.allAds.length === 0) {
+      // Load all ads (use a large page size to get all ads)
+      this.adsService.list(1, 1000).pipe(takeUntil(this.destroy$)).subscribe({
+        next: (response) => {
+          console.log('Initial load response:', response);
+          this.allAds = response.data || [];
+          console.log(`Loaded ${this.allAds.length} ads for filtering`);
+          this.applyFilters();
+        },
+        error: (error) => {
+          console.error('Initial load error:', error);
+          this.ads = [];
+          this.totalPages = 0;
+          this.loading = false;
+        }
+      });
+    } else {
+      // Apply filters to existing ads
+      this.applyFilters();
+    }
+  }
+
+  private applyFilters() {
+    const formValue = this.searchForm.value;
+    const searchTerm = formValue.query || undefined;
+    const categoryId = formValue.categoryId || undefined;
+    const dateFilter = formValue.dateFilter;
+    
+    console.log('Applying filters:', { searchTerm, categoryId, dateFilter });
+    console.log('Total ads before filtering:', this.allAds.length);
+    
+    // Apply client-side filtering similar to admin panel
+    let filteredAds = [...this.allAds];
+    
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filteredAds = filteredAds.filter(ad => 
+        ad.title.toLowerCase().includes(term) ||
+        ad.description?.toLowerCase().includes(term) ||
+        ad.categoryName?.toLowerCase().includes(term)
+      );
+      console.log(`After search filter (${term}): ${filteredAds.length} ads`);
+    }
+    
+    if (categoryId) {
+      const categoryIdNum = parseInt(categoryId, 10);
+      console.log('Filtering by category ID:', { categoryId, categoryIdNum });
+      filteredAds = filteredAds.filter(ad => {
+        const matches = ad.categoryId === categoryIdNum;
+        console.log(`Ad ${ad.id}: categoryId=${ad.categoryId} (${typeof ad.categoryId}), filter=${categoryIdNum} (${typeof categoryIdNum}), matches=${matches}`);
+        return matches;
+      });
+      console.log(`After category filter: ${filteredAds.length} ads`);
+    }
+    
+    if (dateFilter) {
+      const now = new Date();
+      let startDate: Date;
+      
+      switch (dateFilter) {
+        case 'today':
+          startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          break;
+        case 'week':
+          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          break;
+        case 'month':
+          startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+          break;
+        case 'year':
+          startDate = new Date(now.getFullYear(), 0, 1);
+          break;
+        default:
+          startDate = new Date(0);
+      }
+      
+      console.log('Filtering by date:', { 
+        dateFilter, 
+        now: now.toISOString(), 
+        startDate: startDate.toISOString() 
+      });
+      
+      filteredAds = filteredAds.filter(ad => {
+        const adDate = new Date(ad.createdAt);
+        const matches = adDate >= startDate;
+        console.log(`Ad ${ad.id}: createdAt=${ad.createdAt}, adDate=${adDate.toISOString()}, startDate=${startDate.toISOString()}, matches=${matches}`);
+        return matches;
+      });
+      console.log(`After date filter: ${filteredAds.length} ads`);
+    }
+    
+    this.filteredAds = filteredAds;
+    this.totalPages = Math.ceil(filteredAds.length / this.pageSize);
+    this.loading = false;
+    
+    console.log(`Found ${filteredAds.length} ads after filtering`);
+    
+           // Apply pagination
+           const startIndex = (this.currentPage - 1) * this.pageSize;
+           const endIndex = startIndex + this.pageSize;
+           this.ads = filteredAds.slice(startIndex, endIndex);
+           
+           
+        
+           
+           console.log(`Showing ${this.ads.length} ads on page ${this.currentPage} (${startIndex}-${endIndex})`);
+  }
+
+  private buildDateFilter(dateFilter: string) {
+    if (!dateFilter) return {};
+    
+    const now = new Date();
+    let startDate: Date;
+    
+    switch (dateFilter) {
+      case 'today':
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        break;
+      case 'week':
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case 'month':
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        break;
+      case 'year':
+        startDate = new Date(now.getFullYear(), 0, 1);
+        break;
+      default:
+        return {};
+    }
+    
+    return {
+      createdFrom: startDate,
+      createdTo: now
+    };
   }
 
   performSearch() {
     this.loading = true;
-    this.searchRequest.page = this.currentPage;
-    this.searchRequest.pageSize = this.pageSize;
+    
+    // Ensure page and pageSize are set
+    this.searchRequest.page = this.searchRequest.page || this.currentPage;
+    this.searchRequest.pageSize = this.searchRequest.pageSize || this.pageSize;
+    
+    console.log('Performing search with request:', this.searchRequest);
+    console.log('Search URL will be:', this.buildSearchUrl());
     
     this.adsService.search(this.searchRequest).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response) => {
+        console.log('Search response:', response);
         this.paginatedResponse = response;
-        this.ads = response.data;
-        this.totalPages = response.totalPages;
+        this.ads = response.data || [];
+        this.totalPages = response.totalPages || 0;
         this.loading = false;
+        
+        console.log(`Found ${this.ads.length} ads out of ${response.totalCount || 0} total`);
+        
+        // If no active ads found, try loading all ads
+        if (this.ads.length === 0 && this.searchRequest.status === 'Active') {
+          console.log('No active ads found, trying to load all ads...');
+          this.loadAllAdsWithoutStatus();
+        }
       },
       error: (error) => {
         console.error('Error searching ads:', error);
+        console.error('Error details:', error.error);
+        
+        // If error with Active status, try without status filter
+        if (this.searchRequest.status === 'Active') {
+          console.log('Error with Active status, trying without status filter...');
+          this.loadAllAdsWithoutStatus();
+        } else {
+          // If all else fails, use fallback method
+          console.log('All search methods failed, using fallback...');
+          this.loadAdsFallback();
+        }
+      }
+    });
+  }
+
+  private loadAllAdsWithoutStatus() {
+    this.searchRequest = {
+      page: 1,
+      pageSize: this.pageSize
+    };
+    this.currentPage = 1;
+    
+    // Try search first, fallback to direct load if it fails
+    this.performSearch();
+  }
+
+  // Fallback method to load ads using the old method
+  private loadAdsFallback() {
+    console.log('Using fallback method to load ads...');
+    this.loading = true;
+    this.adsService.list(this.currentPage, this.pageSize).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (response) => {
+        console.log('Fallback response:', response);
+        this.ads = response.data || [];
+        this.totalPages = response.totalPages || 0;
+        this.loading = false;
+        console.log(`Fallback found ${this.ads.length} ads`);
+      },
+      error: (error) => {
+        console.error('Fallback error:', error);
+        // If fallback also fails, try direct method
+        console.log('Fallback failed, trying direct method...');
+        this.loadAdsDirect();
+      }
+    });
+  }
+
+  // Direct fallback to load ads without any filters
+  private loadAdsDirect() {
+    console.log('Using direct method to load ads...');
+    this.loading = true;
+    this.adsService.list(this.currentPage, this.pageSize).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (response) => {
+        console.log('Direct response:', response);
+        this.ads = response.data || [];
+        this.totalPages = response.totalPages || 0;
+        this.loading = false;
+        console.log(`Direct found ${this.ads.length} ads`);
+      },
+      error: (error) => {
+        console.error('Direct error:', error);
+        this.ads = [];
+        this.totalPages = 0;
         this.loading = false;
       }
     });
   }
 
+  private buildSearchUrl(): string {
+    const params = new URLSearchParams();
+    if (this.searchRequest.searchTerm) params.append('searchTerm', this.searchRequest.searchTerm);
+    if (this.searchRequest.categoryId) params.append('categoryId', this.searchRequest.categoryId.toString());
+    if (this.searchRequest.status) params.append('status', this.searchRequest.status);
+    if (this.searchRequest.createdFrom) params.append('createdFrom', this.searchRequest.createdFrom.toISOString());
+    if (this.searchRequest.createdTo) params.append('createdTo', this.searchRequest.createdTo.toISOString());
+    if (this.searchRequest.page) params.append('page', this.searchRequest.page.toString());
+    if (this.searchRequest.pageSize) params.append('pageSize', this.searchRequest.pageSize.toString());
+    
+    return `/ads/search?${params.toString()}`;
+  }
+
   clearSearch() {
     this.searchForm.reset();
-    this.searchRequest = {};
     this.currentPage = 1;
-    this.loadAds();
+    // The search will be triggered automatically by form reset
+    console.log('Search cleared, resetting to page 1');
   }
 
   onPageChange(page: number) {
     this.currentPage = page;
-    if (Object.keys(this.searchRequest).length > 0) {
-      this.performSearch();
-    } else {
-      this.loadAds();
-    }
+    console.log(`Page changed to: ${page}`);
+    // Apply filters with new page
+    this.applyFilters();
   }
 
   viewAd(ad: AdItem) {
     this.router.navigate(['/ads', ad.id]);
   }
+
 
   likeAd(ad: AdItem) {
     this.adsService.like(ad.id).pipe(takeUntil(this.destroy$)).subscribe({
@@ -224,10 +474,8 @@ export class AdsListComponent implements OnInit, OnDestroy {
   }
 
   formatPrice(price: number): string {
-    return new Intl.NumberFormat('ar-SA', {
-      style: 'currency',
-      currency: 'SAR'
-    }).format(price);
+    if (price === 0) return 'مجاناً';
+    return new Intl.NumberFormat('ar-SA').format(price) + ' ريال';
   }
 
   formatDate(date: Date): string {

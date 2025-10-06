@@ -376,7 +376,8 @@ export class CompetitionAnalysisComponent implements OnInit, OnDestroy {
 
   loadUserAds() {
     this.adsLoading = true;
-    this.adsService.getMyAds('published')
+    // يجب جلب الإعلانات المنشورة فقط لعرضها في التحليل
+    this.adsService.getMyAds('Active')
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (ads: AdItem[]) => {

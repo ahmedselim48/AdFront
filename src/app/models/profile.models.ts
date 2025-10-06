@@ -13,6 +13,9 @@ export interface ProfileDto {
   phoneNumber?: string;
   address?: string;
   profileImageUrl?: string;
+  facebookUrl?: string;
+  instagramUrl?: string;
+  websiteUrl?: string;
   isEmailConfirmed: boolean;
   isActive: boolean;
   createdAt: string;
@@ -24,6 +27,10 @@ export interface ProfileUpdateDto {
   lastName: string;
   phoneNumber?: string;
   address?: string;
+  fullName?: string; // optional for compatibility
+  facebookUrl?: string;
+  instagramUrl?: string;
+  websiteUrl?: string;
 }
 
 // Note: UserDashboardDto is now in auth.models.ts

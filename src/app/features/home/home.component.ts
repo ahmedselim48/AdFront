@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -23,6 +23,7 @@ import { DirectChatService } from '../../core/services/direct-chat.service';
 import { ToastrService } from 'ngx-toastr';
 import { BehaviorSubject, debounceTime, distinctUntilChanged } from 'rxjs';
 
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -46,7 +47,8 @@ import { BehaviorSubject, debounceTime, distinctUntilChanged } from 'rxjs';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
-export class HomeComponent implements OnInit {
+
+export class HomeComponent implements OnInit, OnDestroy {
   ads: AdItem[] = [];
   loading = true;
   error = '';
@@ -117,6 +119,8 @@ export class HomeComponent implements OnInit {
   // Language selector
   language = 'AR'; // AR or EN
   
+  // Slider removed – restoring original component state
+  
   constructor(
     private adsService: AdsService,
     private route: ActivatedRoute,
@@ -179,6 +183,12 @@ export class HomeComponent implements OnInit {
       this.loadNotifications();
       this.loadConversations();
     }, 500);
+
+    // slider removed
+  }
+
+  ngOnDestroy(): void {
+    // slider removed
   }
 
   private initializeFilterForm(): void {
@@ -194,6 +204,8 @@ export class HomeComponent implements OnInit {
       dateTo: [null]
     });
   }
+
+  // slider code removed
 
   private setupSearchSubscription(): void {
     this.filterForm.get('searchTerm')?.valueChanges.pipe(

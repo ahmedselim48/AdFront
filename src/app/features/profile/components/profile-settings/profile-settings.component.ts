@@ -63,7 +63,10 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
       firstName: ['', [Validators.required, Validators.minLength(2)]],
       lastName: ['', [Validators.required, Validators.minLength(2)]],
       phoneNumber: [''],
-      address: ['']
+      address: [''],
+      facebookUrl: [''],
+      instagramUrl: [''],
+      websiteUrl: ['']
     });
   }
 
@@ -87,11 +90,22 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
   }
 
   private populateForm(user: ProfileDto) {
+    // Prefer backend-provided first/last; fallback to split full name
+    let computedFirstName = user.firstName;
+    let computedLastName = user.lastName;
+    if ((!computedFirstName || !computedLastName) && user.fullName) {
+      const parts = user.fullName.trim().split(' ');
+      computedFirstName = computedFirstName || parts.shift() || '';
+      computedLastName = computedLastName || parts.join(' ');
+    }
     this.profileForm.patchValue({
-      firstName: user.firstName,
-      lastName: user.lastName,
+      firstName: computedFirstName,
+      lastName: computedLastName,
       phoneNumber: user.phoneNumber || '',
-      address: user.address || ''
+      address: user.address || '',
+      facebookUrl: (user as any).facebookUrl || '',
+      instagramUrl: (user as any).instagramUrl || '',
+      websiteUrl: (user as any).websiteUrl || ''
     });
   }
 
@@ -117,7 +131,11 @@ export class ProfileSettingsComponent implements OnInit, OnDestroy {
         firstName: this.profileForm.value.firstName,
         lastName: this.profileForm.value.lastName,
         phoneNumber: this.profileForm.value.phoneNumber || undefined,
-        address: this.profileForm.value.address || undefined
+        address: this.profileForm.value.address || undefined,
+        facebookUrl: this.profileForm.value.facebookUrl || undefined,
+        instagramUrl: this.profileForm.value.instagramUrl || undefined,
+        websiteUrl: this.profileForm.value.websiteUrl || undefined,
+        fullName: `${this.profileForm.value.firstName} ${this.profileForm.value.lastName}`.trim()
       };
 
       this.profileService.updateProfile(updateData).pipe(takeUntil(this.destroy$)).subscribe({

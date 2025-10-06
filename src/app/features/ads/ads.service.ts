@@ -21,6 +21,7 @@ export class AdsService {
         console.log('Response.data:', response?.data);
         console.log('Response.meta:', response?.meta);
         
+        
         // Handle GeneralResponse wrapper from backend
         let adsData: AdItem[] = [];
         let totalCount = 0;
@@ -49,7 +50,9 @@ export class AdsService {
             userName: ad.userName || 'مستخدم',
             images: ad.images || [],
             keywords: ad.keywords || [],
-            isAIGenerated: ad.isAIGenerated || false
+            isAIGenerated: ad.isAIGenerated || false,
+            contactNumber: ad.ContactNumber || ad.contactNumber || '',
+            contactInfo: ad.contactInfo || null
           }));
           totalCount = adsData.length;
           totalPages = Math.ceil(totalCount / pageSize);
@@ -76,7 +79,9 @@ export class AdsService {
             userName: ad.userName || 'مستخدم',
             images: ad.images || [],
             keywords: ad.keywords || [],
-            isAIGenerated: ad.isAIGenerated || false
+            isAIGenerated: ad.isAIGenerated || false,
+            contactNumber: ad.ContactNumber || ad.contactNumber || '',
+            contactInfo: ad.contactInfo || null
           }));
           
           // Extract pagination info from meta if available
@@ -105,16 +110,22 @@ export class AdsService {
 
   search(searchRequest: AdSearchRequest): Observable<PaginatedAdsResponse> {
     const params = new URLSearchParams();
-    if (searchRequest.query) params.append('query', searchRequest.query);
+    if (searchRequest.searchTerm) params.append('searchTerm', searchRequest.searchTerm);
     if (searchRequest.categoryId) params.append('categoryId', searchRequest.categoryId.toString());
     if (searchRequest.minPrice) params.append('minPrice', searchRequest.minPrice.toString());
     if (searchRequest.maxPrice) params.append('maxPrice', searchRequest.maxPrice.toString());
     if (searchRequest.location) params.append('location', searchRequest.location);
     if (searchRequest.status) params.append('status', searchRequest.status);
+    if (searchRequest.userId) params.append('userId', searchRequest.userId);
+    if (searchRequest.createdFrom) params.append('createdFrom', searchRequest.createdFrom.toISOString());
+    if (searchRequest.createdTo) params.append('createdTo', searchRequest.createdTo.toISOString());
+    if (searchRequest.sortBy) params.append('sortBy', searchRequest.sortBy);
+    if (searchRequest.sortDirection) params.append('sortDirection', searchRequest.sortDirection);
     if (searchRequest.page) params.append('page', searchRequest.page.toString());
     if (searchRequest.pageSize) params.append('pageSize', searchRequest.pageSize.toString());
-    if (searchRequest.sortBy) params.append('sortBy', searchRequest.sortBy);
-    if (searchRequest.sortOrder) params.append('sortOrder', searchRequest.sortOrder);
+
+    console.log('Search URL:', `/ads/search?${params.toString()}`);
+    console.log('Search Request:', searchRequest);
 
     return this.api.get$<PaginatedAdsResponse>(`/ads/search?${params.toString()}`);
   }

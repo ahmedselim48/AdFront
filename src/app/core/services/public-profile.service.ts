@@ -10,6 +10,7 @@ export interface PublicProfileDto {
   email: string;
   firstName: string;
   lastName: string;
+  fullName?: string;
   phoneNumber?: string;
   whatsappNumber?: string;
   profileImageUrl?: string;
@@ -21,6 +22,9 @@ export interface PublicProfileDto {
   totalViews: number;
   rating: number;
   reviewsCount: number;
+  facebookUrl?: string;
+  instagramUrl?: string;
+  websiteUrl?: string;
 }
 
 @Injectable({
@@ -28,6 +32,7 @@ export interface PublicProfileDto {
 })
 export class PublicProfileService {
   private readonly apiUrl = `${environment.apiUrl}/api/public-profile`;
+  private readonly socialUrl = `${environment.apiUrl}/api/social`;
 
   constructor(private http: HttpClient) {}
 
@@ -35,4 +40,5 @@ export class PublicProfileService {
   getPublicProfile(userId: string): Observable<GeneralResponse<PublicProfileDto>> {
     return this.http.get<GeneralResponse<PublicProfileDto>>(`${this.apiUrl}/${userId}`);
   }
+
 }
